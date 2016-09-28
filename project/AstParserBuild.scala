@@ -24,7 +24,7 @@ object AstParserBuild extends Build {
   val ScalaVersion = "2.11.8"
   val SkipUpdate = true
   val CacheUpdate = true
-  val appVersion: String = "1.0.0"
+  val appVersion: String = "1.0.2"
 
 
   lazy val buildSettings =
