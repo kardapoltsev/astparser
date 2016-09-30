@@ -24,7 +24,13 @@ object AstParserBuild extends Build {
   val ScalaVersion = "2.11.8"
   val SkipUpdate = true
   val CacheUpdate = true
-  val appVersion: String = "1.0.2"
+  val isSnapshot = true
+  val baseVersion: String = "1.0.2"
+
+  val appVersion = {
+    if(isSnapshot) baseVersion + "-SNAPSHOT"
+    else baseVersion
+  }
 
 
   lazy val buildSettings =
@@ -34,12 +40,13 @@ object AstParserBuild extends Build {
         scalaVersion         := ScalaVersion,
         crossScalaVersions   := Seq("2.10.6", ScalaVersion),
         organizationName     := Organization,
-        organizationHomepage := None
-      )
+        organizationHomepage := None,
 
+        initialize                ~= { _ =>
+          if (sys.props("java.specification.version") < "1.7")
+            sys.error("Java 7 is required for this project.")
+        },
 
-  lazy val commonSettings = buildSettings ++
-      Seq(
         updateOptions := updateOptions.value.withCachedResolution(CacheUpdate),
         incOptions := incOptions.value.withNameHashing(true),
         scalacOptions ++= Seq(
@@ -61,7 +68,30 @@ object AstParserBuild extends Build {
             )
           }
         }
-     )
+      )
+
+  val publishSettings = Seq(
+    pomExtra := {
+      <url>https://github.com/kardapoltsev/astparser</url>
+        <licenses>
+          <license>
+            <name>Apache 2</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+          </license>
+        </licenses>
+        <scm>
+          <connection>scm:git:git@github.com:kardapoltsev/astparser.git</connection>
+          <url>github.com/kardapoltsev/astparser</url>
+        </scm>
+        <developers>
+          <developer>
+            <name>Alexey Kardapoltsev</name>
+            <url>https://github.com/kardapoltsev</url>
+            <email>alexey.kardapoltsev@gmail.com</email>
+          </developer>
+        </developers>
+    }
+  )
 
 
   import de.heikoseeberger.sbtheader.HeaderPattern
@@ -85,41 +115,27 @@ object AstParserBuild extends Build {
       |*/
       |""".stripMargin
 
-  lazy val defaultSettings =
-    commonSettings ++
-      Seq(
-        initialize                ~= { _ =>
-          if (sys.props("java.specification.version") < "1.7")
-            sys.error("Java 7 is required for this project.")
-        },
-        headers := Map(
-          "scala" -> ( HeaderPattern.cStyleBlockComment, ScalaHeader )
-        )
-      )
+  lazy val scalaHeaderSettings = Seq(
+    headers := Map(
+      "scala" -> ( HeaderPattern.cStyleBlockComment, ScalaHeader )
+    )
+  )
 
 
   lazy val root = Project(
     "ast-parser",
     file("."),
     settings =
-      defaultSettings               ++
-      Seq(
-        publishTo := {
-          val nexus = "http://nexus.local/nexus/content/repositories/"
-          if (isSnapshot.value )
-            Some("snapshots" at nexus + "snapshots")
-          else
-            Some("releases"  at nexus + "releases")
-        },
-        credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
-        scalacOptions        in (Compile,doc)     :=  Seq("-groups", "-implicits", "-diagrams"),
-        libraryDependencies <++= (scalaVersion) { sv =>
-          if(sv.startsWith("2.10"))
-            Dependencies.rootScala210
-          else
-            Dependencies.root
-        }
-      )
+      buildSettings ++ scalaHeaderSettings ++ publishSettings ++
+        Seq(
+          scalacOptions        in (Compile,doc)     :=  Seq("-groups", "-implicits", "-diagrams"),
+          libraryDependencies <++= (scalaVersion) { sv =>
+            if(sv.startsWith("2.10"))
+              Dependencies.rootScala210
+            else
+              Dependencies.root
+          }
+        )
   ).enablePlugins(AutomateHeaderPlugin)
 
 }
