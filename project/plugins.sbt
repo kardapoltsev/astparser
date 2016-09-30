@@ -3,7 +3,9 @@ resolvers ++= Seq(
   "Sonatype-releases" at "https://oss.sonatype.org/content/repositories/releases/"
 )
 
-addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.3.3")
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.3.5")
+
+addSbtPlugin("org.scoverage" % "sbt-coveralls" % "1.1.0")
 
 addSbtPlugin("de.heikoseeberger" % "sbt-header" % "1.5.1")
 
