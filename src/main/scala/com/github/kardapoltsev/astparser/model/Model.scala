@@ -56,15 +56,17 @@ case class Argument(
   docs: Seq[Documentation]
 ) extends Documented
 
+trait Parent extends TypeLike
+
 trait TypeLike extends Definition {
-  def parents: Seq[Trait]
+  def parents: Seq[Parent]
 }
 
 case class Type(
   parent: String,
   name: String,
   typeArguments: Seq[TypeParameter],
-  parents: Seq[Trait],
+  parents: Seq[Parent],
   constructors: Seq[TypeConstructor],
   docs: Seq[Documentation]
 ) extends TypeLike with Documented
@@ -73,7 +75,7 @@ case class ExternalType(
   parent: String,
   name: String,
   typeArguments: Seq[TypeParameter]
-) extends TypeLike {
+) extends Parent {
   override def fullName = name
   def parents = Seq.empty
 }
@@ -127,7 +129,7 @@ case class Trait(
   name: String,
   parents: Seq[Trait],
   docs: Seq[Documentation]
-) extends TypeLike with Documented
+) extends Parent with Documented
 
 trait PackageLike extends Definition {
   def name: String
@@ -351,10 +353,19 @@ object Model {
       t.packageName,
       name = t.name,
       typeArguments = ta,
-      parents = t.parents map resolveTrait map convertTrait,
+      parents = t.parents map resolve map convertParent,
       constructors = t.constructors map convertTypeConstructor,
       docs = t.docs map convertDocs
     )
+  }
+
+  private def convertParent(p: parser.TypeLike)(implicit m: parser.Model): Parent = {
+    p match {
+      case t: parser.Trait => convertTrait(t)
+      case e: parser.ExternalType => convertExternalType(e)
+      case other =>
+        throw new Exception(s"expected trait or external type as parent, got ${other.humanReadable}")
+    }
   }
 
   private def convertTypeAlias(

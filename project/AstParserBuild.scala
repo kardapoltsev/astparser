@@ -25,7 +25,7 @@ object AstParserBuild extends Build {
   val SkipUpdate = true
   val CacheUpdate = true
   val isSnapshot = true
-  val baseVersion: String = "1.0.2"
+  val baseVersion: String = "1.0.3"
 
   val appVersion = {
     if(isSnapshot) baseVersion + "-SNAPSHOT"
@@ -38,6 +38,8 @@ object AstParserBuild extends Build {
         organization         := Organization,
         version              := appVersion,
         scalaVersion         := ScalaVersion,
+        //scoverage isn't available for 2.12
+        //crossScalaVersions   := Seq("2.10.6", ScalaVersion, "2.12.0-RC1"),
         crossScalaVersions   := Seq("2.10.6", ScalaVersion),
         organizationName     := Organization,
         organizationHomepage := None,

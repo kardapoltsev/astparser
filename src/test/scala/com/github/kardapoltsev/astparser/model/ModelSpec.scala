@@ -27,6 +27,7 @@ class ModelSpec extends TestBase {
           |version 1;
           |
           |external type Int
+          |external type MyTrait
           |
           |package outer.inner {
           |  type A {
@@ -38,7 +39,7 @@ class ModelSpec extends TestBase {
           |
           |  type TypeAlias = A
           |
-          |  type B {
+          |  type B : MyTrait {
           |    b;
           |  }
           |}
@@ -47,8 +48,8 @@ class ModelSpec extends TestBase {
       //println(m)
       m.schemas should have size 1
       m.schemas.head.versions should have size 1
-      m.schemas.head.versions.head.definitions should have size 2
-      m.deepDefinitions should have size 8
+      m.schemas.head.versions.head.definitions should have size 3
+      m.deepDefinitions should have size 9
 
     }
   }
