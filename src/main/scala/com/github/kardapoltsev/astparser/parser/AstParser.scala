@@ -136,17 +136,6 @@ class AstParser(override val enableProfiling: Boolean = false)
   extends TokenParsers with Parsers with Logger {
   import com.github.kardapoltsev.astparser.parser.Tokens._
 
-  //  class Printer(prefix: String = "### ", indent: Int = 0) {
-  //    def println(str: String): Unit = {
-  //      val p = prefix + (1 to indent).map(_ => " ").mkString
-  //      Predef.println(str.lines.map(p + _).mkString(s"\n"))
-  //    }
-  //
-  //    def newIndent() = new Printer("", indent + 1)
-  //  }
-
-  //  implicit val printer = new Printer
-
   protected val lexer = new Lexer
 
   protected def repLeftDoc = profile("repLeftDoc") {
@@ -162,14 +151,9 @@ class AstParser(override val enableProfiling: Boolean = false)
       path ^^ {
         names =>
           //log.debug(s"parsed ref names: $names at ${names.head.pos}")
-          try {
-            Reference(
-              names.map(_.name).mkString(".")
-            )
-          } catch {
-            case e: Exception =>
-              throw new Exception(s"couldn't create reference defined at ${names.head.pos}", e)
-          }
+          Reference(
+            names.map(_.name).mkString(".")
+          )
       }
     }
   }

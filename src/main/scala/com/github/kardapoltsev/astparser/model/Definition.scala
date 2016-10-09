@@ -38,8 +38,7 @@ trait Definition extends NamedElement {
 
 trait TypeId {
   def id: Int
-  def idHex: String = f"$id%02x"
-  def idString: String = "TODO"
+  def idHex: String = f"$id%08x"
 }
 
 trait Documented {

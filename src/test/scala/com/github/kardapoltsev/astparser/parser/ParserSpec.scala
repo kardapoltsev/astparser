@@ -32,6 +32,18 @@ class ParserSpec extends WordSpec with Matchers {
       parsed._2.get.value shouldBe 3
     }
 
+    "print profiling info" in new ParserTestEnv {
+      override val enableProfiling = true
+      val in =
+        """
+          |schema api;
+          |version 3;
+        """.stripMargin
+      val parsed = parse(schemaInfoExp, in)
+      parsed._1.name shouldBe "api"
+      parsed._2.get.value shouldBe 3
+    }
+
     "parse reference" in new ParserTestEnv {
       parse(reference, "a") shouldBe Reference("a")
       parse(reference, "a.b.c") shouldBe Reference("a.b.c")
@@ -209,6 +221,7 @@ class ParserSpec extends WordSpec with Matchers {
       val parsed = parse(src, "source_name")
 
       parsed.pos shouldBe a[SourcePosition]
+      parsed.pos.asInstanceOf[SourcePosition].lineContents shouldBe "schema api;\n"
 
       def checkPosition(e: Element): Unit = {
         //println(s"checking ${e.humanReadable}")

@@ -17,6 +17,8 @@ package com.github.kardapoltsev.astparser.parser
 
 import org.scalatest.{Matchers, WordSpec}
 
+import scala.util.parsing.input.CharSequenceReader
+
 
 class LexerSpec extends WordSpec with Matchers {
   import Tokens._
@@ -30,6 +32,10 @@ class LexerSpec extends WordSpec with Matchers {
   }
 
   "Lexer" should {
+    "should parse EOF" in {
+      val in = CharSequenceReader.EofCh
+      scan(in.toString) shouldBe List(EOF)
+    }
     "should parse single lexeme" in {
       val in = "34asd2478sdfg"
       scan(in) shouldBe List(Lexeme(in))

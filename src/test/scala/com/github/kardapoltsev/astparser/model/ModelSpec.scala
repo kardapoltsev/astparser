@@ -21,13 +21,10 @@ class ModelSpec extends TestBase {
 
   "Model" should {
     "build" in {
-      val m = buildModel(
+      val s1 =
         """
           |schema api;
           |version 1;
-          |
-          |external type Int
-          |external type MyTrait
           |
           |package outer.inner {
           |  type A {
@@ -43,14 +40,32 @@ class ModelSpec extends TestBase {
           |    b;
           |  }
           |}
-        """.stripMargin)
+        """.stripMargin
 
+      val s2 =
+        """
+          |schema api
+          |version 2
+          |
+          |external type Int
+          |external type MyTrait
+          |
+          |package outer.inner {
+          |  type C {
+          |    c
+          |      param1: Int
+          |    ;
+          |  }
+          |}
+        """.stripMargin
+
+      val m = buildModel(s1, s2)
       //println(m)
       m.schemas should have size 1
-      m.schemas.head.versions should have size 1
-      m.schemas.head.versions.head.definitions should have size 3
-      m.deepDefinitions should have size 9
-
+      m.schemas.head.latestVersion.version shouldBe 2
+      m.deepDefinitions should have size 13
+      val maybeInner = m.getDefinition("api.v2.outer.inner")
+      maybeInner shouldBe defined
     }
   }
 

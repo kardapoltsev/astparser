@@ -58,6 +58,42 @@ class SchemaGeneratorSpec extends TestBase {
           |external type Int""".stripMargin
     }
 
+    "generate imports" in {
+      val g = generate(
+        """
+          |schema api;
+          |version 1;
+          |
+          |package p1 {
+          |  type B {
+          |    b
+          |  }
+          |}
+          |package p2 {
+          |  import p1.B
+          |}
+        """.stripMargin)
+
+      g.head.content shouldBe
+        """schema api
+          |version 1
+          |
+          |
+          |package p1 {
+          |
+          |  type B {
+          |
+          |    b
+          |  }
+          |}
+          |
+          |
+          |package p2 {
+          |  import p1.B
+          |}
+          |""".stripMargin
+    }
+
     "generate traits" in {
       val g = generate(
         """
