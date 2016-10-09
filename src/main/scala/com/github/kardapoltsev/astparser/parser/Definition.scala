@@ -244,12 +244,15 @@ private[astparser] case class TypeStatement(
     //TODO: fix idString
     val m = schema.maybeParent.get.asInstanceOf[Model]
     def resolve(r: Reference): Definition = {
-      m.lookup(r).get match {
+      m.lookup(r) match {
         //case a: TypeAlias =>
         //  resolve(a.reference)
-        case i: Import =>
+        case Some(i: Import) =>
           resolve(i.reference)
-        case d => d
+        case Some(d) => d
+        case None =>
+          log.error("unable to lookup {}", r.humanReadable)
+          throw new Exception(s"couldn't generate idString for ${this.humanReadable}")
       }
     }
     val resolved = resolve(ref)
@@ -370,11 +373,12 @@ private[astparser] case class Model(
 
 
   private def maybeNewerVersion(fullName: String): Option[String] = {
-    fullName match {
-      case Model.VersionRegex(schema, version, rest) =>
+    fullName.split("\\.").toList match {
+      case schema :: version :: rest if version.startsWith("v") =>
         findSchema(schema) flatMap { s =>
-          s.versions.sortBy(_.version).find(_.version > version.toInt) map { nv =>
-            schema ~ s"v${nv.version}" ~ rest
+          val currentVersion = version.drop(1).toInt
+          s.versions.sortBy(_.version).find(_.version > currentVersion) map { nv =>
+            schema ~ s"v${nv.version}" ~ rest.mkString(".")
           }
         }
       case _ => None
@@ -401,14 +405,21 @@ private[astparser] case class Model(
               found
             case None =>
               maybeNewerVersion(packageName) match {
-                case Some(newer) => lookupVersioned(newer)
-                case None => None
+                case Some(newer) =>
+                  lookupVersioned(newer)
+                case None =>
+                  None
               }
           }
         case Some(x) =>
           throw new Exception(s"expected package for name `$packageName`, found ${x.humanReadable}")
         case None =>
-          None
+          maybeNewerVersion(packageName) match {
+            case Some(newer) =>
+              lookupVersioned(newer)
+            case None =>
+              None
+          }
       }
     }
 
@@ -497,7 +508,6 @@ private[astparser] case class Model(
 
 
 object Model {
-  private val VersionRegex = s"^(\\S+)\\.v(\\d+)(.*)".r
 
   private val parser = new AstParser()
   def load(in: Seq[java.io.File]): Model = {

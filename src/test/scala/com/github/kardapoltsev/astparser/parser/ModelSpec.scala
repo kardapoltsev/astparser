@@ -19,6 +19,7 @@ import com.github.kardapoltsev.astparser.TestBase
 
 class ModelSpec extends TestBase {
   "Model" should {
+
     "resolve local references" in {
       val m = buildParserModel(
         """
@@ -243,6 +244,90 @@ class ModelSpec extends TestBase {
       m.lookup(typeBRef) shouldBe defined
       m.lookup(typeBRef).get shouldBe a[Type]
       m.lookup(typeBRef).get.asInstanceOf[Type].name shouldBe "C"
+    }
+
+    "resolve references to newer schema version #2" in {
+      val s1 =
+        """
+          |schema api
+          |version 1
+          |
+          |package p1 {
+          |  type A {
+          |    a
+          |      param1: p2.C
+          |    ;
+          |  }
+          |}
+        """.stripMargin
+      val s2 =
+        """
+          |schema api;
+          |version 2;
+          |type Dummy {
+          |  dummy
+          |}
+        """.stripMargin
+      val s3 =
+        """
+          |schema api
+          |version 3
+          |
+          |package p2 {
+          |  type C {
+          |    c
+          |  }
+          |}
+        """.stripMargin
+      val m = buildParserModel(s1, s2, s3)
+      val maybeTypeA = m.findSchema("api").flatMap(_.getDefinition("v1.p1.A"))
+      maybeTypeA shouldBe defined
+
+      val typeA = maybeTypeA.get
+
+      val typeBRef = typeA.asInstanceOf[Type].
+        constructors.head.arguments.head.`type`.ref
+
+      m.lookup(typeBRef) shouldBe defined
+      m.lookup(typeBRef).get shouldBe a[Type]
+      m.lookup(typeBRef).get.asInstanceOf[Type].name shouldBe "C"
+    }
+
+    "validate arguments in call" in {
+      val s1 =
+        """
+          |schema api
+          |version 1
+          |external type Void
+          |
+          |package p1 {
+          |  call a
+          |      param1: p2.B
+          |  = Void
+          |}
+        """.stripMargin
+      val s2 =
+        """
+          |schema api;
+          |version 2;
+          |type Dummy {
+          |  dummy
+          |}
+        """.stripMargin
+      val s3 =
+        """
+          |schema api
+          |version 3
+          |
+          |package p2 {
+          |  type C {
+          |    c
+          |  }
+          |}
+        """.stripMargin
+      an[Exception] shouldBe thrownBy {
+        buildParserModel(s1, s2, s3)
+      }
     }
 
     "handle imports" in {
