@@ -15,8 +15,6 @@
 */
 package com.github.kardapoltsev.astparser.model
 
-import com.github.kardapoltsev.astparser.parser
-import com.github.kardapoltsev.astparser.parser.AstParser
 import com.github.kardapoltsev.astparser.util.StringUtil._
 
 

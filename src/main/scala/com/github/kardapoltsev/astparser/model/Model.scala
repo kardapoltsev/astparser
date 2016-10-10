@@ -173,6 +173,8 @@ object Model {
         convertTypeAlias(ta)
       case et: parser.ExternalType =>
         convertExternalType(et)
+      case c: parser.Call =>
+        convertCall(c)
     }
   }
 

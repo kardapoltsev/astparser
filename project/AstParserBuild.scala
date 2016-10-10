@@ -56,9 +56,7 @@ object AstParserBuild extends Build {
           "-deprecation",
           "-unchecked",
           "-feature",
-          "-Xlint",
-          "-language:higherKinds",
-          "-language:postfixOps"
+          "-Xlint"
         ),
         scalacOptions <++= scalaVersion map { sv =>
           if(sv.startsWith("2.10")) {
