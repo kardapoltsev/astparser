@@ -325,7 +325,7 @@ class ModelSpec extends TestBase {
           |  }
           |}
         """.stripMargin
-      an[Exception] shouldBe thrownBy {
+      an[ModelValidationException] shouldBe thrownBy {
         buildParserModel(s1, s2, s3)
       }
     }

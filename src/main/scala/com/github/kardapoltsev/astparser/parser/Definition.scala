@@ -454,6 +454,14 @@ private[astparser] final case class Model(
     val unresolvedReferences = c.collect {
       case r: Reference if lookup(r).isEmpty => r
     }
+
+    if(unresolvedReferences.nonEmpty) {
+      failValidation(
+        s"model contains unresolved references:\n" +
+          unresolvedReferences.map(_.humanReadable).mkString("\n")
+      )
+    }
+
     val duplicateIds = schemas flatMap { s =>
       s.versions flatMap { v =>
         v.deepDefinitions.collect {
@@ -463,6 +471,14 @@ private[astparser] final case class Model(
           flatMap { case (id, types) => types.map(_._2) }
       }
     }
+
+    if(duplicateIds.nonEmpty) {
+      failValidation(
+        s"Model contains duplicate ids:" + System.lineSeparator() +
+          duplicateIds.map(_.humanReadable).mkString(System.lineSeparator())
+      )
+    }
+
     val duplicateDefinitions = schemas.flatMap(_.deepDefinitions).map { definition =>
       val duplicates = definition.children.collect {
         case ne: NamedElement => ne
@@ -471,18 +487,6 @@ private[astparser] final case class Model(
       definition -> duplicates
     }.filter { case (d, duplicates) => duplicates.nonEmpty}
 
-    if(unresolvedReferences.nonEmpty) {
-      failValidation(
-        s"model contains unresolved references:\n" +
-          unresolvedReferences.map(_.humanReadable).mkString("\n")
-      )
-    }
-    if(duplicateIds.nonEmpty) {
-      failValidation(
-        s"Model contains duplicate ids:" + System.lineSeparator() +
-         duplicateIds.map(_.humanReadable).mkString(System.lineSeparator())
-      )
-    }
     if(duplicateDefinitions.nonEmpty) {
       failValidation(
         "Model contains duplicate definitions:" + System.lineSeparator() +
@@ -497,7 +501,7 @@ private[astparser] final case class Model(
 
   private def failValidation(msg: String): Unit = {
     log.error(msg)
-    throw new Exception(msg)
+    throw new ModelValidationException(msg)
   }
 
 
