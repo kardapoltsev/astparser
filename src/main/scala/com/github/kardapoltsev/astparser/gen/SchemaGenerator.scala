@@ -23,7 +23,10 @@ import com.github.kardapoltsev.astparser.util.Logger
 
 
 
-class SchemaGenerator(m: model.Model) extends Logger {
+class SchemaGenerator(
+  m: model.Model,
+  filenameExtension: String
+) extends Logger {
   import Hardcoded.{Keywords => K}
   private def ls = System.lineSeparator()
 
@@ -34,7 +37,7 @@ class SchemaGenerator(m: model.Model) extends Logger {
   }
 
   private def generateVersion(version: SchemaVersion): GeneratedFile = {
-    val filename = version.schema.name + ".v" + version.version + "." + Hardcoded.FilenameExtension
+    val filename = version.schema.name + ".v" + version.version + "." + filenameExtension
     val h = generateHeader(version)
     val c = (version.definitions map generateDefinition).mkString(ls)
     val content = h + c

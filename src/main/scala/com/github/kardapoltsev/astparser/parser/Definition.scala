@@ -114,12 +114,13 @@ private[astparser] sealed trait NamedElement extends Element {
 }
 
 private[astparser] sealed trait Definition extends NamedElement
+
 private[astparser] sealed trait TypeLike extends Definition with Documented {
   def parents: Seq[Reference]
   def fullName = packageName ~ name
 }
 
-private[astparser] case class Type(
+private[astparser] final case class Type(
   name: String,
   typeArguments: Seq[TypeParameter],
   parents: Seq[Reference],
@@ -131,7 +132,7 @@ private[astparser] case class Type(
   def isGeneric = typeArguments.nonEmpty
 }
 
-private[astparser] case class ExternalType(
+private[astparser] final case class ExternalType(
   override val fullName: String,
   typeArguments: Seq[TypeParameter]
 ) extends TypeLike {
@@ -140,12 +141,12 @@ private[astparser] case class ExternalType(
   def name = fullName.simpleName
 }
 
-private[astparser] case class TypeParameter(
+private[astparser] final case class TypeParameter(
   name: String,
   typeParameters: Seq[TypeParameter]
 ) extends Element
 
-private[astparser] case class TypeConstructor(
+private[astparser] final case class TypeConstructor(
   name: String,
   maybeId: Option[Int],
   typeArguments: Seq[TypeParameter],
@@ -172,14 +173,14 @@ private[astparser] case class TypeConstructor(
 }
 
 
-private[astparser] case class Reference(
+private[astparser] final case class Reference(
   fullName: String
 ) extends NamedElement {
   def name = fullName.simpleName
   assert(name.nonEmpty, "reference fullName couldn't be empty")
 }
 
-private[astparser] case class Import(
+private[astparser] final case class Import(
   name: String,
   reference: Reference
 ) extends Definition {
@@ -188,7 +189,7 @@ private[astparser] case class Import(
 }
 
 
-private[astparser] case class TypeAlias(
+private[astparser] final case class TypeAlias(
   name: String,
   reference: Reference
 ) extends TypeLike {
@@ -198,7 +199,7 @@ private[astparser] case class TypeAlias(
   //def fullName = packageName ~ name
 }
 
-private[astparser] case class Call(
+private[astparser] final case class Call(
   name: String,
   maybeId: Option[Int],
   arguments: Seq[Argument],
@@ -220,7 +221,7 @@ private[astparser] case class Call(
   }
 }
 
-private[astparser] case class Argument(
+private[astparser] final case class Argument(
   name: String,
   `type`: TypeStatement,
   docs: Seq[Documentation]
@@ -231,7 +232,7 @@ private[astparser] case class Argument(
   def idString: String = s"$name:${`type`.idString}"
 }
 
-private[astparser] case class TypeStatement(
+private[astparser] final case class TypeStatement(
   ref: Reference,
   typeArguments: Seq[TypeStatement]
 ) extends Element {
@@ -261,7 +262,7 @@ private[astparser] case class TypeStatement(
   }
 }
 
-trait PackageLike extends NamedElement with Logger {
+private[astparser] sealed trait PackageLike extends Definition with Logger {
   def definitions: Seq[Definition]
 
   def deepDefinitions: Seq[Definition] = {
@@ -299,15 +300,15 @@ trait PackageLike extends NamedElement with Logger {
 
 }
 
-private[astparser] case class Package(
+private[astparser] final case class Package(
   name: String,
   definitions: Seq[Definition]
-) extends Definition with PackageLike {
+) extends PackageLike {
   children = definitions
   def fullName = packageName ~ name
 }
 
-private[astparser] case class Trait(
+private[astparser] final case class Trait(
   name: String,
   parents: Seq[Reference],
   docs: Seq[Documentation]
@@ -315,7 +316,7 @@ private[astparser] case class Trait(
   children = parents
 }
 
-private[astparser] case class Documentation(
+private[astparser] final case class Documentation(
   content: String
 ) extends Positional
 
@@ -323,19 +324,19 @@ trait Documented {
   def docs: Seq[Documentation]
 }
 
-private[astparser] case class SchemaVersion(
+private[astparser] final case class SchemaVersion(
   version: Int,
   definitions: Seq[Definition]
-) extends Definition with PackageLike {
+) extends PackageLike {
   children = definitions
   def name = s"v$version"
   def fullName = packageName ~ name
 }
 
-private[astparser] case class Schema(
+private[astparser] final case class Schema(
   name: String,
   versions: Seq[SchemaVersion]
-) extends Definition with PackageLike {
+) extends PackageLike {
   children = definitions
   def definitions = versions
   //def name: String = ""
@@ -343,11 +344,11 @@ private[astparser] case class Schema(
 }
 
 
-private[astparser] case class Model(
+private[astparser] final case class Model(
   private val _schemas: Seq[Schema]
-) extends Element with PackageLike with Logger {
+) extends PackageLike with Logger {
   val schemas = _schemas.groupBy(_.name).map { case (name, versions) =>
-    Schema(name, versions.flatMap(_.versions))//.setPos(versions.head.pos)
+    Schema(name, versions.flatMap(_.versions))
   }.toSeq
   //schemas.foreach(_.initParents())
   children = schemas

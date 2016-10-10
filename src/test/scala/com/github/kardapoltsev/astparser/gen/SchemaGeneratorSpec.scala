@@ -17,13 +17,13 @@ package com.github.kardapoltsev.astparser.gen
 
 import com.github.kardapoltsev.astparser.TestBase
 
-import scala.collection
+
 
 class SchemaGeneratorSpec extends TestBase {
 
   private def generate(source: String, sources: String*): Seq[GeneratedFile] = {
     val m =  buildModel(source, sources:_*)
-    new SchemaGenerator(m).generate()
+    new SchemaGenerator(m, "sl").generate()
   }
 
   "SchemaGenerator" should {

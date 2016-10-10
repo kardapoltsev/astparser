@@ -17,8 +17,6 @@ package com.github.kardapoltsev.astparser
 
 object Hardcoded {
 
-  val FilenameExtension = "sl"
-
   object Keywords {
     val Schema = "schema"
     val Version = "version"

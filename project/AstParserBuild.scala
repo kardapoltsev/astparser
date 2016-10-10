@@ -25,7 +25,7 @@ object AstParserBuild extends Build {
   val SkipUpdate = true
   val CacheUpdate = true
   val isSnapshot = true
-  val baseVersion: String = "1.0.3"
+  val baseVersion: String = "1.0.4"
 
   val appVersion = {
     if(isSnapshot) baseVersion + "-SNAPSHOT"
@@ -48,7 +48,6 @@ object AstParserBuild extends Build {
           if (sys.props("java.specification.version") < "1.7")
             sys.error("Java 7 is required for this project.")
         },
-
         updateOptions := updateOptions.value.withCachedResolution(CacheUpdate),
         incOptions := incOptions.value.withNameHashing(true),
         scalacOptions ++= Seq(
@@ -130,8 +129,17 @@ object AstParserBuild extends Build {
     settings =
       buildSettings ++ scalaHeaderSettings ++ publishSettings ++
         Seq(
-          scalacOptions        in (Compile,doc)     :=  Seq("-groups", "-implicits", "-diagrams"),
-          libraryDependencies <++= (scalaVersion) { sv =>
+          scalacOptions in (Compile,doc) :=  Seq(
+            "-encoding",
+            "UTF-8",
+            "-Xlint",
+            "-deprecation",
+            "-unchecked",
+            "-groups",
+            "-implicits",
+            "-diagrams"
+          ),
+          libraryDependencies <++= scalaVersion { sv =>
             if(sv.startsWith("2.10"))
               Dependencies.rootScala210
             else

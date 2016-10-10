@@ -21,22 +21,23 @@ object Dependencies {
   }
 
   object Compile {
-    val logbackClassic  = "ch.qos.logback"                % "logback-classic"                % "1.1.6"
-    val scalaParsers    = "org.scala-lang.modules"        %% "scala-parser-combinators"      % "1.0.4"
+    val slf4jApi        = "org.slf4j"                    % "slf4j-api"                      % "1.7.21"
+    val scalaParsers    = "org.scala-lang.modules"       %% "scala-parser-combinators"      % "1.0.4"
   }
 
   object Test {
-    val scalatest         = "org.scalatest"              %% "scalatest"                     % "2.2.5"           % "test"
+    val logbackClassic  = "ch.qos.logback"               % "logback-classic"                % "1.1.7"         % "test"
+    val scalatest       = "org.scalatest"                %% "scalatest"                     % "2.2.5"           % "test"
   }
 
   import Compile._
   import Test._
 
   val root = Seq(
-    logbackClassic, scalaParsers, scalatest
+    slf4jApi, logbackClassic, scalaParsers, scalatest
   )
   val rootScala210 = Seq(
-    logbackClassic, scalatest
+    slf4jApi, logbackClassic, scalatest
   )
 
 }
