@@ -61,7 +61,7 @@ class ParserSpec extends WordSpec with Matchers {
     "parse type alias" in new ParserTestEnv {
       val in =
         """
-          |type myAlias := api.User;
+          |type myAlias = api.User;
         """.stripMargin
       val parsed = parse(typeAlias, in)
       parsed shouldBe TypeAlias("myAlias", Reference("api.User"))
@@ -109,7 +109,7 @@ class ParserSpec extends WordSpec with Matchers {
       val in =
         s"""
            |type A {
-           |  a
+           |  a =
            |    param1: Int
            |  ;
            |}
@@ -131,6 +131,7 @@ class ParserSpec extends WordSpec with Matchers {
                 docs = Seq.empty
               )
             ),
+            parents = Seq.empty,
             docs = Seq.empty
           )
         ),
@@ -142,7 +143,7 @@ class ParserSpec extends WordSpec with Matchers {
       val in =
         s"""
            |type A {
-           |  a #000001
+           |  a #000001 =
            |    param1: Int
            |  ;
            |}
@@ -164,6 +165,7 @@ class ParserSpec extends WordSpec with Matchers {
                 docs = Seq.empty
               )
             ),
+            parents = Seq.empty,
             docs = Seq.empty
           )
         ),
@@ -176,10 +178,10 @@ class ParserSpec extends WordSpec with Matchers {
       val in =
         s"""
           |/**$docString*/
-          |call myCall : ParentA
+          |call myCall <: ParentA =
           |  param1: Int
           |  param2: User
-          |  = Void;
+          |  => Void;
         """.stripMargin
       val parsed = parse(callDefinition, in)
       val expected = Call(
@@ -201,12 +203,12 @@ class ParserSpec extends WordSpec with Matchers {
         |schema api;
         |version 1;
         |external type Int;
-        |type UserId := Int;
+        |type UserId = Int;
         |
         |package outer.inner {
         |  import p.B;
         |  type A {
-        |    a
+        |    a =
         |      param1: B
         |    ;
         |  }

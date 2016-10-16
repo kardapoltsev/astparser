@@ -28,7 +28,7 @@ class ModelSpec extends TestBase {
           |
           |package outer.inner {
           |  type A {
-          |    a
+          |    a =
           |      param1: B
           |      `version`: Int
           |    ;
@@ -36,7 +36,7 @@ class ModelSpec extends TestBase {
           |
           |  type TypeAlias = A
           |
-          |  type B : MyTrait {
+          |  type B <: MyTrait {
           |    b;
           |  }
           |}
@@ -52,7 +52,7 @@ class ModelSpec extends TestBase {
           |
           |package outer.inner {
           |  type C {
-          |    c
+          |    c =
           |      param1: Int
           |    ;
           |  }

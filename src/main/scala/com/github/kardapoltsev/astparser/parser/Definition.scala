@@ -151,6 +151,7 @@ private[astparser] final case class TypeConstructor(
   maybeId: Option[Int],
   typeArguments: Seq[TypeParameter],
   arguments: Seq[Argument],
+  parents: Seq[Reference],
   docs: Seq[Documentation]
 ) extends NamedElement with TypeId with Documented {
   children = typeArguments ++ arguments

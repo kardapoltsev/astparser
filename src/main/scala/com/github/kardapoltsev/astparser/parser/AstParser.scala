@@ -162,6 +162,10 @@ class AstParser(override val enableProfiling: Boolean = false)
     rep1sep(identifier, Dot())
   }
 
+  private def extendsOperator = LessSign() ~ Colon()
+
+  private def responseOperator = Eq() ~ GreaterSign()
+
   protected[astparser] def typeStatement: Parser[TypeStatement] = profile("typeStatement") {
     positioned {
       reference ~ opt(LeftBracket() ~> rep(typeStatement) <~ RightBracket()) ^^ {
@@ -220,7 +224,7 @@ class AstParser(override val enableProfiling: Boolean = false)
 
   protected def typeAlias: Parser[TypeAlias] = {
     profile("typeAliasExp") {
-      (TypeKeyword() ~> identifier <~ ((Colon() ~ Eq()) | Eq())) ~ (reference <~ opt(Semicolon())) ^^ {
+      (TypeKeyword() ~> identifier <~ Eq()) ~ (reference <~ opt(Semicolon())) ^^ {
         case name ~ ref =>
           TypeAlias(name.name, ref)
       }
@@ -269,20 +273,25 @@ class AstParser(override val enableProfiling: Boolean = false)
   }
 
   protected def typeExtensionExpr = {
-    rep(Colon() ~> reference)
+    opt(extendsOperator ~> rep1(reference)) ^^ (_.getOrElse(Seq.empty))
+  }
+
+  protected def argumentsExpr = {
+    opt(Eq() ~> rep1(argument)) ^^ (_.getOrElse(Seq.empty))
   }
 
   protected def typeConstructor = profile("typeConstructor") {
     positioned {
-      repLeftDoc ~ opt(Dot()) ~ identifier ~ opt(hashId) ~ genericTypeParameters ~ (rep(argument) <~ opt(Semicolon())) ~ repRightDoc ^^ {
-        case ld ~ dot ~ name ~ id ~ ta ~ args ~ rd =>
+      repLeftDoc ~ opt(Dot()) ~ identifier ~ opt(hashId) ~ typeExtensionExpr ~ genericTypeParameters ~
+          (argumentsExpr <~ opt(Semicolon())) ~ repRightDoc ^^ {
+        case ld ~ dot ~ name ~ id ~ ext ~ ta ~ args ~ rd =>
           TypeConstructor(
             name.name,
             id.map(_.value),
             ta,
             args,
-            docs = ld ++ rd
-          )
+            ext,
+            docs = ld ++ rd)
       }
     }
   }
@@ -296,7 +305,8 @@ class AstParser(override val enableProfiling: Boolean = false)
   }
 
   protected def callDefinitionExp: Parser[Call] = {
-    identifier ~ opt(hashId) ~ typeExtensionExpr ~ rep(argument) ~ (Eq() ~> typeStatement <~ opt(Semicolon())) ^^ {
+    identifier ~ opt(hashId) ~ typeExtensionExpr ~ argumentsExpr ~
+        (responseOperator ~> typeStatement <~ opt(Semicolon())) ^^ {
       case name ~ id ~ parents ~ args ~ rtype =>
         Call(
           name.name,

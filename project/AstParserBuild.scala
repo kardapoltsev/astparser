@@ -25,7 +25,7 @@ object AstParserBuild extends Build {
   val SkipUpdate = true
   val CacheUpdate = true
   val isSnapshot = true
-  val baseVersion: String = "1.0.4"
+  val baseVersion: String = "2.0.0"
 
   val appVersion = {
     if(isSnapshot) baseVersion + "-SNAPSHOT"
