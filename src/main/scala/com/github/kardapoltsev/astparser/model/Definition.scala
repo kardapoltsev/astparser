@@ -98,8 +98,8 @@ case class TypeConstructor(
   arguments: Seq[Argument],
   parents: Seq[Parent],
   docs: Seq[Documentation]
-) extends NamedElement with TypeId with Documented {
-  def packageName = parent
+) extends NamedElement with TypeLike with TypeId with Documented {
+  override def packageName = parent
 }
 
 case class TypeStatement(
