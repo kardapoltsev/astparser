@@ -95,20 +95,14 @@ class SchemaGeneratorSpec extends TestBase {
     }
 
     "generate traits" in {
-      val g = generate(
-        """
-          |schema api;
-          |version 1;
-          |
-          |trait A
-          |trait B : A
-        """.stripMargin)
-      g.head.content shouldBe
+      val sample =
         """schema api
           |version 1
           |
           |trait A
-          |trait B : A""".stripMargin
+          |trait B <: A""".stripMargin
+
+      generate(sample).head.content shouldBe sample
     }
 
     "generate type aliases" in {
@@ -138,7 +132,7 @@ class SchemaGeneratorSpec extends TestBase {
           |trait T
           |
           |type MyType {
-          |  myType
+          |  myType ::
           |    param1: Int -- docs
           |    paramWithVeryLongName: String -- comment
           |}
@@ -146,14 +140,14 @@ class SchemaGeneratorSpec extends TestBase {
           |/** Docs for type B
           |    Very long
           |  */
-          |type B : T {
-          |  b
+          |type B <: T {
+          |  b ::
           |    parameter: api.v1.MyType
           |    `version`   : Int
           |
           |  /** Docs for constructor c
           |    */
-          |  c
+          |  c ::
           |    parameter: api.v1.MyType
           |}
         """.stripMargin)
@@ -168,7 +162,7 @@ class SchemaGeneratorSpec extends TestBase {
           |
           |type MyType {
           |
-          |  myType
+          |  myType ::
           |    param1                : Int    -- docs
           |    paramWithVeryLongName : String -- comment
           |}
@@ -176,15 +170,15 @@ class SchemaGeneratorSpec extends TestBase {
           |/** Docs for type B
           |Very long
           |  */
-          |type B : T {
+          |type B <: T {
           |
-          |  b
+          |  b ::
           |    parameter : api.v1.MyType
           |    `version` : Int
           |
           |  /** Docs for constructor c
           |    */
-          |  c
+          |  c ::
           |    parameter : api.v1.MyType
           |}""".stripMargin
     }
@@ -197,10 +191,10 @@ class SchemaGeneratorSpec extends TestBase {
           |external type Int;
           |external type String;
           |external type Void;
-          |call myCall
+          |call myCall ::
           |  param1: Int -- docs
           |  paramWithVeryLongName: String -- comment
-          |  = Void;
+          |  => Void;
         """.stripMargin)
 
       g.head.content shouldBe
@@ -211,10 +205,10 @@ class SchemaGeneratorSpec extends TestBase {
           |external type String
           |external type Void
           |
-          |call myCall
+          |call myCall ::
           |  param1                : Int    -- docs
           |  paramWithVeryLongName : String -- comment
-          |  = Void""".stripMargin
+          |  => Void""".stripMargin
     }
 
     "generate packages" in {

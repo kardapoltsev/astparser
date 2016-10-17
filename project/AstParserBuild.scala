@@ -22,10 +22,10 @@ import sbt._
 object AstParserBuild extends Build {
   val Organization = "com.github.kardapoltsev"
   val ScalaVersion = "2.11.8"
-  val SkipUpdate = true
-  val CacheUpdate = true
-  val isSnapshot = true
-  val baseVersion: String = "1.0.4"
+  val SkipUpdate   = true
+  val CacheUpdate  = true
+  val isSnapshot   = true
+  val baseVersion: String = "1.1.0"
 
   val appVersion = {
     if(isSnapshot) baseVersion + "-SNAPSHOT"

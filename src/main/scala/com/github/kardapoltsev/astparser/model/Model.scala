@@ -261,6 +261,7 @@ object Model {
       id = c.id,
       typeArguments = c.typeArguments map convertTypeParameter,
       arguments = c.arguments map convertArgument,
+      parents = c.parents map resolve map convertParent,
       docs = c.docs map convertDocs
     )
   }

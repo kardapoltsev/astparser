@@ -96,6 +96,7 @@ case class TypeConstructor(
   id: Int,
   typeArguments: Seq[TypeParameter],
   arguments: Seq[Argument],
+  parents: Seq[Parent],
   docs: Seq[Documentation]
 ) extends NamedElement with TypeId with Documented {
   def packageName = parent

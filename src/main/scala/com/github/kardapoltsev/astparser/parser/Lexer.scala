@@ -45,6 +45,9 @@ object Tokens {
   case class LeftBracket() extends Token
   case class RightBracket() extends Token
 
+  case class LessSign() extends Token
+  case class GreaterSign() extends Token
+
   case class Lexeme(chars: String) extends Token
 
   trait Doc extends Token {
@@ -125,6 +128,9 @@ class Lexer extends Scanners with Parsers {
   protected def leftBracket = '[' ^^ (_ => LeftBracket())
   protected def rightBracket = ']' ^^ (_ => RightBracket())
 
+  protected def lessSign = '<' ^^ (_ => LessSign())
+  protected def greaterSign = '>' ^^ (_ => GreaterSign())
+
   import com.github.kardapoltsev.astparser.Hardcoded.{Keywords => K}
   private def typeKeyword: Parser[Token] = keyword(K.Type, TypeKeyword())
   private def packageKeyword: Parser[Token] = keyword(K.Package, PackageKeyword())
@@ -160,9 +166,9 @@ class Lexer extends Scanners with Parsers {
 
   private def eof = EofCh ^^^ EOF
 
-  private def symbol: Parser[Token] = {
-    eq | colon | semicolon | hash | dot | leftBrace | rightBrace | leftBracket | rightBracket
-  }
+  private def symbol: Parser[Token] =
+        eq | colon | semicolon | hash | dot | leftBrace | rightBrace | leftBracket | rightBracket |
+            lessSign | greaterSign
 
   private def lexemeChar = elem("valid lexeme", x => x != EofCh && (x.isLetter || x.isDigit))
 
