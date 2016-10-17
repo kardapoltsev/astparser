@@ -28,7 +28,7 @@ class ModelSpec extends TestBase {
           |
           |package outer.inner {
           |  type A {
-          |    a =
+          |    a
           |      param1: B
           |    ;
           |  }
@@ -61,7 +61,7 @@ class ModelSpec extends TestBase {
           |package outer {
           | package inner {
           |  type A {
-          |    a =
+          |    a
           |     param1: inner2.C
           |    ;
           |  }
@@ -107,7 +107,7 @@ class ModelSpec extends TestBase {
           |
           |package p1 {
           |  type A {
-          |    a =
+          |    a
           |      param1: p2.B
           |    ;
           |  }
@@ -140,7 +140,7 @@ class ModelSpec extends TestBase {
           |
           |package p1 {
           |  type A {
-          |    a =
+          |    a
           |      param1: s2.v3.p2.C
           |    ;
           |  }
@@ -179,7 +179,7 @@ class ModelSpec extends TestBase {
           |
           |package p1 {
           |  type A {
-          |    a =
+          |    a
           |      param1: C
           |  }
           |}
@@ -216,7 +216,7 @@ class ModelSpec extends TestBase {
           |
           |package p1 {
           |  type A {
-          |    a =
+          |    a
           |      param1: p2.C
           |    ;
           |  }
@@ -254,7 +254,7 @@ class ModelSpec extends TestBase {
           |
           |package p1 {
           |  type A {
-          |    a =
+          |    a
           |      param1: p2.C
           |    ;
           |  }
@@ -301,9 +301,9 @@ class ModelSpec extends TestBase {
           |external type Void
           |
           |package p1 {
-          |  call a =
+          |  call a
           |      param1: p2.B
-          |  => Void
+          |  = Void
           |}
         """.stripMargin
       val s2 =
@@ -339,7 +339,7 @@ class ModelSpec extends TestBase {
           |package p1 {
           |  import p2.B;
           |  type A {
-          |    a =
+          |    a
           |      param1: B
           |    ;
           |  }
@@ -371,27 +371,27 @@ class ModelSpec extends TestBase {
           |version 1;
           |external type Int;
           |trait Object;
-          |trait Model <: Object;
+          |trait Model : Object;
         """.stripMargin,
         """
           |schema api;
           |version 1;
           |import common.v1.Int;
-          |type UserId = Int;
-          |trait Object <: common.v1.Object;
-          |trait Model <: Object common.v1.Model;
+          |type UserId := Int;
+          |trait Object : common.v1.Object;
+          |trait Model : Object : common.v1.Model;
           |
           |package p1 {
-          |  type A <: Model {
-          |    a =
+          |  type A : Model {
+          |    a
           |      param1: UserId
           |    ;
           |  }
-          |  type B <: Model {
+          |  type B : Model {
           |    b;
           |  }
           |  package inner.inner2 {
-          |    type C <: Model {
+          |    type C : Model {
           |      c;
           |    }
           |  }
@@ -400,8 +400,8 @@ class ModelSpec extends TestBase {
         """
           |schema api
           |version 2
-          |trait Object <: common.v1.Object;
-          |trait Model <: Object common.v1.Model;
+          |trait Object : common.v1.Object;
+          |trait Model : Object : common.v1.Model;
           |package p1.inner.inner2 {
           |
           |}
@@ -461,12 +461,12 @@ class ModelSpec extends TestBase {
             |schema api;
             |version 2;
             |import common.v1.Int;
-            |type UserId = Int;
+            |type UserId := Int;
             |
             |package p1 {
             |  trait C;
             |  type A {
-            |    a =
+            |    a
             |      param1: UserId
             |    ;
             |  }
@@ -477,7 +477,7 @@ class ModelSpec extends TestBase {
             |schema api;
             |version 1;
             |package p1 {
-            |  type D <: C {
+            |  type D : C {
             |    d;
             |  }
             |}
@@ -496,8 +496,8 @@ class ModelSpec extends TestBase {
             |external type Int
             |
             |package a {
-            |  call b => Int
-            |  call b => Int
+            |  call b = Int
+            |  call b = Int
             |}
             |
           """.stripMargin
@@ -515,10 +515,10 @@ class ModelSpec extends TestBase {
             |external type String
             |
             |package a {
-            |  call b =
+            |  call b
             |   param1: Int
             |   param1: String
-            |   => Int
+            |   = Int
             |}
             |
           """.stripMargin
@@ -533,7 +533,7 @@ class ModelSpec extends TestBase {
           |external type MyTrait
           |trait SchemaTrait
           |
-          |type A <: MyTrait SchemaTrait {
+          |type A : MyTrait : SchemaTrait {
           |  a
           |}
         """.stripMargin

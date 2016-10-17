@@ -164,7 +164,10 @@ class AstParser(override val enableProfiling: Boolean = false)
 
   private def extendsOperator = LessSign() ~ Colon()
 
-  private def responseOperator = Eq() ~ GreaterSign()
+  // TODO: GreaterSign() should become strictly required after transition
+  private def responseOperator = Eq() ~ opt(GreaterSign())
+
+  private def argumentsOperator = Colon() ~ Colon()
 
   protected[astparser] def typeStatement: Parser[TypeStatement] = profile("typeStatement") {
     positioned {
@@ -224,7 +227,7 @@ class AstParser(override val enableProfiling: Boolean = false)
 
   protected def typeAlias: Parser[TypeAlias] = {
     profile("typeAliasExp") {
-      (TypeKeyword() ~> identifier <~ Eq()) ~ (reference <~ opt(Semicolon())) ^^ {
+      (TypeKeyword() ~> identifier <~ (opt(Colon()) ~ Eq())) ~ (reference <~ opt(Semicolon())) ^^ {
         case name ~ ref =>
           TypeAlias(name.name, ref)
       }
@@ -273,17 +276,31 @@ class AstParser(override val enableProfiling: Boolean = false)
   }
 
   protected def typeExtensionExpr = {
-    opt(extendsOperator ~> rep1(reference)) ^^ (_.getOrElse(Seq.empty))
+    (extendsOperator ~> rep1(reference)) |
+      legacyTypeExtensionExpr
+  }
+
+  protected def legacyTypeExtensionExpr = {
+    rep(Colon() ~> reference)
+  }
+
+  protected def legacyArgumentsExpr = {
+    rep1(argument)
+  }
+
+  protected def modernArgumentsExpr = {
+    argumentsOperator ~> rep1(argument)
   }
 
   protected def argumentsExpr = {
-    opt(Eq() ~> rep1(argument)) ^^ (_.getOrElse(Seq.empty))
+    opt(modernArgumentsExpr | legacyArgumentsExpr) ^^ (_.getOrElse(Seq.empty))
   }
+
 
   protected def typeConstructor = profile("typeConstructor") {
     positioned {
-      repLeftDoc ~ opt(Dot()) ~ identifier ~ opt(hashId) ~ typeExtensionExpr ~ genericTypeParameters ~
-          (argumentsExpr <~ opt(Semicolon())) ~ repRightDoc ^^ {
+      repLeftDoc ~ opt(Dot()) ~ identifier ~ opt(hashId) ~ typeExtensionExpr ~
+        genericTypeParameters ~ (argumentsExpr <~ opt(Semicolon())) ~ repRightDoc ^^ {
         case ld ~ dot ~ name ~ id ~ ext ~ ta ~ args ~ rd =>
           TypeConstructor(
             name.name,

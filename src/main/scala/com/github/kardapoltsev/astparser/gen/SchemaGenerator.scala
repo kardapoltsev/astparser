@@ -129,7 +129,7 @@ class SchemaGenerator(
     if(args.nonEmpty) {
       val paramNameLength = args.map(n => escaped(n.name).length).max
       val typeLength = args.map(a => formatTypeStatement(a.`type`).length).max
-      s" =$ls" + args.map { a =>
+      s" ::$ls" + args.map { a =>
         val escapedName = escaped(a.name)
         val n = escapedName + " " * (paramNameLength - escapedName.length)
         val ft = formatTypeStatement(a.`type`)
