@@ -16,6 +16,7 @@
 package com.github.kardapoltsev.astparser.model
 
 import com.github.kardapoltsev.astparser.TestBase
+import com.github.kardapoltsev.astparser.parser.Type
 
 class ModelSpec extends TestBase {
 
@@ -67,6 +68,21 @@ class ModelSpec extends TestBase {
       val maybeInner = m.getDefinition("api.v2.outer.inner")
       maybeInner shouldBe defined
     }
+  }
+
+
+
+  "accept traits as parents for type constructors" in {
+    val model = buildModel(
+      """
+        |schema api
+        |trait MyTrait
+        |
+        |type A {
+        |  consA <: MyTrait;
+        |}
+      """.stripMargin
+    )
   }
 
 }

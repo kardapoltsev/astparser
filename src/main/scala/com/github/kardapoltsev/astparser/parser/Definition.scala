@@ -154,7 +154,7 @@ private[astparser] final case class TypeConstructor(
   parents: Seq[Reference],
   docs: Seq[Documentation]
 ) extends NamedElement with TypeId with Documented {
-  children = typeArguments ++ arguments
+  children = typeArguments ++ arguments ++ parents
   def fullName: String = packageName ~ name
   def idString: String = {
     maybeParent match {
