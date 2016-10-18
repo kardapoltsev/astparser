@@ -239,6 +239,29 @@ class SchemaGeneratorSpec extends TestBase {
           |""".stripMargin
     }
 
+    "escape call name" in {
+      val g = generate(
+        """
+          |schema api;
+          |version 1;
+          |external type Int
+          |
+          |call `call` ::
+          |  param1 : Int
+          |  => Int
+        """.stripMargin
+      )
+      println(g.head.content)
+      g.head.content shouldBe
+        """schema api
+          |version 1
+          |
+          |external type Int
+          |
+          |call `call` ::
+          |  param1 : Int
+          |  => Int""".stripMargin
+    }
   }
 
 }

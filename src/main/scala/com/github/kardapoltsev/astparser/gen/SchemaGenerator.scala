@@ -101,8 +101,9 @@ class SchemaGenerator(
     val docs = formatDocs(t.docs)
     val c = t.constructors.map(generateConstructor).mkString(ls)
     val ext = formatParents(t.parents)
+    val escapedName = escaped(t.name)
     s"""$docs
-       |${K.Type} ${t.name}$ext {
+       |${K.Type} $escapedName$ext {
        |${c.offset(2)}
        |}""".stripMargin
   }
@@ -112,16 +113,18 @@ class SchemaGenerator(
     val ext = formatParents(c.parents)
     val args = generateArguments(c.arguments)
     val id = formatId(c.maybeId)
+    val escapedName = escaped(c.name)
     s"""$docs
-       |${c.name}$id$ext$args""".stripMargin
+       |$escapedName$id$ext$args""".stripMargin
   }
 
   private def generateCall(c: Call): String = {
     val docs = formatDocs(c.docs)
     val ext = formatParents(c.parents)
     val id = formatId(c.maybeId)
+    val escapedName = escaped(c.name)
     s"""$docs
-       |${K.Call} ${c.name}$id$ext${generateArguments(c.arguments)}
+       |${K.Call} $escapedName$id$ext${generateArguments(c.arguments)}
        |  => ${formatTypeStatement(c.returnType)}""".stripMargin
   }
 

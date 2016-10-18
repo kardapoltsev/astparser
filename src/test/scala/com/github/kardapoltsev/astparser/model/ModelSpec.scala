@@ -16,7 +16,8 @@
 package com.github.kardapoltsev.astparser.model
 
 import com.github.kardapoltsev.astparser.TestBase
-import com.github.kardapoltsev.astparser.parser.Type
+
+
 
 class ModelSpec extends TestBase {
 
