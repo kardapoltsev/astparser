@@ -57,13 +57,13 @@ class SchemaGenerator(
 
   private def generateDefinition(d: Definition): String = {
     d match {
-      case p: PackageLike => generatePackage(p)
       case et: ExternalType => generateExternalType(et)
       case ta: TypeAlias => generateTypeAlias(ta)
       case t: Trait => generateTrait(t)
       case t: Type => generateType(t)
       case c: Call => generateCall(c)
       case i: Import => generateImport(i)
+      case p: PackageLike => generatePackage(p)
     }
   }
 

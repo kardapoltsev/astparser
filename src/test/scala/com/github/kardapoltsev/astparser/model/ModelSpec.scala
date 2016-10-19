@@ -65,12 +65,14 @@ class ModelSpec extends TestBase {
       //println(m)
       m.schemas should have size 1
       m.schemas.head.latestVersion.version shouldBe 2
-      m.deepDefinitions should have size 13
       val maybeInner = m.getDefinition("api.v2.outer.inner")
       maybeInner shouldBe defined
+      val inner = maybeInner.get
+      inner shouldBe a[Package]
+      val maybeTypeC = inner.asInstanceOf[Package].definitions.find(_.name == "C")
+      maybeTypeC shouldBe defined
     }
   }
-
 
 
   "accept traits as parents for type constructors" in {
@@ -80,10 +82,16 @@ class ModelSpec extends TestBase {
         |trait MyTrait
         |
         |type A {
-        |  consA <: MyTrait;
+        |  consA <: MyTrait
         |}
       """.stripMargin
     )
+    val myTrait = model.getDefinition("api.v1.MyTrait").get
+    val maybeA = model.getDefinition("api.v1.A")
+    maybeA shouldBe defined
+    val constructorA = maybeA.get.asInstanceOf[Type].constructors.head
+    constructorA shouldBe a[TypeConstructor]
+    constructorA.asInstanceOf[TypeConstructor].parents should contain(myTrait)
   }
 
 }

@@ -544,6 +544,7 @@ class ModelSpec extends TestBase {
       typeA shouldBe a[Type]
       typeA.asInstanceOf[Type].parents should have size 2
     }
+
   }
 
 }

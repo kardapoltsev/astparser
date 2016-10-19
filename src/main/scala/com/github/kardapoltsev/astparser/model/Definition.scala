@@ -19,27 +19,27 @@ import com.github.kardapoltsev.astparser.util.StringUtil._
 
 
 
-trait AstElement {
+sealed trait AstElement {
   def parent: String
 }
 
-trait NamedElement extends AstElement {
+sealed trait NamedElement extends AstElement {
   def packageName: String
   def name: String
   def fullName = packageName ~ name
 }
 
-trait Definition extends NamedElement {
+sealed trait Definition extends NamedElement {
   def parent: String
   def packageName = parent
 }
 
-trait TypeId {
+sealed trait TypeId {
   def id: Int
   def idHex: String = f"$id%08x"
 }
 
-trait Documented {
+sealed trait Documented {
   def docs: Seq[Documentation]
 }
 
@@ -53,9 +53,9 @@ case class Argument(
   docs: Seq[Documentation]
 ) extends Documented
 
-trait Parent extends TypeLike
+sealed trait Parent extends TypeLike
 
-trait TypeLike extends Definition {
+sealed trait TypeLike extends Definition {
   def parents: Seq[Parent]
 }
 
@@ -129,7 +129,7 @@ case class Trait(
   docs: Seq[Documentation]
 ) extends Parent with Documented
 
-trait PackageLike extends Definition {
+sealed trait PackageLike extends Definition {
   def name: String
   def definitions: Seq[Definition]
 
@@ -146,8 +146,7 @@ case class Package(
   parent: String,
   name: String,
   definitions: Seq[Definition]
-) extends PackageLike {
-}
+) extends PackageLike
 
 case class SchemaVersion(
   parent: String,
@@ -169,8 +168,3 @@ case class Schema(
   }
 
 }
-
-
-
-
-

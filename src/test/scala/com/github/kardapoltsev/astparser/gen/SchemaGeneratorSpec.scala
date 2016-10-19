@@ -251,7 +251,6 @@ class SchemaGeneratorSpec extends TestBase {
           |  => Int
         """.stripMargin
       )
-      println(g.head.content)
       g.head.content shouldBe
         """schema api
           |version 1
