@@ -73,7 +73,6 @@ private[astparser] trait TokenParsers extends Parsers {
         val end = System.currentTimeMillis
         val t = res match {
           case Success(x: Definition, _) => s"${x.getClass.getSimpleName}: name = ${x.name}"
-          case Success(x: TypeConstructor, _) => s"${x.getClass.getSimpleName}: name = ${x.fullName}"
           case Success(x: Argument, _) => s"${x.getClass.getSimpleName}: $x"
           case Success(x: Identifier, _) => s"${x.getClass.getSimpleName}: $x"
           case Success(x: Reference, _) => s"${x.getClass.getSimpleName}: ${x.fullName}"

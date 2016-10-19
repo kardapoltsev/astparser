@@ -66,7 +66,9 @@ case class Type(
   parents: Seq[Parent],
   constructors: Seq[TypeConstructor],
   docs: Seq[Documentation]
-) extends TypeLike with Documented
+) extends TypeLike with PackageLike with Documented {
+  override def definitions: Seq[Definition] = constructors
+}
 
 case class ExternalType(
   parent: String,
@@ -98,8 +100,9 @@ case class TypeConstructor(
   arguments: Seq[Argument],
   parents: Seq[Parent],
   docs: Seq[Documentation]
-) extends NamedElement with TypeLike with TypeId with Documented {
+) extends TypeLike with TypeId with Documented {
   override def packageName = parent
+  val typeReference = TypeReference(parent)
 }
 
 case class TypeStatement(

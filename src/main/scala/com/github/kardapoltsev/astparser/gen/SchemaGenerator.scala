@@ -39,7 +39,7 @@ class SchemaGenerator(
   private def generateVersion(version: SchemaVersion): GeneratedFile = {
     val filename = version.schema.name + ".v" + version.version + "." + filenameExtension
     val h = generateHeader(version)
-    val c = (version.definitions map generateDefinition).mkString(ls)
+    val c = (version.definitions flatMap generateDefinition).mkString(ls)
     val content = h + c
     GeneratedFile(
       path = "",
@@ -55,23 +55,25 @@ class SchemaGenerator(
        |""".stripMargin
   }
 
-  private def generateDefinition(d: Definition): String = {
+  private def generateDefinition(d: Definition): Option[String] = {
     d match {
-      case et: ExternalType => generateExternalType(et)
-      case ta: TypeAlias => generateTypeAlias(ta)
-      case t: Trait => generateTrait(t)
-      case t: Type => generateType(t)
-      case c: Call => generateCall(c)
-      case i: Import => generateImport(i)
-      case p: PackageLike => generatePackage(p)
+      case et: ExternalType => Some(generateExternalType(et))
+      case ta: TypeAlias => Some(generateTypeAlias(ta))
+      case t: Trait => Some(generateTrait(t))
+      case t: Type => Some(generateType(t))
+      case c: Call => Some(generateCall(c))
+      case i: Import => Some(generateImport(i))
+      case p: Package => Some(generatePackage(p))
+      case t: TypeConstructor => None //should be generated inside generateType
+      case v: SchemaVersion => None
+      case s: Schema => None
+      case m: Model => None
     }
   }
 
   private def generatePackage(p: PackageLike): String = {
-    val c = p.definitions.map {
-      case inner: PackageLike =>
-        generatePackage(inner)
-      case d: Definition => generateDefinition(d)
+    val c = p.definitions.flatMap {
+      d => generateDefinition(d)
     }.mkString(System.lineSeparator())
     s"""
       |package ${p.name} {

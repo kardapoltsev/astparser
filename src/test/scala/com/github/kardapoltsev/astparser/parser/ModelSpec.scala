@@ -545,6 +545,28 @@ class ModelSpec extends TestBase {
       typeA.asInstanceOf[Type].parents should have size 2
     }
 
+    "accept constructor as an argument type" in {
+      val model = buildParserModel(
+        """
+          |schema api
+          |external type Int
+          |
+          |type A {
+          |  a ::
+          |    param1: Int
+          |  b ::
+          |    param: a
+          |}
+        """.stripMargin
+      )
+      val maybeA = model.getDefinition("api.v1.A")
+      maybeA shouldBe defined
+      val typeA = maybeA.get
+      typeA shouldBe a[Type]
+      typeA.asInstanceOf[Type].constructors should have size 2
+
+      model.getDefinition("api.v1.A.a") shouldBe defined
+    }
   }
 
 }

@@ -126,7 +126,7 @@ private[astparser] final case class Type(
   parents: Seq[Reference],
   constructors: Seq[TypeConstructor],
   docs: Seq[Documentation]
-) extends TypeLike {
+) extends TypeLike with PackageLike {
   children = constructors ++ typeArguments ++ parents
   def definitions = constructors
   def isGeneric = typeArguments.nonEmpty
@@ -153,9 +153,8 @@ private[astparser] final case class TypeConstructor(
   arguments: Seq[Argument],
   parents: Seq[Reference],
   docs: Seq[Documentation]
-) extends NamedElement with TypeId with Documented {
+) extends TypeLike with TypeId with Documented {
   children = typeArguments ++ arguments ++ parents
-  def fullName: String = packageName ~ name
   def idString: String = {
     maybeParent match {
       case Some(t: Type) =>

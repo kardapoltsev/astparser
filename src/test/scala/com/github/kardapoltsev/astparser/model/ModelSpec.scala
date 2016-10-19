@@ -71,6 +71,12 @@ class ModelSpec extends TestBase {
       inner shouldBe a[Package]
       val maybeTypeC = inner.asInstanceOf[Package].definitions.find(_.name == "C")
       maybeTypeC shouldBe defined
+      val typeC = maybeTypeC.get
+
+      val constructorC = m.getDefinition("api.v2.outer.inner.C.c").get
+      val constructorCParent = m.getDefinition(constructorC.parent).get
+      constructorCParent shouldBe a[Type]
+      constructorCParent shouldBe typeC
     }
   }
 
@@ -92,6 +98,25 @@ class ModelSpec extends TestBase {
     val constructorA = maybeA.get.asInstanceOf[Type].constructors.head
     constructorA shouldBe a[TypeConstructor]
     constructorA.asInstanceOf[TypeConstructor].parents should contain(myTrait)
+  }
+
+  "accept constructors as an argument type" in {
+    val model = buildModel(
+      """
+        |schema api
+        |external type Int
+        |
+        |type A {
+        |  a ::
+        |    param: Int
+        |  b ::
+        |    param : a
+        |}
+      """.stripMargin
+    )
+    val maybeB = model.getDefinition("api.v1.A.b")
+    maybeB shouldBe defined
+    maybeB.get shouldBe a[TypeConstructor]
   }
 
 }

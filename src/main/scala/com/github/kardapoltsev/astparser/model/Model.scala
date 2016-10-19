@@ -167,6 +167,8 @@ object Model {
     tl match {
       case t: parser.Type =>
         convertType(t)
+      case c: parser.TypeConstructor =>
+        convertTypeConstructor(c)
       case t: parser.Trait =>
         convertTrait(t)
       case ta: parser.TypeAlias =>
@@ -198,11 +200,10 @@ object Model {
   }
 
   private def convertType(t: parser.Type)(implicit m: parser.Model): Type = {
-    val ta = t.typeArguments map convertTypeParameter
     Type(
       t.packageName,
       name = t.name,
-      typeArguments = ta,
+      typeArguments = t.typeArguments map convertTypeParameter,
       parents = t.parents map resolve map convertParent,
       constructors = t.constructors map convertTypeConstructor,
       docs = t.docs map convertDocs
@@ -243,6 +244,8 @@ object Model {
         t
       case Some(ta: parser.TypeAlias) =>
         ta
+      case Some(c: parser.TypeConstructor) =>
+        c
       case Some(i: parser.Import) =>
         resolve(i.reference)
       case Some(x: parser.Definition) =>
