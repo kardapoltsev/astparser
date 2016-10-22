@@ -320,6 +320,8 @@ private[astparser] final case class Documentation(
   content: String
 ) extends Positional
 
+case class RestDefinition(content: String) extends Positional
+
 trait Documented {
   def docs: Seq[Documentation]
 }

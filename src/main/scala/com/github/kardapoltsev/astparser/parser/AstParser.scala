@@ -15,10 +15,10 @@
 */
 package com.github.kardapoltsev.astparser.parser
 
+import com.github.kardapoltsev.astparser.parser.TokenParsers.{Identifier, IntNumber}
+
 import scala.io.Source
-import scala.util.parsing.combinator.Parsers
 import scala.util.parsing.input._
-import com.github.kardapoltsev.astparser.util.Logger
 
 
 
@@ -28,16 +28,12 @@ object TokenParsers {
 }
 
 
-private[astparser] trait TokenParsers extends Parsers {
-  override type Elem = Token
+private[astparser] trait TokenParsers extends BaseParser {
   protected val IdentifierRegexp = "^[a-zA-Z][a-zA-Z0-9]*$".r
   protected val HexNumberRegexp = "^[0-9a-fA-F]+$".r
   protected val IntNumberRegexp = "^[-]?[0-9]+$".r
 
-  import TokenParsers._
-  import Tokens._
-
-  val enableProfiling: Boolean = false
+  protected val enableProfiling: Boolean = false
 
   private class Printer(val prefix: String = "### ", val indent: Int = 0) {
     def println(str: String): Unit = {
@@ -62,8 +58,7 @@ private[astparser] trait TokenParsers extends Parsers {
     printers = printers.tail
   }
 
-
-  protected def profile[T](name: String)(p: Parser[T]) =
+  protected def profile[T](name: String)(p: Parser[T]) = {
     if (enableProfiling)
       Parser { in =>
         println(s"{ $name --- start parsing")
@@ -72,6 +67,7 @@ private[astparser] trait TokenParsers extends Parsers {
         val res = p(in)
         val end = System.currentTimeMillis
         val t = res match {
+          case Success(xs: Iterable[_], _) => s"${xs.map(_.getClass.getSimpleName)}"
           case Success(x: Definition, _) => s"${x.getClass.getSimpleName}: name = ${x.name}"
           case Success(x: Argument, _) => s"${x.getClass.getSimpleName}: $x"
           case Success(x: Identifier, _) => s"${x.getClass.getSimpleName}: $x"
@@ -84,46 +80,8 @@ private[astparser] trait TokenParsers extends Parsers {
         res
       }
     else p
-
-
-
-  protected def leftDoc = accept("prefix doc", {
-    case ld @ LeftDoc(d) => Documentation(d)
-  })
-
-  protected def rightDoc = accept("suffix doc", {
-    case rd @ RightDoc(d) => Documentation(d)
-  })
-
-  protected def identifierM =
-    acceptIf {
-      case Lexeme(x) =>
-        x.nonEmpty &&
-          (x.charAt(0).isLetter || x.charAt(0) == '_') &&
-          !x.drop(1).exists(c => !c.isLetterOrDigit)
-      case _ => false
-    } { x => s"valid identifier expected but $x found" }
-
-  protected def identifier: Parser[Identifier] = profile("identifier") {
-    identifierM ^^ {
-      case id: Lexeme => Identifier(id.chars).setPos(id.pos)
-    }
   }
 
-  protected def intNumber: Parser[IntNumber] = profile("intNumber") {
-    accept("int number", {
-      case l @ Lexeme(x) if IntNumberRegexp.unapplySeq(x).isDefined =>
-        IntNumber(x.toInt).setPos(l.pos)
-    })
-  }
-
-  protected def hexNumber: Parser[IntNumber] = profile("hexNumber") {
-    accept("hex number", {
-      case l @ Lexeme(x) if HexNumberRegexp.unapplySeq(x).isDefined =>
-        //noinspection ScalaStyle
-        IntNumber(java.lang.Long.parseLong(x, 16).toInt).setPos(l.pos)
-    })
-  }
 }
 
 
@@ -131,8 +89,10 @@ class ParseException(message: String, val pos: Position, cause: Throwable = null
 
 
 //noinspection ScalaStyle
-class AstParser(override val enableProfiling: Boolean = false)
-  extends TokenParsers with Parsers with Logger {
+class AstParser(override protected val enableProfiling: Boolean = false)
+  extends TokenParsers {
+  override type Elem = Token
+
   import com.github.kardapoltsev.astparser.parser.Tokens._
 
   protected val lexer = new Lexer
@@ -322,7 +282,7 @@ class AstParser(override val enableProfiling: Boolean = false)
 
   protected def callDefinitionExp: Parser[Call] = {
     identifier ~ opt(hashId) ~ typeExtensionExpr ~ argumentsExpr ~
-        (responseOperator ~> typeStatement <~ opt(Semicolon())) ^^ {
+      (responseOperator ~> typeStatement <~ opt(Semicolon())) ^^ {
       case name ~ id ~ parents ~ args ~ rtype =>
         Call(
           name.name,
@@ -373,6 +333,50 @@ class AstParser(override val enableProfiling: Boolean = false)
     }
   }
 
+  protected def restDefinition: Parser[RestDefinition] = profile("REST") {
+    accept("rest definition", {
+      case rd @ Http(chars) => RestDefinition(chars)
+    })
+  }
+
+  protected def leftDoc = accept("prefix doc", {
+    case LeftDoc(d) => Documentation(d)
+  })
+
+  protected def rightDoc = accept("suffix doc", {
+    case RightDoc(d) => Documentation(d)
+  })
+
+  protected def identifierM =
+    acceptIf {
+      case Lexeme(x) =>
+        x.nonEmpty &&
+          (x.charAt(0).isLetter || x.charAt(0) == '_') &&
+          !x.drop(1).exists(c => !c.isLetterOrDigit)
+      case _ => false
+    } { x => s"valid identifier expected but $x found" }
+
+  protected def identifier: Parser[Identifier] = profile("identifier") {
+    identifierM ^^ {
+      case id: Lexeme => Identifier(id.chars).setPos(id.pos)
+    }
+  }
+
+  protected def intNumber: Parser[IntNumber] = profile("intNumber") {
+    accept("int number", {
+      case l @ Lexeme(x) if IntNumberRegexp.unapplySeq(x).isDefined =>
+        IntNumber(x.toInt).setPos(l.pos)
+    })
+  }
+
+  protected def hexNumber: Parser[IntNumber] = profile("hexNumber") {
+    accept("hex number", {
+      case l @ Lexeme(x) if HexNumberRegexp.unapplySeq(x).isDefined =>
+        //noinspection ScalaStyle
+        IntNumber(java.lang.Long.parseLong(x, 16).toInt).setPos(l.pos)
+    })
+  }
+
   private def packagesFromString(
     fullName: String,
     definitions: Seq[Definition],
@@ -415,8 +419,4 @@ class AstParser(override val enableProfiling: Boolean = false)
     parse(content, file.getAbsolutePath)
   }
 
-  private def getResult[T](res: ParseResult[T]): T = res match {
-    case Success(v, _) => v
-    case NoSuccess(msg, next) => throw new ParseException(s"$msg; at `${next.first}`:${next.pos}", next.pos)
-  }
 }
