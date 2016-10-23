@@ -42,7 +42,8 @@ object AstParserBuild extends Build {
         //crossScalaVersions   := Seq("2.10.6", ScalaVersion, "2.12.0-RC1"),
         crossScalaVersions   := Seq("2.10.6", ScalaVersion),
         organizationName     := Organization,
-        organizationHomepage := None,
+        organizationHomepage := Some(url("https://github.com/kardapoltsev")),
+        parallelExecution in Test := true,
 
         initialize                ~= { _ =>
           if (sys.props("java.specification.version") < "1.7")

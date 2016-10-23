@@ -25,7 +25,13 @@ case class QueryParam(name: String)
 case class PathSegment(segment: String) extends PathElement
 case class PathParam(name: String) extends PathElement
 case class Url(path: Seq[PathElement], query: Seq[QueryParam]) extends Positional
-case class HttpMethod(method: String) extends Positional
+//case class HttpMethod(method: String) extends Positional
+sealed trait HttpMethod extends Positional
+case class Get() extends HttpMethod
+case class Put() extends HttpMethod
+case class Post() extends HttpMethod
+case class Delete() extends HttpMethod
+case class Patch() extends HttpMethod
 case class HttpRequest(method: HttpMethod, url: Url) extends Positional
 
 
@@ -38,15 +44,21 @@ class HttpParser(override protected val enableProfiling: Boolean = false) extend
 
   def request: Parser[HttpRequest] = profile("request") {
     positioned {
-      method ~ url ^^ { case m ~ url =>
-        HttpRequest(m, url)
+      phrase {
+        method ~ url ^^ { case m ~ url =>
+          HttpRequest(m, url)
+        }
       }
     }
   }
 
 
-  protected def method = accept("Method", {
-    case Method(m) => HttpMethod(m)
+  protected def method: Parser[HttpMethod] = accept("HttpMethod", {
+    case Method("GET") => Get()
+    case Method("PUT") => Put()
+    case Method("POST") => Post()
+    case Method("PATCH") => Patch()
+    case Method("DELETE") => Delete()
   })
 
   private def url: Parser[Url] = profile("url") {
@@ -88,9 +100,10 @@ class HttpParser(override protected val enableProfiling: Boolean = false) extend
 
 
   private def tryParse(input: CharSequence, sourceName: String): ParseResult[HttpRequest] = {
-    val reader = new ReaderWithSourcePosition(new CharSequenceReader(input), sourceName)
-    val scanner = new lexer.Scanner(reader)
-    request(scanner)
+    //val reader = new ReaderWithSourcePosition(new CharSequenceReader(input), sourceName)
+    //val scanner = new lexer.Scanner(reader)
+    //request(scanner)
+    tryParse(request, input, sourceName)
   }
 
   def parse(input: CharSequence, sourceName: String): HttpRequest = {
@@ -106,8 +119,8 @@ class HttpParser(override protected val enableProfiling: Boolean = false) extend
   protected def tryParse[T](
     parser: Parser[T], input: CharSequence, sourceName: String
   ): ParseResult[T] = {
-    parser(new lexer.Scanner(
-      new ReaderWithSourcePosition(new CharSequenceReader(input), sourceName)
-    ))
+    val reader = new ReaderWithSourcePosition(new CharSequenceReader(input), sourceName)
+    val scanner = new lexer.Scanner(reader)
+    parser(scanner)
   }
 }

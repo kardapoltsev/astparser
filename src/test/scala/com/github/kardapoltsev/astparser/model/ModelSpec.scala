@@ -16,6 +16,7 @@
 package com.github.kardapoltsev.astparser.model
 
 import com.github.kardapoltsev.astparser.TestBase
+import com.github.kardapoltsev.astparser.parser.http.{Get}
 
 
 
@@ -117,6 +118,30 @@ class ModelSpec extends TestBase {
     val maybeB = model.getDefinition("api.v1.A.b")
     maybeB shouldBe defined
     maybeB.get shouldBe a[TypeConstructor]
+  }
+
+  "handle http definitions" in {
+    val model = buildModel(
+      """
+        |schema api
+        |external type Int
+        |external type User
+        |
+        |@GET /api/users/{userId}
+        |call GetUser ::
+        |  userId: Int
+        |  = User
+      """.stripMargin
+    )
+    val maybeGetUser = model.getDefinition("api.v1.GetUser")
+    maybeGetUser shouldBe defined
+    maybeGetUser.get shouldBe a[Call]
+    val getUser = maybeGetUser.get.asInstanceOf[Call]
+    getUser.httpRequest shouldBe defined
+    val http = getUser.httpRequest.get
+    http.method shouldBe Get()
+    http.url.path should have size 3
+    http.url.query shouldBe empty
   }
 
 }

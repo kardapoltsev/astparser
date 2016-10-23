@@ -22,7 +22,6 @@ import scala.util.parsing.input.Positional
 
 
 class HttpLexer extends BaseLexer {
-  import scala.util.parsing.input.CharArrayReader.EofCh
   import HttpLexer._
 
   override type Token = HttpLexer.Token
@@ -36,7 +35,8 @@ class HttpLexer extends BaseLexer {
   }
 
   protected def lexeme: Parser[Lexeme] = rep1(lexemeChar) ^^ (x => Lexeme(x.mkString))
-  private def lexemeChar = elem("valid lexeme", x => x != EofCh && (x.isLetter || x.isDigit))
+  //TODO: fix valid http elems
+  private def lexemeChar = elem("valid lexeme", x => x.isLetter || x.isDigit)
 
   protected def method: Parser[Token] = {
     get | post | put | patch | delete
@@ -47,11 +47,11 @@ class HttpLexer extends BaseLexer {
   protected def put: Parser[Token] = acceptSeq("PUT") ^^ { m => Method(m.mkString) }
   protected def patch: Parser[Token] = acceptSeq("PATCH") ^^ { m => Method(m.mkString) }
   protected def delete: Parser[Token] = acceptSeq("DELETE") ^^ { m => Method(m.mkString) }
-  protected def leftBrace = '{' ^^ { _ => LeftBrace() }
-  protected def rightBrace = '}' ^^ { _ => RightBrace() }
-  protected def questionMark = '?' ^^ { _ => QuestionMark() }
-  protected def ampersand = '&' ^^ { _ => Ampersand() }
-  protected def slash = '/' ^^ { _ => Slash() }
+  protected def leftBrace = '{' ^^^ LeftBrace()
+  protected def rightBrace = '}' ^^^ RightBrace()
+  protected def questionMark = '?' ^^^ QuestionMark()
+  protected def ampersand = '&' ^^^ Ampersand()
+  protected def slash = '/' ^^^ Slash()
 
 
   override def whitespace: Parser[Any] = rep[Any] {

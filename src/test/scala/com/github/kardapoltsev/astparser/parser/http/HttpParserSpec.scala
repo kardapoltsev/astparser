@@ -21,7 +21,7 @@ import org.scalatest.{Matchers, WordSpec}
 
 trait HttpParserEnv extends HttpParser {
 
-  protected def parse[T](p: Parser[T], input: String): T = {
+  protected def parse[T](p: Parser[T], input: CharSequence): T = {
     parse(phrase(p), input, "test_source")
   }
 
@@ -31,10 +31,10 @@ class HttpParserSpec extends WordSpec with Matchers {
   "HttpParser" should {
 
     "parse method" in new HttpParserEnv {
-      parse(method, "GET") shouldBe HttpMethod("GET")
-      parse(method, "POST") shouldBe HttpMethod("POST")
-      parse(method, "PATCH") shouldBe HttpMethod("PATCH")
-      parse(method, "DELETE") shouldBe HttpMethod("DELETE")
+      parse(method, "GET") shouldBe Get()
+      parse(method, "POST") shouldBe Post()
+      parse(method, "PATCH") shouldBe Patch()
+      parse(method, "DELETE") shouldBe Delete()
     }
 
     "not parse invalid method" in new HttpParserEnv {
@@ -61,18 +61,29 @@ class HttpParserSpec extends WordSpec with Matchers {
       a[ParseException] shouldBe thrownBy {
         parse(path, "/users//")
       }
+      a[ParseException] shouldBe thrownBy {
+        parse(path, "/users{}/")
+      }
     }
 
     "parse http request" in new HttpParserEnv {
       override protected val enableProfiling: Boolean = true
       parse(request, "GET /api/users/{userId}?{param1}&{param2}") shouldBe
         HttpRequest(
-          HttpMethod("GET"),
+          Get(),
           Url(
             Seq(PathSegment("api"), PathSegment("users"), PathParam("userId")),
             Seq(QueryParam("param1"), QueryParam("param2"))
           )
         )
+    }
+    "not parse invalid http request" in new HttpParserEnv {
+      a[ParseException] shouldBe thrownBy {
+        parse("GET /api/users{bug}", "test_src")
+      }
+      a[ParseException] shouldBe thrownBy {
+        parse("GET /api/users/{bug", "test_src")
+      }
     }
 
   }

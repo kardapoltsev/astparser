@@ -15,6 +15,7 @@
 */
 package com.github.kardapoltsev.astparser.model
 
+import com.github.kardapoltsev.astparser.parser.http.HttpRequest
 import com.github.kardapoltsev.astparser.util.StringUtil._
 
 
@@ -122,6 +123,7 @@ case class Call(
   arguments: Seq[Argument],
   returnType: TypeStatement,
   parents: Seq[Parent],
+  httpRequest: Option[HttpRequest],
   docs: Seq[Documentation]
 ) extends TypeLike with TypeId with Documented
 

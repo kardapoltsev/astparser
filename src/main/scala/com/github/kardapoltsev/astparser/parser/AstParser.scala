@@ -272,12 +272,19 @@ class AstParser(override protected val enableProfiling: Boolean = false)
     }
   }
 
+  //TODO: fix copy
   protected def callDefinition: Parser[Call] = profile("callDefinition") {
     positioned {
-      repLeftDoc ~ CallKeyword() ~ (callDefinitionExp | failure("call definition expected")) ~ repRightDoc ^^ {
-        case ld ~ kw ~ cd ~ rd => cd.copy(docs = ld ++ rd)
+      repLeftDoc ~ opt(httpDefinition) ~ CallKeyword() ~ (callDefinitionExp | failure("call definition expected")) ~ repRightDoc ^^ {
+        case ld ~ httpDef ~ kw ~ cd ~ rd => cd.copy(docs = ld ++ rd, httpRequest = httpDef)
       }
     }
+  }
+
+  private def httpDefinition: Parser[String] = {
+    accept("httpDefinition", {
+      case Http(content) => content
+    })
   }
 
   protected def callDefinitionExp: Parser[Call] = {
@@ -290,6 +297,7 @@ class AstParser(override protected val enableProfiling: Boolean = false)
           args,
           rtype,
           parents = parents,
+          httpRequest = None,
           docs = Seq.empty
         )
     }
@@ -331,12 +339,6 @@ class AstParser(override protected val enableProfiling: Boolean = false)
           | failure("definition expected")
       )
     }
-  }
-
-  protected def restDefinition: Parser[RestDefinition] = profile("REST") {
-    accept("rest definition", {
-      case rd @ Http(chars) => RestDefinition(chars)
-    })
   }
 
   protected def leftDoc = accept("prefix doc", {

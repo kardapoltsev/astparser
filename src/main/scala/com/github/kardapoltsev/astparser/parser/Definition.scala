@@ -205,6 +205,7 @@ private[astparser] final case class Call(
   arguments: Seq[Argument],
   returnType: TypeStatement,
   parents: Seq[Reference],
+  httpRequest: Option[String],
   docs: Seq[Documentation]
 ) extends TypeLike with TypeId {
   children = (arguments :+ returnType) ++ parents
@@ -319,8 +320,6 @@ private[astparser] final case class Trait(
 private[astparser] final case class Documentation(
   content: String
 ) extends Positional
-
-case class RestDefinition(content: String) extends Positional
 
 trait Documented {
   def docs: Seq[Documentation]

@@ -103,20 +103,20 @@ class Lexer extends BaseLexer {
     | rep (noneOf(EofCh, '*')) ~ '*' ~ comment ^^ { case _ => ' ' }
     )
 
-  protected def eq = '=' ^^ (_ => Eq())
-  protected def colon = ':' ^^ (_ => Colon())
-  protected def semicolon = ';' ^^ (_ => Semicolon())
-  protected def hash = '#' ^^ (_ => Hash())
-  protected def dot = '.' ^^ (_ => Dot())
+  protected def eq = '=' ^^^ Eq()
+  protected def colon = ':' ^^^ Colon()
+  protected def semicolon = ';' ^^^ Semicolon()
+  protected def hash = '#' ^^^ Hash()
+  protected def dot = '.' ^^^ Dot()
 
-  protected def leftBrace = '{' ^^ (_ => LeftBrace())
-  protected def rightBrace = '}' ^^ (_ => RightBrace())
+  protected def leftBrace = '{' ^^^ LeftBrace()
+  protected def rightBrace = '}' ^^^ RightBrace()
 
-  protected def leftBracket = '[' ^^ (_ => LeftBracket())
-  protected def rightBracket = ']' ^^ (_ => RightBracket())
+  protected def leftBracket = '[' ^^^ LeftBracket()
+  protected def rightBracket = ']' ^^^ RightBracket()
 
-  protected def lessSign = '<' ^^ (_ => LessSign())
-  protected def greaterSign = '>' ^^ (_ => GreaterSign())
+  protected def lessSign = '<' ^^^ LessSign()
+  protected def greaterSign = '>' ^^^ GreaterSign()
 
   import com.github.kardapoltsev.astparser.Hardcoded.{Keywords => K}
   private def typeKeyword: Parser[Token] = keyword(K.Type, TypeKeyword())
@@ -135,7 +135,7 @@ class Lexer extends BaseLexer {
   }
 
   private def keyword(keyword: String, keywordToken: => Token): Parser[Token] = {
-    acceptSeq(keyword) ~ ' ' ^^ (_ => keywordToken)
+    acceptSeq(keyword) ~ ' ' ^^^ keywordToken
   }
 
   override def errorToken(msg: String) = Tokens.Error(msg)
