@@ -5,15 +5,6 @@ scala:
    - 2.12-RC2
 jdk:
   - oraclejdk8
-  - oraclejdk7
-  - openjdk7
-
-matrix:
-  exclude:
-  - scala: 2.12-RC2
-    jdk: openjdk7
-  - scala: 2.12-RC2
-    jdk: oraclejdk7
 
 cache:
   directories:
