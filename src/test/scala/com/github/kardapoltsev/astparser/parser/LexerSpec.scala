@@ -82,6 +82,12 @@ class LexerSpec extends WordSpec with Matchers {
       scan(in) shouldBe List(Lexeme("asdf"), Lexeme("adsf"))
     }
 
+    "should parse REST definition" in {
+      val str = "GET /api/users/{userId}"
+      val res = scan("@" + str)
+      res shouldBe List(Http(str))
+    }
+
     "should lead to the error if comment unclosed" in {
       val res = scan("/* asdf ")
       // println(res)

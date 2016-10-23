@@ -17,6 +17,7 @@ package com.github.kardapoltsev.astparser.model
 
 import com.github.kardapoltsev.astparser.parser
 import com.github.kardapoltsev.astparser.parser.AstParser
+import com.github.kardapoltsev.astparser.parser.http.HttpParser
 
 
 
@@ -50,6 +51,7 @@ case class Model(
 
 object Model {
   private val astParser = new AstParser()
+  private val httpParser = new HttpParser()
 
   def build(schemas: Seq[java.io.File]): Model = {
     val parsed = schemas.map(f => astParser.parse(f))
@@ -121,6 +123,13 @@ object Model {
   private def convertCall(
     c: parser.Call
   )(implicit m: parser.Model): Call = {
+    val httpDefinition = c.httpRequest map { http =>
+      httpParser.parse(
+        http,
+        s"http definition for ${c.humanReadable}"
+      )
+    }
+
     Call(
       c.packageName,
       c.name,
@@ -128,6 +137,7 @@ object Model {
       c.arguments map convertArgument,
       convertTypeStatement(c.returnType),
       c.parents map resolve map convertParent,
+      httpDefinition,
       c.docs map convertDocs
     )
   }

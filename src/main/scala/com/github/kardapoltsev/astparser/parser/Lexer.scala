@@ -15,9 +15,6 @@
 */
 package com.github.kardapoltsev.astparser.parser
 
-import scala.collection.mutable.ListBuffer
-import scala.util.parsing.combinator.Parsers
-import scala.util.parsing.combinator.lexical.Scanners
 import scala.util.parsing.input._
 
 
@@ -50,6 +47,8 @@ object Tokens {
 
   case class Lexeme(chars: String) extends Token
 
+  case class Http(chars: String) extends Token
+
   trait Doc extends Token {
     def chars: String
   }
@@ -67,43 +66,31 @@ object Tokens {
 }
 
 
-class TokenReader(seq: Seq[Token]) extends Reader[Token] {
-  override def atEnd = seq.isEmpty
-
-  override def pos = {
-    if(seq.nonEmpty) seq.head.pos
-    else NoPosition
-  }
-
-  override def first = {
-    if (seq.nonEmpty) seq.head
-    else throw new RuntimeException("SeqReader at end")
-  }
-
-  override def rest =  {
-    if (seq.nonEmpty) new TokenReader(seq.tail)
-    else throw new RuntimeException("SeqReader at end")
-  }
-}
+//class TokenReader(seq: Seq[Token]) extends Reader[Token] {
+//  override def atEnd = seq.isEmpty
+//
+//  override def pos = {
+//    if(seq.nonEmpty) seq.head.pos
+//    else NoPosition
+//  }
+//
+//  override def first = {
+//    if (seq.nonEmpty) seq.head
+//    else throw new RuntimeException("SeqReader at end")
+//  }
+//
+//  override def rest =  {
+//    if (seq.nonEmpty) new TokenReader(seq.tail)
+//    else throw new RuntimeException("SeqReader at end")
+//  }
+//}
 
 
 //noinspection ScalaStyle
-class Lexer extends Scanners with Parsers {
+class Lexer extends BaseLexer {
   override type Token = com.github.kardapoltsev.astparser.parser.Token
   import Tokens._
   import scala.util.parsing.input.CharArrayReader.EofCh
-
-  def scan(input: Reader[Char]): List[Token] = {
-    var r = new Scanner(input)
-    val buf = ListBuffer[Token]()
-    while (!r.atEnd) {
-      buf += r.first
-      r = r.rest
-    }
-    buf.toList
-  }
-
-  def scan(input: CharSequence): List[Token] = scan(new CharSequenceReader(input))
 
   override def whitespace: Parser[Any] = rep[Any](
       elem("", _.isWhitespace)
@@ -116,20 +103,20 @@ class Lexer extends Scanners with Parsers {
     | rep (noneOf(EofCh, '*')) ~ '*' ~ comment ^^ { case _ => ' ' }
     )
 
-  protected def eq = '=' ^^ (_ => Eq())
-  protected def colon = ':' ^^ (_ => Colon())
-  protected def semicolon = ';' ^^ (_ => Semicolon())
-  protected def hash = '#' ^^ (_ => Hash())
-  protected def dot = '.' ^^ (_ => Dot())
+  protected def eq = '=' ^^^ Eq()
+  protected def colon = ':' ^^^ Colon()
+  protected def semicolon = ';' ^^^ Semicolon()
+  protected def hash = '#' ^^^ Hash()
+  protected def dot = '.' ^^^ Dot()
 
-  protected def leftBrace = '{' ^^ (_ => LeftBrace())
-  protected def rightBrace = '}' ^^ (_ => RightBrace())
+  protected def leftBrace = '{' ^^^ LeftBrace()
+  protected def rightBrace = '}' ^^^ RightBrace()
 
-  protected def leftBracket = '[' ^^ (_ => LeftBracket())
-  protected def rightBracket = ']' ^^ (_ => RightBracket())
+  protected def leftBracket = '[' ^^^ LeftBracket()
+  protected def rightBracket = ']' ^^^ RightBracket()
 
-  protected def lessSign = '<' ^^ (_ => LessSign())
-  protected def greaterSign = '>' ^^ (_ => GreaterSign())
+  protected def lessSign = '<' ^^^ LessSign()
+  protected def greaterSign = '>' ^^^ GreaterSign()
 
   import com.github.kardapoltsev.astparser.Hardcoded.{Keywords => K}
   private def typeKeyword: Parser[Token] = keyword(K.Type, TypeKeyword())
@@ -141,8 +128,14 @@ class Lexer extends Scanners with Parsers {
   protected def externalKeyword = keyword(K.External, ExternalKeyword())
   protected def importKeyword = keyword(K.Import, ImportKeyword())
 
+  protected def restString = {
+    (elem('@') ~> tillEndOfLine) ^^ {
+      rest => Http(rest)
+    }
+  }
+
   private def keyword(keyword: String, keywordToken: => Token): Parser[Token] = {
-    acceptSeq(keyword) ~ ' ' ^^ (_ => keywordToken)
+    acceptSeq(keyword) ~ ' ' ^^^ keywordToken
   }
 
   override def errorToken(msg: String) = Tokens.Error(msg)
@@ -155,6 +148,7 @@ class Lexer extends Scanners with Parsers {
         | schemaKeyword
         | versionKeyword
         | traitKeyword
+        | restString
         | callKeyword
         | externalKeyword
         | importKeyword

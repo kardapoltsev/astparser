@@ -212,6 +212,7 @@ class ParserSpec extends WordSpec with Matchers {
         ),
         returnType = TypeStatement(Reference("Void"), Seq.empty),
         parents = Seq(Reference("ParentA")),
+        httpRequest = None,
         docs = Seq(Documentation(docString))
       )
       parsed shouldBe expected
@@ -237,6 +238,33 @@ class ParserSpec extends WordSpec with Matchers {
         ),
         returnType = TypeStatement(Reference("Void"), Seq.empty),
         parents = Seq(Reference("ParentA"), Reference("ParentB")),
+        httpRequest = None,
+        docs = Seq(Documentation(docString))
+      )
+      parsed shouldBe expected
+    }
+
+    "parse call definition with http request" in new ParserTestEnv {
+      val docString = "Documentation for myCall"
+      val http = "GET /api/myCall/{param1}"
+      val in =
+        s"""
+           |/**$docString*/
+           |@$http
+           |call myCall <: ParentA ParentB ::
+           |  param1: Int
+           |  => Void;
+        """.stripMargin
+      val parsed = parse(callDefinition, in)
+      val expected = Call(
+        name = "myCall",
+        maybeId = None,
+        arguments = Seq(
+          Argument("param1", TypeStatement(Reference("Int"), Seq.empty), Seq.empty)
+        ),
+        returnType = TypeStatement(Reference("Void"), Seq.empty),
+        parents = Seq(Reference("ParentA"), Reference("ParentB")),
+        httpRequest = Some(http),
         docs = Seq(Documentation(docString))
       )
       parsed shouldBe expected

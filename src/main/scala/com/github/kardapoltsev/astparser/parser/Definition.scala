@@ -205,6 +205,7 @@ private[astparser] final case class Call(
   arguments: Seq[Argument],
   returnType: TypeStatement,
   parents: Seq[Reference],
+  httpRequest: Option[String],
   docs: Seq[Documentation]
 ) extends TypeLike with TypeId {
   children = (arguments :+ returnType) ++ parents
