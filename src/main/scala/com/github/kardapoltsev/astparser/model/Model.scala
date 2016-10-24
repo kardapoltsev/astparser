@@ -17,7 +17,7 @@ package com.github.kardapoltsev.astparser.model
 
 import com.github.kardapoltsev.astparser.parser
 import com.github.kardapoltsev.astparser.parser.AstParser
-import com.github.kardapoltsev.astparser.parser.http.HttpParser
+import com.github.kardapoltsev.astparser.parser.http.{HttpParser, HttpRequest, PathParam}
 
 
 
@@ -130,6 +130,10 @@ object Model {
       )
     }
 
+    httpDefinition foreach { http =>
+      checkHttpParameters(c, http)
+    }
+
     Call(
       c.packageName,
       c.name,
@@ -140,6 +144,23 @@ object Model {
       httpDefinition,
       c.docs map convertDocs
     )
+  }
+
+  private def checkHttpParameters(call: parser.Call, http: HttpRequest): Unit = {
+    val pathParams = http.url.path.collect {
+      case PathParam(name) => name
+    }
+    val queryParams = http.url.query.map(_.name)
+    pathParams ++ queryParams foreach { paramName =>
+      call.arguments.find(_.name == paramName) match {
+        case Some(_) =>
+        case None =>
+          throw new Exception(
+            s"Parameter `$paramName` defined at ${http.pos} " +
+              s"not found in `${call.name}` call definition"
+          )
+      }
+    }
   }
 
   private def convertArgument(

@@ -144,4 +144,21 @@ class ModelSpec extends TestBase {
     http.url.query shouldBe empty
   }
 
+  "check http parameters" in {
+    an[Exception] shouldBe thrownBy {
+      buildModel(
+        """
+          |schema api
+          |external type Int
+          |external type User
+          |
+          |@GET /api/users/{wrongParamName}
+          |call GetUser ::
+          |  userId: Int
+          |  = User
+        """.stripMargin
+      )
+    }
+  }
+
 }
