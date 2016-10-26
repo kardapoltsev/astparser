@@ -31,15 +31,14 @@ class SchemaGenerator(
   private def ls = System.lineSeparator()
 
   def generate(): Seq[GeneratedFile] = loggingTime("formatting") {
-    m.parsedModel.schemas flatMap { s =>
-      s.versions map generateVersion
-    }
+    m.parsedModel.schemas map generateSchema
   }
 
-  private def generateVersion(version: SchemaVersion): GeneratedFile = {
-    val filename = version.schema.name + ".v" + version.version + "." + filenameExtension
-    val h = generateHeader(version)
-    val c = (version.definitions flatMap generateDefinition).mkString(ls)
+
+  private def generateSchema(schema: Schema): GeneratedFile = {
+    val filename = schema.name + "." + filenameExtension
+    val h = generateHeader(schema)
+    val c = (schema.definitions flatMap generateDefinition).mkString(ls)
     val content = h + c
     GeneratedFile(
       path = "",
@@ -48,11 +47,8 @@ class SchemaGenerator(
     )
   }
 
-  private def generateHeader(version: SchemaVersion): String = {
-    s"""${K.Schema} ${version.schema.name}
-       |${K.Version} ${version.version}
-       |
-       |""".stripMargin
+  private def generateHeader(schema: Schema): String = {
+    s"${K.Schema} ${schema.name}" + ls * 2
   }
 
   private def generateDefinition(d: Definition): Option[String] = {
@@ -65,7 +61,6 @@ class SchemaGenerator(
       case i: Import => Some(generateImport(i))
       case p: Package => Some(generatePackage(p))
       case t: TypeConstructor => None //should be generated inside generateType
-      case v: SchemaVersion => None
       case s: Schema => None
       case m: Model => None
     }
@@ -149,7 +144,7 @@ class SchemaGenerator(
   }
 
   private val keywords = Set(
-    K.Import, K.External, K.Trait, K.Version, K.Call, K.Package,
+    K.Import, K.External, K.Trait, K.Call, K.Package,
     K.Schema, K.Type
   )
 

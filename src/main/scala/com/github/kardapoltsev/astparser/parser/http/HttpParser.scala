@@ -15,7 +15,7 @@
 */
 package com.github.kardapoltsev.astparser.parser.http
 
-import com.github.kardapoltsev.astparser.parser.{ReaderWithSourcePosition, TokenParsers}
+import com.github.kardapoltsev.astparser.parser.{BaseParser, ReaderWithSourcePosition}
 
 import scala.util.parsing.input.{CharSequenceReader, Positional}
 
@@ -25,7 +25,6 @@ case class QueryParam(name: String)
 case class PathSegment(segment: String) extends PathElement
 case class PathParam(name: String) extends PathElement
 case class Url(path: Seq[PathElement], query: Seq[QueryParam]) extends Positional
-//case class HttpMethod(method: String) extends Positional
 sealed trait HttpMethod extends Positional
 case class Get() extends HttpMethod
 case class Put() extends HttpMethod
@@ -36,7 +35,7 @@ case class HttpRequest(method: HttpMethod, url: Url) extends Positional
 
 
 
-class HttpParser(override protected val enableProfiling: Boolean = false) extends TokenParsers {
+class HttpParser(override protected val enableProfiling: Boolean = false) extends BaseParser {
   override type Elem = HttpLexer.Token
   import HttpLexer._
 

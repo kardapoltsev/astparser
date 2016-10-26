@@ -31,14 +31,12 @@ class SchemaGeneratorSpec extends TestBase {
     "generate header" in {
       val g = generate(
         """
-          |schema api;
-          |version 1;
+          |schema api
         """.stripMargin
       )
       g should have size 1
       g.head.content shouldBe
         """schema api
-          |version 1
           |
           |""".stripMargin
     }
@@ -46,14 +44,12 @@ class SchemaGeneratorSpec extends TestBase {
     "generate external types" in {
       val g = generate(
         """
-          |schema api;
-          |version 1;
+          |schema api
           |
-          |external type Int;
+          |external type Int
         """.stripMargin)
       g.head.content shouldBe
         """schema api
-          |version 1
           |
           |external type Int""".stripMargin
     }
@@ -61,8 +57,7 @@ class SchemaGeneratorSpec extends TestBase {
     "generate imports" in {
       val g = generate(
         """
-          |schema api;
-          |version 1;
+          |schema api
           |
           |package p1 {
           |  type B {
@@ -76,7 +71,6 @@ class SchemaGeneratorSpec extends TestBase {
 
       g.head.content shouldBe
         """schema api
-          |version 1
           |
           |
           |package p1 {
@@ -97,7 +91,6 @@ class SchemaGeneratorSpec extends TestBase {
     "generate traits" in {
       val sample =
         """schema api
-          |version 1
           |
           |trait A
           |trait B <: A""".stripMargin
@@ -108,15 +101,13 @@ class SchemaGeneratorSpec extends TestBase {
     "generate type aliases" in {
       val g = generate(
         """
-          |schema api;
-          |version 1;
+          |schema api
           |
           |external type Int
           |type UserId = Int
         """.stripMargin)
       g.head.content shouldBe
         """schema api
-          |version 1
           |
           |external type Int
           |type UserId = Int""".stripMargin
@@ -126,7 +117,6 @@ class SchemaGeneratorSpec extends TestBase {
       val g = generate(
         """
           |schema api
-          |version 1
           |external type Int
           |external type String
           |trait T
@@ -142,19 +132,18 @@ class SchemaGeneratorSpec extends TestBase {
           |  */
           |type B <: T {
           |  b ::
-          |    parameter: api.v1.MyType
+          |    parameter: api.MyType
           |    `version`   : Int
           |
           |  /** Docs for constructor c
           |    */
           |  c ::
-          |    parameter: api.v1.MyType
+          |    parameter: api.MyType
           |}
         """.stripMargin)
 
       g.head.content shouldBe
         """schema api
-          |version 1
           |
           |external type Int
           |external type String
@@ -173,33 +162,31 @@ class SchemaGeneratorSpec extends TestBase {
           |type B <: T {
           |
           |  b ::
-          |    parameter : api.v1.MyType
-          |    `version` : Int
+          |    parameter : api.MyType
+          |    version   : Int
           |
           |  /** Docs for constructor c
           |    */
           |  c ::
-          |    parameter : api.v1.MyType
+          |    parameter : api.MyType
           |}""".stripMargin
     }
 
     "generate calls" in {
       val g = generate(
         """
-          |schema api;
-          |version 1;
-          |external type Int;
-          |external type String;
-          |external type Void;
+          |schema api
+          |external type Int
+          |external type String
+          |external type Void
           |call myCall ::
           |  param1: Int -- docs
           |  paramWithVeryLongName: String -- comment
-          |  => Void;
+          |  => Void
         """.stripMargin)
 
       g.head.content shouldBe
         """schema api
-          |version 1
           |
           |external type Int
           |external type String
@@ -213,8 +200,7 @@ class SchemaGeneratorSpec extends TestBase {
 
     "generate packages" in {
       val g = generate("""
-        |schema api;
-        |version 1;
+        |schema api
         |
         |package p1.p2 {
         |  package p3 {
@@ -224,7 +210,6 @@ class SchemaGeneratorSpec extends TestBase {
       """.stripMargin)
       g.head.content shouldBe
         """schema api
-          |version 1
           |
           |
           |package p1 {
@@ -242,8 +227,7 @@ class SchemaGeneratorSpec extends TestBase {
     "escape call name" in {
       val g = generate(
         """
-          |schema api;
-          |version 1;
+          |schema api
           |external type Int
           |
           |call `call` ::
@@ -253,7 +237,6 @@ class SchemaGeneratorSpec extends TestBase {
       )
       g.head.content shouldBe
         """schema api
-          |version 1
           |
           |external type Int
           |

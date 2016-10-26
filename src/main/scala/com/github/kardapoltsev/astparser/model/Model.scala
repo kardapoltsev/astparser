@@ -68,13 +68,8 @@ object Model {
       parsed.schemas map { s =>
         Schema(
           name = s.name,
-          s.versions.map { v =>
-            SchemaVersion(
-              parent = s.name,
-              version = v.version,
-              definitions = convertDefinitions(v.definitions)
-            )
-          })
+          definitions = convertDefinitions(s.definitions)
+        )
       },
       parsed
     )
@@ -142,6 +137,7 @@ object Model {
       convertTypeStatement(c.returnType),
       c.parents map resolve map convertParent,
       httpDefinition,
+      convertVersionsInterval(c.versions),
       c.docs map convertDocs
     )
   }
@@ -296,6 +292,7 @@ object Model {
       typeArguments = c.typeArguments map convertTypeParameter,
       arguments = c.arguments map convertArgument,
       parents = c.parents map resolve map convertParent,
+      convertVersionsInterval(c.versions),
       docs = c.docs map convertDocs
     )
   }
@@ -304,6 +301,12 @@ object Model {
     d: parser.Documentation
   )(implicit m: parser.Model): Documentation = {
     Documentation(d.content)
+  }
+
+  private def convertVersionsInterval(
+    v: parser.VersionsInterval
+  )(implicit m: parser.Model): VersionsInterval = {
+    VersionsInterval(v.start, v.end)
   }
 
 }

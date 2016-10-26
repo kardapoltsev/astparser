@@ -44,6 +44,16 @@ sealed trait Documented {
   def docs: Seq[Documentation]
 }
 
+sealed trait Versioned {
+  def versions: VersionsInterval
+}
+
+case class VersionsInterval(start: Option[Int], end: Option[Int]) {
+  def contains(version: Int): Boolean = {
+    start.forall(_ <= version) && end.forall(_ >= version)
+  }
+}
+
 case class Documentation(
   content: String
 )
@@ -100,8 +110,9 @@ case class TypeConstructor(
   typeArguments: Seq[TypeParameter],
   arguments: Seq[Argument],
   parents: Seq[Parent],
+  versions: VersionsInterval,
   docs: Seq[Documentation]
-) extends TypeLike with TypeId with Documented {
+) extends TypeLike with TypeId with Documented with Versioned {
   override def packageName = parent
   val typeReference = TypeReference(parent)
 }
@@ -124,8 +135,9 @@ case class Call(
   returnType: TypeStatement,
   parents: Seq[Parent],
   httpRequest: Option[HttpRequest],
+  versions: VersionsInterval,
   docs: Seq[Documentation]
-) extends TypeLike with TypeId with Documented
+) extends TypeLike with TypeId with Documented with Versioned
 
 case class Trait(
   parent: String,
@@ -153,23 +165,10 @@ case class Package(
   definitions: Seq[Definition]
 ) extends PackageLike
 
-case class SchemaVersion(
-  parent: String,
-  version: Int,
-  definitions: Seq[Definition]
-) extends PackageLike {
-  def name = "v" + version
-}
-
 case class Schema(
   name: String,
-  versions: Seq[SchemaVersion]
+  definitions: Seq[Definition]
 ) extends PackageLike {
-  def definitions = versions
   def parent = ""
-
-  def latestVersion: SchemaVersion = {
-    versions.maxBy(_.version)
-  }
 
 }

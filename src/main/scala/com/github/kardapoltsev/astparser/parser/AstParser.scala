@@ -28,70 +28,18 @@ object TokenParsers {
 }
 
 
-private[astparser] trait TokenParsers extends BaseParser {
-  protected val IdentifierRegexp = "^[a-zA-Z][a-zA-Z0-9]*$".r
-  protected val HexNumberRegexp = "^[0-9a-fA-F]+$".r
-  protected val IntNumberRegexp = "^[-]?[0-9]+$".r
-
-  protected val enableProfiling: Boolean = false
-
-  private class Printer(val prefix: String = "### ", val indent: Int = 0) {
-    def println(str: String): Unit = {
-      val p = prefix + " " * indent
-      Predef.println(str.lines.map(p + _).mkString(s"\n"))
-    }
-
-    def newIndent() = new Printer("", indent + 1)
-  }
-
-  private var printers: List[Printer] = List(new Printer())
-
-  private def printer = printers.head
-
-  private def println(str: String) = printer.println(str)
-
-  private def printerIndent() = {
-    printers = new Printer(printer.prefix, printer.indent + 1) :: printers
-  }
-
-  private def printerUnindent() = {
-    printers = printers.tail
-  }
-
-  protected def profile[T](name: String)(p: Parser[T]) = {
-    if (enableProfiling)
-      Parser { in =>
-        println(s"{ $name --- start parsing")
-        printerIndent()
-        val start = System.currentTimeMillis
-        val res = p(in)
-        val end = System.currentTimeMillis
-        val t = res match {
-          case Success(xs: Iterable[_], _) => s"${xs.map(_.getClass.getSimpleName)}"
-          case Success(x: Definition, _) => s"${x.getClass.getSimpleName}: name = ${x.name}"
-          case Success(x: Argument, _) => s"${x.getClass.getSimpleName}: $x"
-          case Success(x: Identifier, _) => s"${x.getClass.getSimpleName}: $x"
-          case Success(x: Reference, _) => s"${x.getClass.getSimpleName}: ${x.fullName}"
-          case Success(x, _) => x.getClass.getSimpleName
-          case x @ NoSuccess(m, _) => s"${x.getClass.getSimpleName}: $m"
-        }
-        printerUnindent()
-        println(s"} $name => $t - parse in ${end - start}ms")
-        res
-      }
-    else p
-  }
-
-}
-
-
 class ParseException(message: String, val pos: Position, cause: Throwable = null) extends Exception(message, cause)
 
 
-//noinspection ScalaStyle
-class AstParser(override protected val enableProfiling: Boolean = false)
-  extends TokenParsers {
+class AstParser(
+  override protected val enableProfiling: Boolean = false
+) extends BaseParser {
+
   override type Elem = Token
+
+  protected val IdentifierRegexp = "^[a-zA-Z][a-zA-Z0-9]*$".r
+  protected val HexNumberRegexp = "^[0-9a-fA-F]+$".r
+  protected val IntNumberRegexp = "^[-]?[0-9]+$".r
 
   import com.github.kardapoltsev.astparser.parser.Tokens._
 
@@ -123,8 +71,7 @@ class AstParser(override protected val enableProfiling: Boolean = false)
 
   private def extendsOperator = LessSign() ~ Colon()
 
-  // TODO: GreaterSign() should become strictly required after transition
-  private def responseOperator = Eq() ~ opt(GreaterSign())
+  private def responseOperator = Eq() ~ GreaterSign()
 
   private def argumentsOperator = Colon() ~ Colon()
 
@@ -153,7 +100,7 @@ class AstParser(override protected val enableProfiling: Boolean = false)
 
   protected def traitDefinition: Parser[Trait] = {
     positioned {
-      repLeftDoc ~ (TraitKeyword() ~> identifier) ~ typeExtensionExpr <~ opt(Semicolon()) ^^ {
+      repLeftDoc ~ (TraitKeyword() ~> identifier) ~ typeExtensionExpr ^^ {
         case ld ~ name ~ exts =>
           Trait(name.name, exts, ld)
       }
@@ -162,7 +109,7 @@ class AstParser(override protected val enableProfiling: Boolean = false)
 
   protected def externalTypeDefinition: Parser[Definition] = profile("externalTypeDefinition") {
     positioned {
-      (ExternalKeyword() ~> TypeKeyword()) ~ identifier ~ genericTypeParameters <~ opt(Semicolon()) ^^ {
+      (ExternalKeyword() ~> TypeKeyword()) ~ identifier ~ genericTypeParameters ^^ {
         case kw ~ name ~ ta =>
           ExternalType(name.name, ta)
       }
@@ -186,7 +133,7 @@ class AstParser(override protected val enableProfiling: Boolean = false)
 
   protected def typeAlias: Parser[TypeAlias] = {
     profile("typeAliasExp") {
-      (TypeKeyword() ~> identifier <~ (opt(Colon()) ~ Eq())) ~ (reference <~ opt(Semicolon())) ^^ {
+      (TypeKeyword() ~> identifier <~ Eq()) ~ reference ^^ {
         case name ~ ref =>
           TypeAlias(name.name, ref)
       }
@@ -195,7 +142,7 @@ class AstParser(override protected val enableProfiling: Boolean = false)
 
   protected[astparser] def importDefinition: Parser[Import] = {
     positioned {
-      (ImportKeyword() ~ reference <~ opt(Semicolon())) ^^ {
+      ImportKeyword() ~ reference ^^ {
         case kw ~ reference =>
           Import(reference.name, reference)
       }
@@ -234,17 +181,10 @@ class AstParser(override protected val enableProfiling: Boolean = false)
     }
   }
 
-  protected def typeExtensionExpr = {
-    (extendsOperator ~> rep1(reference)) |
-      legacyTypeExtensionExpr
-  }
-
-  protected def legacyTypeExtensionExpr = {
-    rep(Colon() ~> reference)
-  }
-
-  protected def legacyArgumentsExpr = {
-    rep1(argument)
+  protected def typeExtensionExpr: Parser[Seq[Reference]] = {
+    opt(extendsOperator ~> rep1(reference)) ^^ {
+      exts => exts.getOrElse(Seq.empty)
+    }
   }
 
   protected def modernArgumentsExpr = {
@@ -252,22 +192,37 @@ class AstParser(override protected val enableProfiling: Boolean = false)
   }
 
   protected def argumentsExpr = {
-    opt(modernArgumentsExpr | legacyArgumentsExpr) ^^ (_.getOrElse(Seq.empty))
+    opt(modernArgumentsExpr) ^^ (_.getOrElse(Seq.empty))
   }
 
 
   protected def typeConstructor = profile("typeConstructor") {
     positioned {
-      repLeftDoc ~ opt(Dot()) ~ identifier ~ opt(hashId) ~ typeExtensionExpr ~
-        genericTypeParameters ~ (argumentsExpr <~ opt(Semicolon())) ~ repRightDoc ^^ {
-        case ld ~ dot ~ name ~ id ~ ext ~ ta ~ args ~ rd =>
+      repLeftDoc ~ opt(Dot()) ~ identifier ~ opt(hashId) ~ opt(versionsInterval) ~ typeExtensionExpr ~
+        genericTypeParameters ~ argumentsExpr ~ repRightDoc ^^ {
+        case ld ~ dot ~ name ~ id ~ int ~ ext ~ ta ~ args ~ rd =>
+          val i = int.getOrElse(VersionsInterval(None, None))
           TypeConstructor(
             name.name,
             id.map(_.value),
             ta,
             args,
             ext,
+            i,
             docs = ld ++ rd)
+      }
+    }
+  }
+
+  protected def versionsInterval: Parser[VersionsInterval] = profile("versions interval") {
+    positioned {
+      (
+        LeftParen() ~>
+          opt(intNumber)) ~ (opt(Dash()) ~> opt(intNumber)
+        <~ RightParen()
+        ) ^^ {
+        case maybeStart ~ maybeEnd =>
+          VersionsInterval(maybeStart.map(_.value), maybeEnd.map(_.value))
       }
     }
   }
@@ -288,9 +243,10 @@ class AstParser(override protected val enableProfiling: Boolean = false)
   }
 
   protected def callDefinitionExp: Parser[Call] = {
-    identifier ~ opt(hashId) ~ typeExtensionExpr ~ argumentsExpr ~
-      (responseOperator ~> typeStatement <~ opt(Semicolon())) ^^ {
-      case name ~ id ~ parents ~ args ~ rtype =>
+    identifier ~ opt(hashId) ~ opt(versionsInterval) ~ typeExtensionExpr ~ argumentsExpr ~
+      (responseOperator ~> typeStatement) ^^ {
+      case name ~ id ~ int ~ parents ~ args ~ rtype =>
+        val i = int.getOrElse(VersionsInterval(None, None))
         Call(
           name.name,
           id.map(_.value),
@@ -298,6 +254,7 @@ class AstParser(override protected val enableProfiling: Boolean = false)
           rtype,
           parents = parents,
           httpRequest = None,
+          i,
           docs = Seq.empty
         )
     }
@@ -316,19 +273,15 @@ class AstParser(override protected val enableProfiling: Boolean = false)
   def schema: Parser[Schema] = profile("schema") {
     positioned {
       phrase(schemaInfoExp ~ definitions) ^^ {
-        case sn ~ maybeVersion ~ ds =>
-          val v = SchemaVersion(
-            maybeVersion.map(_.value).getOrElse(1), ds
-          ).setPos(sn.pos)
-          Schema(sn.name, Seq(v))
+        case sn ~ ds =>
+          Schema(sn.name, ds)
       }
     }
   }
 
 
   def schemaInfoExp = profile("schemaInfo") {
-    (SchemaKeyword() ~> identifier <~ opt(Semicolon())) ~
-      opt(VersionKeyword() ~> intNumber <~ opt(Semicolon()))
+    SchemaKeyword() ~> identifier
   }
 
 
@@ -349,7 +302,7 @@ class AstParser(override protected val enableProfiling: Boolean = false)
     case RightDoc(d) => Documentation(d)
   })
 
-  protected def identifierM =
+  protected def identifierM: Parser[Elem] =
     acceptIf {
       case Lexeme(x) =>
         x.nonEmpty &&

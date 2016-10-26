@@ -26,14 +26,13 @@ object Tokens {
   case class PackageKeyword() extends Token
   case class SchemaKeyword() extends Token
   case class TraitKeyword() extends Token
-  case class VersionKeyword() extends Token
   case class CallKeyword() extends Token
   case class ExternalKeyword() extends Token
   case class ImportKeyword() extends Token
 
   case class Eq() extends Token
   case class Colon() extends Token
-  case class Semicolon() extends Token
+  case class Dash() extends Token
   case class Hash() extends Token
   case class Dot() extends Token
 
@@ -41,6 +40,8 @@ object Tokens {
   case class RightBrace() extends Token
   case class LeftBracket() extends Token
   case class RightBracket() extends Token
+  case class LeftParen() extends Token
+  case class RightParen() extends Token
 
   case class LessSign() extends Token
   case class GreaterSign() extends Token
@@ -66,27 +67,6 @@ object Tokens {
 }
 
 
-//class TokenReader(seq: Seq[Token]) extends Reader[Token] {
-//  override def atEnd = seq.isEmpty
-//
-//  override def pos = {
-//    if(seq.nonEmpty) seq.head.pos
-//    else NoPosition
-//  }
-//
-//  override def first = {
-//    if (seq.nonEmpty) seq.head
-//    else throw new RuntimeException("SeqReader at end")
-//  }
-//
-//  override def rest =  {
-//    if (seq.nonEmpty) new TokenReader(seq.tail)
-//    else throw new RuntimeException("SeqReader at end")
-//  }
-//}
-
-
-//noinspection ScalaStyle
 class Lexer extends BaseLexer {
   override type Token = com.github.kardapoltsev.astparser.parser.Token
   import Tokens._
@@ -105,7 +85,7 @@ class Lexer extends BaseLexer {
 
   protected def eq = '=' ^^^ Eq()
   protected def colon = ':' ^^^ Colon()
-  protected def semicolon = ';' ^^^ Semicolon()
+  protected def dash = '-' ^^^ Dash()
   protected def hash = '#' ^^^ Hash()
   protected def dot = '.' ^^^ Dot()
 
@@ -115,6 +95,9 @@ class Lexer extends BaseLexer {
   protected def leftBracket = '[' ^^^ LeftBracket()
   protected def rightBracket = ']' ^^^ RightBracket()
 
+  protected def leftParen = '(' ^^^ LeftParen()
+  protected def rightParen = ')' ^^^ RightParen()
+
   protected def lessSign = '<' ^^^ LessSign()
   protected def greaterSign = '>' ^^^ GreaterSign()
 
@@ -122,7 +105,6 @@ class Lexer extends BaseLexer {
   private def typeKeyword: Parser[Token] = keyword(K.Type, TypeKeyword())
   private def packageKeyword: Parser[Token] = keyword(K.Package, PackageKeyword())
   protected def schemaKeyword = keyword(K.Schema, SchemaKeyword())
-  protected def versionKeyword = keyword(K.Version, VersionKeyword())
   protected def traitKeyword = keyword(K.Trait, TraitKeyword())
   protected def callKeyword = keyword(K.Call, CallKeyword())
   protected def externalKeyword = keyword(K.External, ExternalKeyword())
@@ -142,27 +124,26 @@ class Lexer extends BaseLexer {
 
 
   override def token: Parser[Token] = positioned(
-      symbol
-        | packageKeyword
-        | typeKeyword
-        | schemaKeyword
-        | versionKeyword
-        | traitKeyword
-        | restString
-        | callKeyword
-        | externalKeyword
-        | importKeyword
-        | lexeme
-        | doc
-        | eof
-        | failure("illegal character")
+    packageKeyword
+      | typeKeyword
+      | schemaKeyword
+      | traitKeyword
+      | restString
+      | callKeyword
+      | externalKeyword
+      | importKeyword
+      | lexeme
+      | doc
+      | symbol
+      | eof
+      | failure("illegal character")
   )
 
   private def eof = EofCh ^^^ EOF
 
   private def symbol: Parser[Token] =
-        eq | colon | semicolon | hash | dot | leftBrace | rightBrace | leftBracket | rightBracket |
-            lessSign | greaterSign
+        eq | colon | hash | dot | leftBrace | rightBrace | leftBracket | rightBracket |
+          leftParen | rightParen | dash | lessSign | greaterSign
 
   private def lexemeChar = elem("valid lexeme", x => x != EofCh && (x.isLetter || x.isDigit))
 

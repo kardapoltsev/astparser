@@ -47,10 +47,10 @@ class LexerSpec extends WordSpec with Matchers {
     }
 
     "should parse symbols" in {
-      val in = ";:#.{}[]="
+      val in = ":#.{}[]=()-"
       scan(in) shouldBe List(
-        Semicolon(), Colon(), Hash(), Dot(), LeftBrace(), RightBrace(),
-        LeftBracket(), RightBracket(), Eq()
+        Colon(), Hash(), Dot(), LeftBrace(), RightBrace(),
+        LeftBracket(), RightBracket(), Eq(), LeftParen(), RightParen(), Dash()
       )
     }
 
@@ -131,7 +131,7 @@ class LexerSpec extends WordSpec with Matchers {
         List(
           Lexeme("ASD"), LeftBrace(), LeftDoc(multiDocSample),
           Lexeme("abc"), Dot(), Lexeme("abc"), Hash(), Lexeme("789"), Colon(),
-          Lexeme("T"), LeftBracket(), Lexeme("B"), RightBracket(), Semicolon(),
+          Lexeme("T"), LeftBracket(), Lexeme("B"), RightBracket(),
           RightDoc(lineDocSample), RightBrace())
 
       val in =
@@ -139,7 +139,7 @@ class LexerSpec extends WordSpec with Matchers {
           |  ASD { // $lineDocSample
           |    /*$multiDocSample*/
           |    /**$multiDocSample*/
-          |    abc.abc # 789 : T[B]; --$lineDocSample
+          |    abc.abc # 789 : T[B] --$lineDocSample
           |  }
         """.stripMargin
 
@@ -152,13 +152,13 @@ class LexerSpec extends WordSpec with Matchers {
     "should parse type aliases" in {
       val in =
         """
-          |type MyType = some.other.Type;
+          |type MyType = some.other.Type
           |type MyType2 = some.other.Type
         """.stripMargin
 
       scan(in) shouldBe List(
         TypeKeyword(), Lexeme("MyType"), Eq(),
-        Lexeme("some"), Dot(), Lexeme("other"), Dot(), Lexeme("Type"), Semicolon(),
+        Lexeme("some"), Dot(), Lexeme("other"), Dot(), Lexeme("Type"),
         TypeKeyword(), Lexeme("MyType2"), Eq(),
         Lexeme("some"), Dot(), Lexeme("other"), Dot(), Lexeme("Type")
       )

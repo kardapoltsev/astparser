@@ -23,22 +23,20 @@ class ModelSpec extends TestBase {
     "resolve local references" in {
       val m = buildParserModel(
         """
-          |schema api;
-          |version 1;
+          |schema api
           |
           |package outer.inner {
           |  type A {
-          |    a
+          |    a ::
           |      param1: B
-          |    ;
           |  }
           |
           |  type B {
-          |    b;
+          |    b
           |  }
           |}
         """.stripMargin)
-      val maybeTypeA = m.findSchema("api").flatMap(_.getDefinition("v1.outer.inner.A"))
+      val maybeTypeA = m.findSchema("api").flatMap(_.getDefinition("outer.inner.A"))
       maybeTypeA shouldBe defined
 
       val typeA = maybeTypeA.get
@@ -55,37 +53,25 @@ class ModelSpec extends TestBase {
     "resolve local references #2" in {
       val m = buildParserModel(
         """
-          |schema api;
-          |version 1;
+          |schema api
           |
           |package outer {
-          | package inner {
-          |  type A {
-          |    a
-          |     param1: inner2.C
-          |    ;
-          |  }
+          |  package inner {
+          |    type A {
+          |      a ::
+          |       param1: inner2.C
+          |    }
           |  }
           |
           |  package inner2 {
           |    type C {
-          |      c;
+          |      c (1-2)
           |    }
-          |  }
-          |}
-        """.stripMargin,
-        """
-          |schema api;
-          |version 2;
-          |
-          |package outer.inner2 {
-          |  type C {
-          |    c;
           |  }
           |}
         """.stripMargin
       )
-      val maybeTypeA = m.getDefinition("api.v1.outer.inner.A")
+      val maybeTypeA = m.getDefinition("api.outer.inner.A")
       maybeTypeA shouldBe defined
 
       val typeA = maybeTypeA.get
@@ -95,30 +81,29 @@ class ModelSpec extends TestBase {
 
       m.lookup(typeBRef) shouldBe defined
       m.lookup(typeBRef).get shouldBe a[Type]
-      m.lookup(typeBRef).get.asInstanceOf[Type].fullName shouldBe "api.v1.outer.inner2.C"
+      m.lookup(typeBRef).get.asInstanceOf[Type].fullName shouldBe "api.outer.inner2.C"
 
     }
 
     "resolve absolute references within one schema" in {
       val m = buildParserModel(
         """
-          |schema api;
-          |version 1;
+          |schema api
           |
           |package p1 {
           |  type A {
-          |    a
+          |    a ::
           |      param1: p2.B
-          |    ;
+          |
           |  }
           |}
           |package p2 {
           |  type B {
-          |    b;
+          |    b
           |  }
           |}
         """.stripMargin)
-      val maybeTypeA = m.findSchema("api").flatMap(_.getDefinition("v1.p1.A"))
+      val maybeTypeA = m.findSchema("api").flatMap(_.getDefinition("p1.A"))
       maybeTypeA shouldBe defined
 
       val typeA = maybeTypeA.get
@@ -135,21 +120,20 @@ class ModelSpec extends TestBase {
     "resolve absolute references from another schema" in {
       val s1 =
         """
-          |schema s1;
-          |version 1;
+          |schema s1
           |
           |package p1 {
           |  type A {
-          |    a
-          |      param1: s2.v3.p2.C
-          |    ;
+          |    a ::
+          |      param1: s2.p2.C
+          |
           |  }
           |}
         """.stripMargin
       val s2 =
         """
-          |schema s2;
-          |version 3;
+          |schema s2
+          |
           |package p2 {
           |  type C {
           |    c
@@ -157,7 +141,7 @@ class ModelSpec extends TestBase {
           |}
         """.stripMargin
       val m = buildParserModel(s1, s2)
-      val maybeTypeA = m.findSchema("s1").flatMap(_.getDefinition("v1.p1.A"))
+      val maybeTypeA = m.findSchema("s1").flatMap(_.getDefinition("p1.A"))
       maybeTypeA shouldBe defined
 
       val typeA = maybeTypeA.get
@@ -174,12 +158,11 @@ class ModelSpec extends TestBase {
       val s1 =
         """
           |schema s1
-          |version 1
-          |import s2.v3.p2.C
+          |import s2.p2.C
           |
           |package p1 {
           |  type A {
-          |    a
+          |    a ::
           |      param1: C
           |  }
           |}
@@ -187,7 +170,6 @@ class ModelSpec extends TestBase {
       val s2 =
         """
           |schema s2
-          |version 3
           |package p2 {
           |  type C {
           |    c
@@ -195,7 +177,7 @@ class ModelSpec extends TestBase {
           |}
         """.stripMargin
       val m = buildParserModel(s1, s2)
-      val maybeTypeA = m.findSchema("s1").flatMap(_.getDefinition("v1.p1.A"))
+      val maybeTypeA = m.findSchema("s1").flatMap(_.getDefinition("p1.A"))
       maybeTypeA shouldBe defined
 
       val typeA = maybeTypeA.get
@@ -208,150 +190,44 @@ class ModelSpec extends TestBase {
       m.lookup(argTypeRef).get.asInstanceOf[Import].name shouldBe "C"
     }
 
-    "resolve references to newer schema version" in {
-      val s1 =
-        """
-          |schema api;
-          |version 1;
-          |
-          |package p1 {
-          |  type A {
-          |    a
-          |      param1: p2.C
-          |    ;
-          |  }
-          |}
-        """.stripMargin
-      val s2 =
-        """
-          |schema api;
-          |version 2;
-          |package p2 {
-          |  type C {
-          |    c
-          |  }
-          |}
-        """.stripMargin
-      val m = buildParserModel(s1, s2)
-      val maybeTypeA = m.findSchema("api").flatMap(_.getDefinition("v1.p1.A"))
-      maybeTypeA shouldBe defined
-
-      val typeA = maybeTypeA.get
-
-      val typeBRef = typeA.asInstanceOf[Type].
-        constructors.head.arguments.head.`type`.ref
-
-      m.lookup(typeBRef) shouldBe defined
-      m.lookup(typeBRef).get shouldBe a[Type]
-      m.lookup(typeBRef).get.asInstanceOf[Type].name shouldBe "C"
-    }
-
-    "resolve references to newer schema version #2" in {
-      val s1 =
-        """
-          |schema api
-          |version 1
-          |
-          |package p1 {
-          |  type A {
-          |    a
-          |      param1: p2.C
-          |    ;
-          |  }
-          |}
-        """.stripMargin
-      val s2 =
-        """
-          |schema api;
-          |version 2;
-          |type Dummy {
-          |  dummy
-          |}
-        """.stripMargin
-      val s3 =
-        """
-          |schema api
-          |version 3
-          |
-          |package p2 {
-          |  type C {
-          |    c
-          |  }
-          |}
-        """.stripMargin
-      val m = buildParserModel(s1, s2, s3)
-      val maybeTypeA = m.findSchema("api").flatMap(_.getDefinition("v1.p1.A"))
-      maybeTypeA shouldBe defined
-
-      val typeA = maybeTypeA.get
-
-      val typeBRef = typeA.asInstanceOf[Type].
-        constructors.head.arguments.head.`type`.ref
-
-      m.lookup(typeBRef) shouldBe defined
-      m.lookup(typeBRef).get shouldBe a[Type]
-      m.lookup(typeBRef).get.asInstanceOf[Type].name shouldBe "C"
-    }
-
     "validate arguments in call" in {
       val s1 =
         """
           |schema api
-          |version 1
           |external type Void
           |
           |package p1 {
-          |  call a
+          |  call a ::
           |      param1: p2.B
-          |  = Void
-          |}
-        """.stripMargin
-      val s2 =
-        """
-          |schema api;
-          |version 2;
-          |type Dummy {
-          |  dummy
-          |}
-        """.stripMargin
-      val s3 =
-        """
-          |schema api
-          |version 3
-          |
-          |package p2 {
-          |  type C {
-          |    c
-          |  }
+          |  => Void
           |}
         """.stripMargin
       an[ModelValidationException] shouldBe thrownBy {
-        buildParserModel(s1, s2, s3)
+        buildParserModel(s1)
       }
     }
 
     "handle imports" in {
       val m = buildParserModel(
         """
-          |schema api;
-          |version 1;
+          |schema api
           |
           |package p1 {
-          |  import p2.B;
+          |  import p2.B
           |  type A {
-          |    a
+          |    a ::
           |      param1: B
-          |    ;
+          |
           |  }
           |}
           |package p2 {
           |  type B {
-          |    b;
+          |    b
           |  }
           |}
         """.stripMargin)
       val api = m.findSchema("api").get
-      val typeA = api.getDefinition("v1.p1.A").get
+      val typeA = api.getDefinition("p1.A").get
 
       val typeBRef = typeA.asInstanceOf[Type].
         constructors.head.arguments.head.`type`.ref
@@ -367,49 +243,36 @@ class ModelSpec extends TestBase {
     "resolve references" in {
       val m = buildParserModel(
         """
-          |schema common;
-          |version 1;
-          |external type Int;
-          |trait Object;
-          |trait Model : Object;
-        """.stripMargin,
-        """
-          |schema api;
-          |version 1;
-          |import common.v1.Int;
-          |type UserId := Int;
-          |trait Object : common.v1.Object;
-          |trait Model : Object : common.v1.Model;
-          |
-          |package p1 {
-          |  type A : Model {
-          |    a
-          |      param1: UserId
-          |    ;
-          |  }
-          |  type B : Model {
-          |    b;
-          |  }
-          |  package inner.inner2 {
-          |    type C : Model {
-          |      c;
-          |    }
-          |  }
-          |}
+          |schema common
+          |external type Int
+          |trait Object
+          |trait Model <: Object
         """.stripMargin,
         """
           |schema api
-          |version 2
-          |trait Object : common.v1.Object;
-          |trait Model : Object : common.v1.Model;
-          |package p1.inner.inner2 {
+          |import common.Int
+          |type UserId = Int
+          |trait Object <: common.Object
+          |trait Model <: Object common.Model
           |
+          |package p1 {
+          |  type A <: Model {
+          |    a ::
+          |      param1: UserId
+          |  }
+          |  type B <: Model {
+          |    b
+          |  }
+          |  package inner.inner2 {
+          |    type C <: Model {
+          |      c
+          |    }
+          |  }
           |}
-          |
         """.stripMargin
       )
       val api = m.findSchema("api").get
-      val typeA = api.getDefinition("v1.p1.A").get.asInstanceOf[Type]
+      val typeA = api.getDefinition("p1.A").get.asInstanceOf[Type]
 
       val typeBRef = typeA.constructors.head.arguments.head.`type`.ref
 
@@ -419,7 +282,7 @@ class ModelSpec extends TestBase {
       val i = m.lookup(typeBRef).get.asInstanceOf[TypeAlias]
       m.lookup(i.reference) shouldBe defined
 
-      val maybeObject = m.getDefinition("api.v1.Object")
+      val maybeObject = m.getDefinition("api.Object")
       maybeObject shouldBe defined
       val obj = maybeObject.get
       obj shouldBe a[Trait]
@@ -429,66 +292,54 @@ class ModelSpec extends TestBase {
       val parentRef = objParent.asInstanceOf[Reference]
       m.lookup(parentRef) shouldBe defined
       m.lookup(parentRef).get shouldBe a[Trait]
-      m.lookup(parentRef).get.asInstanceOf[Trait].fullName shouldBe "common.v1.Object"
+      m.lookup(parentRef).get.asInstanceOf[Trait].fullName shouldBe "common.Object"
 
-      val b = m.getDefinition("api.v1.p1.B").get.asInstanceOf[Type]
+      val b = m.getDefinition("api.p1.B").get.asInstanceOf[Type]
       val bParent = m.lookup(b.parents.head)
       bParent shouldBe defined
-      bParent.get.asInstanceOf[Trait].fullName shouldBe "api.v1.Model"
+      bParent.get.asInstanceOf[Trait].fullName shouldBe "api.Model"
 
-      val model = m.getDefinition("api.v1.Model").get
+      val model = m.getDefinition("api.Model").get
       model.asInstanceOf[Trait].parents should have size 2
       val objModelParent = model.asInstanceOf[Trait].parents.find(_.name == "Object").get
       m.lookup(objModelParent) shouldBe defined
-      m.lookup(objModelParent).get.fullName shouldBe "api.v1.Object"
+      m.lookup(objModelParent).get.fullName shouldBe "api.Object"
 
-      val typeC = m.getDefinition("api.v1.p1.inner.inner2.C").get.asInstanceOf[Type]
+      val typeC = m.getDefinition("api.p1.inner.inner2.C").get.asInstanceOf[Type]
       typeC.parents should have size 1
-      m.lookup(typeC.parents.head).map(_.fullName) shouldBe Some("api.v1.Model")
+      m.lookup(typeC.parents.head).map(_.fullName) shouldBe Some("api.Model")
     }
 
     "resolve any valid references" in {
       noException shouldBe thrownBy {
         buildParserModel(
           """
-            |schema common;
-            |version 1;
-            |external type Int;
+            |schema common
+            |external type Int
             |type A { a }
-          """.
-            stripMargin,
+          """.stripMargin,
           """
-            |schema api;
-            |version 2;
-            |import common.v1.Int;
-            |type UserId := Int;
+            |schema api
+            |import common.Int
+            |type UserId = Int
             |
             |package p1 {
-            |  trait C;
+            |  trait C
             |  type A {
-            |    a
+            |    a(2-) ::
             |      param1: UserId
-            |    ;
+            |  }
+            |  type D <: C {
+            |    d(1-1)
             |  }
             |}
-          """.
-            stripMargin,
-          """
-            |schema api;
-            |version 1;
-            |package p1 {
-            |  type D : C {
-            |    d;
-            |  }
-            |}
-          """.
-            stripMargin
+          """.stripMargin
         )
       }
     }
 
     "validate duplicate ids" in {
-      an[Exception] shouldBe thrownBy {
+      a[ModelValidationException] shouldBe thrownBy {
         buildParserModel(
           """
             |schema api
@@ -496,8 +347,8 @@ class ModelSpec extends TestBase {
             |external type Int
             |
             |package a {
-            |  call b = Int
-            |  call b = Int
+            |  call b => Int
+            |  call b => Int
             |}
             |
           """.stripMargin
@@ -506,7 +357,7 @@ class ModelSpec extends TestBase {
     }
 
     "validate duplicate definitions" in {
-      an[Exception] shouldBe thrownBy {
+      a[ModelValidationException] shouldBe thrownBy {
         buildParserModel(
           """
             |schema api
@@ -515,10 +366,10 @@ class ModelSpec extends TestBase {
             |external type String
             |
             |package a {
-            |  call b
+            |  call b ::
             |   param1: Int
             |   param1: String
-            |   = Int
+            |   => Int
             |}
             |
           """.stripMargin
@@ -538,7 +389,7 @@ class ModelSpec extends TestBase {
           |}
         """.stripMargin
       )
-      val maybeA = model.getDefinition("api.v1.A")
+      val maybeA = model.getDefinition("api.A")
       maybeA shouldBe defined
       val typeA = maybeA.get
       typeA shouldBe a[Type]
@@ -559,13 +410,13 @@ class ModelSpec extends TestBase {
           |}
         """.stripMargin
       )
-      val maybeA = model.getDefinition("api.v1.A")
+      val maybeA = model.getDefinition("api.A")
       maybeA shouldBe defined
       val typeA = maybeA.get
       typeA shouldBe a[Type]
       typeA.asInstanceOf[Type].constructors should have size 2
 
-      model.getDefinition("api.v1.A.a") shouldBe defined
+      model.getDefinition("api.A.a") shouldBe defined
     }
   }
 

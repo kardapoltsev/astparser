@@ -45,26 +45,6 @@ private[astparser] sealed trait Element extends Positional with Logger {
     }
   }
 
-  def maybeSchemaVersion: Option[SchemaVersion] = {
-    this match {
-      case v: SchemaVersion =>
-        Some(v)
-      case _ =>
-        maybeParent match {
-          case Some(v: SchemaVersion) => Some(v)
-          case Some(e) => e.maybeSchemaVersion
-          case None => None
-        }
-    }
-  }
-
-  def schemaVersion: SchemaVersion = {
-    maybeSchemaVersion match {
-      case Some(sv) => sv
-      case None =>
-        throw new Exception(s"SchemaVersion not found for ${this.humanReadable}")
-    }
-  }
 
   def maybePackage: Option[PackageLike] = {
     maybeParent match {
@@ -95,13 +75,16 @@ private[astparser] sealed trait Element extends Positional with Logger {
 
 }
 
+private[astparser] case class VersionsInterval(
+  start: Option[Int], end: Option[Int]
+) extends Element
+
+
 private[astparser] trait TypeId {
   def maybeId: Option[Int]
   def idString: String
   def id: Int = maybeId.getOrElse {
-    //remove versions (api.v1 -> api) from idString
-    val fixedId = idString.replaceAll(s"v\\d+.", "")
-    val r = CRC32Helper.crc32(fixedId)
+    val r = CRC32Helper.crc32(idString)
     //println(f"computed hash `$r%02x` for `$fixedId` (before fix `$idString`)")
     r
   }
@@ -152,6 +135,7 @@ private[astparser] final case class TypeConstructor(
   typeArguments: Seq[TypeParameter],
   arguments: Seq[Argument],
   parents: Seq[Reference],
+  versions: VersionsInterval,
   docs: Seq[Documentation]
 ) extends TypeLike with TypeId with Documented {
   children = typeArguments ++ arguments ++ parents
@@ -206,6 +190,7 @@ private[astparser] final case class Call(
   returnType: TypeStatement,
   parents: Seq[Reference],
   httpRequest: Option[String],
+  versions: VersionsInterval,
   docs: Seq[Documentation]
 ) extends TypeLike with TypeId {
   children = (arguments :+ returnType) ++ parents
@@ -325,21 +310,12 @@ trait Documented {
   def docs: Seq[Documentation]
 }
 
-private[astparser] final case class SchemaVersion(
-  version: Int,
-  definitions: Seq[Definition]
-) extends PackageLike {
-  children = definitions
-  def name = s"v$version"
-  def fullName = packageName ~ name
-}
 
 private[astparser] final case class Schema(
   name: String,
-  versions: Seq[SchemaVersion]
+    definitions: Seq[Definition]
 ) extends PackageLike {
   children = definitions
-  def definitions = versions
   //def name: String = ""
   def fullName = name
 }
@@ -348,8 +324,8 @@ private[astparser] final case class Schema(
 private[astparser] final case class Model(
   private val _schemas: Seq[Schema]
 ) extends PackageLike with Logger {
-  val schemas = _schemas.groupBy(_.name).map { case (name, versions) =>
-    Schema(name, versions.flatMap(_.versions))
+  val schemas = _schemas.groupBy(_.name).map { case (name, schemas) =>
+    Schema(name, schemas.flatMap(_.definitions))
   }.toSeq
   //schemas.foreach(_.initParents())
   children = schemas
@@ -365,84 +341,26 @@ private[astparser] final case class Model(
     schemas.find(_.name == name)
   }
 
-  def isLatest(version: SchemaVersion): Boolean = {
-    !version.schema.versions.exists(_.version > version.version)
-  }
-
-  def maybeNewerSchema(version: SchemaVersion): Option[SchemaVersion] = {
-    version.schema.versions.find(_.version == version.version + 1)
-  }
-
-
-  private def maybeNewerVersion(fullName: String): Option[String] = {
-    fullName.split("\\.").toList match {
-      case schema :: version :: rest if version.startsWith("v") =>
-        findSchema(schema) flatMap { s =>
-          val currentVersion = version.drop(1).toInt
-          s.versions.sortBy(_.version).find(_.version > currentVersion) map { nv =>
-            schema ~ s"v${nv.version}" ~ rest.mkString(".")
-          }
-        }
-      case _ => None
-    }
-  }
-
 
   def lookup(ref: Reference): Option[Definition] = loggingTime("lookup") {
-    def lookupAbsolute(fullName: String): Option[Definition] = {
-      getDefinition(fullName) match {
-        case found @ Some(_) => found
-        case None =>
-          maybeNewerVersion(fullName) flatMap { newer =>
-            lookupAbsolute(newer)
-          }
-      }
-    }
-
-    def lookupVersioned(packageName: String): Option[Definition] = {
+    def lookupInScope(packageName: String): Option[Definition] = {
       getDefinition(packageName) match {
         case Some(p: PackageLike) =>
           p.getDefinition(ref) match {
             case found @ Some(_) =>
               found
             case None =>
-              maybeNewerVersion(packageName) match {
-                case Some(newer) =>
-                  lookupVersioned(newer)
+              p.maybePackage match {
+                case Some(outer) =>
+                  lookupInScope(p.packageName)
                 case None =>
-                  None
+                  getDefinition(ref)
               }
           }
         case Some(x) =>
           throw new Exception(s"expected package for name `$packageName`, found ${x.humanReadable}")
         case None =>
-          maybeNewerVersion(packageName) match {
-            case Some(newer) =>
-              lookupVersioned(newer)
-            case None =>
-              None
-          }
-      }
-    }
-
-    def lookupInScope(packageName: String): Option[Definition] = {
-      lookupVersioned(packageName) match {
-        case found @ Some(_) =>
-          found
-        case None =>
-          getDefinition(packageName) match {
-            case Some(p: PackageLike) =>
-              p.maybePackage match {
-                case Some(outer) =>
-                  lookupInScope(p.packageName)
-                case None =>
-                  lookupAbsolute(ref.fullName)
-              }
-            case Some(x) =>
-              throw new Exception(s"expected package for name `$packageName`, found ${x.humanReadable}")
-            case None =>
-              lookupAbsolute(ref.fullName)
-          }
+          getDefinition(ref)
       }
     }
 
@@ -464,13 +382,11 @@ private[astparser] final case class Model(
     }
 
     val duplicateIds = schemas flatMap { s =>
-      s.versions flatMap { v =>
-        v.deepDefinitions.collect {
-          case ti: TypeId => ti.id -> ti
-        }.groupBy { case (id, t) => id }.
-          filter { case (id, types) => types.size > 1 }.
-          flatMap { case (id, types) => types.map(_._2) }
-      }
+      s.deepDefinitions.collect {
+        case ti: TypeId => ti.id -> ti
+      }.groupBy { case (id, t) => id }.
+        filter { case (id, types) => types.size > 1 }.
+        flatMap { case (id, types) => types.map(_._2) }
     }
 
     if(duplicateIds.nonEmpty) {
@@ -491,11 +407,11 @@ private[astparser] final case class Model(
     if(duplicateDefinitions.nonEmpty) {
       failValidation(
         "Model contains duplicate definitions:" + System.lineSeparator() +
-        duplicateDefinitions.map { case (d, duplicates) =>
-          duplicates.map { sameElems =>
-            s"${sameElems.map(_.humanReadable)} defined at ${d.humanReadable}"
+          duplicateDefinitions.map { case (d, duplicates) =>
+            duplicates.map { sameElems =>
+              s"${sameElems.map(_.humanReadable)} defined at ${d.humanReadable}"
+            }.mkString(System.lineSeparator())
           }.mkString(System.lineSeparator())
-        }.mkString(System.lineSeparator())
       )
     }
   }

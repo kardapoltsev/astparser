@@ -24,24 +24,19 @@ class ParserSpec extends WordSpec with Matchers {
     "parse schema info" in new ParserTestEnv {
       val in =
         """
-          |schema api;
-          |version 3;
+          |schema api
         """.stripMargin
       val parsed = parse(schemaInfoExp, in)
-      parsed._1.name shouldBe "api"
-      parsed._2.get.value shouldBe 3
+      parsed.name shouldBe "api"
     }
 
     "print profiling info" in new ParserTestEnv {
       override val enableProfiling = true
       val in =
         """
-          |schema api;
-          |version 3;
+          |schema api
         """.stripMargin
       val parsed = parse(schemaInfoExp, in)
-      parsed._1.name shouldBe "api"
-      parsed._2.get.value shouldBe 3
     }
 
     "parse reference" in new ParserTestEnv {
@@ -49,28 +44,27 @@ class ParserSpec extends WordSpec with Matchers {
       parse(reference, "a.b.c") shouldBe Reference("a.b.c")
     }
 
+    "versions interval" in new ParserTestEnv {
+      parse(versionsInterval, "(2-3)") shouldBe VersionsInterval(Some(2), Some(3))
+      parse(versionsInterval, "(-3)") shouldBe VersionsInterval(None, Some(3))
+      parse(versionsInterval, "(2-)") shouldBe VersionsInterval(Some(2), None)
+      parse(versionsInterval, "(-)") shouldBe VersionsInterval(None, None)
+      parse(versionsInterval, "()") shouldBe VersionsInterval(None, None)
+    }
+
     "parse import definition" in new ParserTestEnv {
       val in =
         """
-          |import api.User;
+          |import api.User
         """.stripMargin
       val parsed = parse(importDefinition, in)
       parsed shouldBe Import("User", Reference("api.User"))
     }
 
-    "parse type alias (legacy syntax)" in new ParserTestEnv {
-      val in =
-        """
-          |type myAlias := api.User;
-        """.stripMargin
-      val parsed = parse(typeAlias, in)
-      parsed shouldBe TypeAlias("myAlias", Reference("api.User"))
-    }
-
     "parse type alias syntax" in new ParserTestEnv {
       val in =
         """
-          |type myAlias = api.User;
+          |type myAlias = api.User
         """.stripMargin
       val parsed = parse(typeAlias, in)
       parsed shouldBe TypeAlias("myAlias", Reference("api.User"))
@@ -79,7 +73,7 @@ class ParserSpec extends WordSpec with Matchers {
     "parse external type definition" in new ParserTestEnv {
       val in =
         """
-          |external type Int;
+          |external type Int
         """.stripMargin
       val parsed = parse(externalTypeDefinition, in)
       parsed shouldBe ExternalType("Int", Seq.empty)
@@ -88,7 +82,7 @@ class ParserSpec extends WordSpec with Matchers {
     "parse external type definition with type params" in new ParserTestEnv {
       val in =
         """
-          |external type Vector[T];
+          |external type Vector[T]
         """.stripMargin
       val parsed = parse(externalTypeDefinition, in)
       parsed shouldBe ExternalType("Vector", Seq(TypeParameter("T", Seq.empty)))
@@ -114,42 +108,6 @@ class ParserSpec extends WordSpec with Matchers {
       parsed shouldBe Package("a", Seq(Package("b", Seq(Package("c", Seq.empty)))))
     }
 
-    "parse full type definition (legacy syntax)" in new ParserTestEnv {
-      val in =
-        s"""
-           |type TypeA {
-           |  consA
-           |    param1: Int
-           |  ;
-           |}
-         """.stripMargin
-      val parsed = parse(typeDefinition, in)
-      val expected = Type(
-        name =  "TypeA",
-        typeArguments = Seq.empty,
-        parents = Seq.empty,
-        constructors = Seq(
-          TypeConstructor(
-            name = "consA",
-            maybeId = None,
-            typeArguments = Seq.empty,
-            arguments = Seq(
-              Argument(
-                name = "param1",
-                `type` = TypeStatement(Reference("Int"), Seq.empty),
-                docs = Seq.empty
-              )
-            ),
-            parents = Seq.empty,
-            docs = Seq.empty
-          )
-        ),
-        docs = Seq.empty
-      )
-
-      parsed shouldBe expected
-    }
-
     "parse full type definition" in new ParserTestEnv {
       val in =
         s"""
@@ -157,7 +115,6 @@ class ParserSpec extends WordSpec with Matchers {
            |  consA #000001 <: ParentA ParentB ::
            |    param1: Int
            |    param2: String
-           |  ;
            |}
          """.stripMargin
       val parsed = parse(typeDefinition, in)
@@ -183,38 +140,13 @@ class ParserSpec extends WordSpec with Matchers {
               )
             ),
             parents = Seq(Reference("ParentA"), Reference("ParentB")),
+            VersionsInterval(None, None),
             docs = Seq.empty
           )
         ),
         docs = Seq.empty
       )
 
-      parsed shouldBe expected
-    }
-
-    "parse call definition (legacy syntax)" in new ParserTestEnv {
-      val docString = "Documentation for myCall"
-      val in =
-        s"""
-          |/**$docString*/
-          |call myCall : ParentA
-          |  param1: Int
-          |  param2: User
-          |  = Void;
-        """.stripMargin
-      val parsed = parse(callDefinition, in)
-      val expected = Call(
-        name = "myCall",
-        maybeId = None,
-        arguments = Seq(
-          Argument("param1", TypeStatement(Reference("Int"), Seq.empty), Seq.empty),
-          Argument("param2", TypeStatement(Reference("User"), Seq.empty), Seq.empty)
-        ),
-        returnType = TypeStatement(Reference("Void"), Seq.empty),
-        parents = Seq(Reference("ParentA")),
-        httpRequest = None,
-        docs = Seq(Documentation(docString))
-      )
       parsed shouldBe expected
     }
 
@@ -226,7 +158,7 @@ class ParserSpec extends WordSpec with Matchers {
            |call myCall <: ParentA ParentB ::
            |  param1: Int
            |  param2: User
-           |  => Void;
+           |  => Void
         """.stripMargin
       val parsed = parse(callDefinition, in)
       val expected = Call(
@@ -239,6 +171,7 @@ class ParserSpec extends WordSpec with Matchers {
         returnType = TypeStatement(Reference("Void"), Seq.empty),
         parents = Seq(Reference("ParentA"), Reference("ParentB")),
         httpRequest = None,
+        VersionsInterval(None, None),
         docs = Seq(Documentation(docString))
       )
       parsed shouldBe expected
@@ -253,7 +186,7 @@ class ParserSpec extends WordSpec with Matchers {
            |@$http
            |call myCall <: ParentA ParentB ::
            |  param1: Int
-           |  => Void;
+           |  => Void
         """.stripMargin
       val parsed = parse(callDefinition, in)
       val expected = Call(
@@ -265,6 +198,7 @@ class ParserSpec extends WordSpec with Matchers {
         returnType = TypeStatement(Reference("Void"), Seq.empty),
         parents = Seq(Reference("ParentA"), Reference("ParentB")),
         httpRequest = Some(http),
+        VersionsInterval(None, None),
         docs = Seq(Documentation(docString))
       )
       parsed shouldBe expected
@@ -272,30 +206,29 @@ class ParserSpec extends WordSpec with Matchers {
 
     "save positions for all elements" in new ParserTestEnv {
       val src = """
-        |schema api;
-        |version 1;
-        |external type Int;
-        |type UserId = Int;
+        |schema api
+        |external type Int
+        |type UserId = Int
         |
         |package outer.inner {
-        |  import p.B;
+        |  import p.B
         |  type A {
         |    a ::
         |      param1: B
-        |    ;
+        |
         |  }
         |}
         |
         |package p {
         |  type B {
-        |    b;
+        |    b
         |  }
         |}
       """.stripMargin
       val parsed = parse(src, "source_name")
 
       parsed.pos shouldBe a[SourcePosition]
-      parsed.pos.asInstanceOf[SourcePosition].lineContents shouldBe "schema api;\n"
+      parsed.pos.asInstanceOf[SourcePosition].lineContents shouldBe "schema api\n"
 
       def checkPosition(e: Element): Unit = {
         //println(s"checking ${e.humanReadable}")

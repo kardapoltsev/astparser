@@ -19,7 +19,6 @@ object Hardcoded {
 
   object Keywords {
     val Schema = "schema"
-    val Version = "version"
     val Type = "type"
     val Trait = "trait"
     val Call = "call"

@@ -26,47 +26,36 @@ class ModelSpec extends TestBase {
     "build" in {
       val s1 =
         """
-          |schema api;
-          |version 1;
-          |
-          |package outer.inner {
-          |  type A {
-          |    a
-          |      param1: B
-          |      `version`: Int
-          |    ;
-          |  }
-          |
-          |  type TypeAlias = A
-          |
-          |  type B : MyTrait {
-          |    b;
-          |  }
-          |}
-        """.stripMargin
-
-      val s2 =
-        """
           |schema api
-          |version 2
-          |
           |external type Int
           |external type MyTrait
           |
           |package outer.inner {
+          |  type A {
+          |    a ::
+          |      param1: B
+          |      `version`: Int
+          |
+          |  }
+          |
+          |  type TypeAlias = A
+          |
+          |  type B <: MyTrait {
+          |    b
+          |  }
+          |
           |  type C {
-          |    c
+          |    c(2-) ::
           |      param1: Int
-          |    ;
+          |
           |  }
           |}
         """.stripMargin
 
-      val m = buildModel(s1, s2)
+      val m = buildModel(s1)
       //println(m)
       m.schemas should have size 1
-      m.schemas.head.latestVersion.version shouldBe 2
-      val maybeInner = m.getDefinition("api.v2.outer.inner")
+      val maybeInner = m.getDefinition("api.outer.inner")
       maybeInner shouldBe defined
       val inner = maybeInner.get
       inner shouldBe a[Package]
@@ -74,12 +63,15 @@ class ModelSpec extends TestBase {
       maybeTypeC shouldBe defined
       val typeC = maybeTypeC.get
 
-      val constructorC = m.getDefinition("api.v2.outer.inner.C.c").get
+      val constructorC = m.getDefinition("api.outer.inner.C.c").get.asInstanceOf[TypeConstructor]
+      constructorC.versions.contains(1) shouldBe false
+      constructorC.versions.contains(2) shouldBe true
+
       val constructorCParent = m.getDefinition(constructorC.parent).get
       constructorCParent shouldBe a[Type]
       constructorCParent shouldBe typeC
     }
-  }
+
 
 
   "accept traits as parents for type constructors" in {
@@ -93,8 +85,8 @@ class ModelSpec extends TestBase {
         |}
       """.stripMargin
     )
-    val myTrait = model.getDefinition("api.v1.MyTrait").get
-    val maybeA = model.getDefinition("api.v1.A")
+    val myTrait = model.getDefinition("api.MyTrait").get
+    val maybeA = model.getDefinition("api.A")
     maybeA shouldBe defined
     val constructorA = maybeA.get.asInstanceOf[Type].constructors.head
     constructorA shouldBe a[TypeConstructor]
@@ -115,7 +107,7 @@ class ModelSpec extends TestBase {
         |}
       """.stripMargin
     )
-    val maybeB = model.getDefinition("api.v1.A.b")
+    val maybeB = model.getDefinition("api.A.b")
     maybeB shouldBe defined
     maybeB.get shouldBe a[TypeConstructor]
   }
@@ -130,10 +122,10 @@ class ModelSpec extends TestBase {
         |@GET /api/users/{userId}
         |call GetUser ::
         |  userId: Int
-        |  = User
+        |  => User
       """.stripMargin
     )
-    val maybeGetUser = model.getDefinition("api.v1.GetUser")
+    val maybeGetUser = model.getDefinition("api.GetUser")
     maybeGetUser shouldBe defined
     maybeGetUser.get shouldBe a[Call]
     val getUser = maybeGetUser.get.asInstanceOf[Call]
@@ -155,10 +147,11 @@ class ModelSpec extends TestBase {
           |@GET /api/users/{wrongParamName}
           |call GetUser ::
           |  userId: Int
-          |  = User
+          |  => User
         """.stripMargin
       )
     }
+  }
   }
 
 }
