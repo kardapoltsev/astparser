@@ -122,10 +122,14 @@ class SchemaGenerator(
 
   private def generateCall(c: Call): String = {
     val docs = formatDocs(c.docs)
+    val httpString = c.httpRequest match {
+      case Some(http) => ls + "@" + http
+      case None => ""
+    }
     val ext = formatParents(c.parents)
     val id = formatId(c.maybeId)
     val escapedName = escaped(c.name)
-    s"""$docs
+    s"""$docs$httpString
        |${K.Call} $escapedName$id$ext${generateArguments(c.arguments)}
        |  => ${formatTypeStatement(c.returnType)}""".stripMargin
   }
