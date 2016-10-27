@@ -26,24 +26,29 @@ case class Model(
   private[astparser] val parsedModel: parser.Model
 ) {
 
-  private val definitions = deepDefinitions.map { d =>
-    d.fullName -> d
-  }.toMap
+  private val definitions = deepDefinitions.groupBy(_.fullName).map {
+    case (fullName, defs) =>
+      fullName -> defs
+  }.withDefaultValue(Seq.empty)
 
   def deepDefinitions: Seq[Definition] = {
     schemas ++ (schemas flatMap (_.deepDefinitions))
   }
 
-  def getDefinition(fullName: String): Option[Definition] = {
-    definitions.get(fullName)
+  def getDefinition(fullName: String): Seq[Definition] = {
+    definitions(fullName)
   }
 
   def getType(typeReference: TypeReference): TypeLike = {
     getDefinition(typeReference.fullName) match {
-      case Some(t: TypeLike) => t
+      case Seq(t: TypeLike) => t
       case x =>
         throw new Exception(s"found unexpected entity for $typeReference: $x")
     }
+  }
+
+  def slice(from: Int, to: Int): Model = {
+    this.copy(schemas = schemas.map(_.slice(VersionsInterval(Some(from), Some(to)))))
   }
 
 }

@@ -52,6 +52,24 @@ case class VersionsInterval(start: Option[Int], end: Option[Int]) {
   def contains(version: Int): Boolean = {
     start.forall(_ <= version) && end.forall(_ >= version)
   }
+
+  def isIntersect(other: VersionsInterval): Boolean = {
+    !intersect(other).isEmpty
+  }
+
+  def intersect(other: VersionsInterval): VersionsInterval = {
+    val newStart = Seq(start, other.start).flatten.sorted.lastOption
+    val newEnd = Seq(end, other.end).flatten.sorted.headOption
+    VersionsInterval(newStart, newEnd)
+  }
+
+  def isEmpty: Boolean = {
+    (start, end) match {
+      case (Some(s), Some(e)) => s > e
+      case _ => false
+    }
+  }
+
 }
 
 case class Documentation(
@@ -79,6 +97,13 @@ case class Type(
   docs: Seq[Documentation]
 ) extends TypeLike with PackageLike with Documented {
   override def definitions: Seq[Definition] = constructors
+
+  override def slice(interval: VersionsInterval): Type = {
+    val filtered = constructors.filter { c =>
+      c.versions.isIntersect(interval)
+    }
+    this.copy(constructors = filtered)
+  }
 }
 
 case class ExternalType(
@@ -157,18 +182,47 @@ sealed trait PackageLike extends Definition {
     })
   }
 
+  def slice(interval: VersionsInterval): PackageLike
+
+  protected def sliceInt(interval: VersionsInterval): Seq[Definition] = {
+    definitions flatMap {
+      case p: PackageLike =>
+        Some(p.slice(interval))
+      case c: Call =>
+        if(c.versions.isIntersect(interval)) {
+          Some(c)
+        } else {
+          None
+        }
+      case d: Definition =>
+        Some(d)
+    }
+  }
+
 }
 
 case class Package(
   parent: String,
   name: String,
   definitions: Seq[Definition]
-) extends PackageLike
+) extends PackageLike {
+  override def slice(interval: VersionsInterval): Package = {
+    this.copy(
+      definitions = sliceInt(interval)
+    )
+  }
+}
 
 case class Schema(
   name: String,
   definitions: Seq[Definition]
 ) extends PackageLike {
   def parent = ""
+
+  override def slice(interval: VersionsInterval): Schema = {
+    this.copy(
+      definitions = sliceInt(interval)
+    )
+  }
 
 }

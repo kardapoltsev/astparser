@@ -55,7 +55,7 @@ class ModelSpec extends TestBase {
       val m = buildModel(s1)
       //println(m)
       m.schemas should have size 1
-      val maybeInner = m.getDefinition("api.outer.inner")
+      val maybeInner = m.getDefinition("api.outer.inner").headOption
       maybeInner shouldBe defined
       val inner = maybeInner.get
       inner shouldBe a[Package]
@@ -63,95 +63,135 @@ class ModelSpec extends TestBase {
       maybeTypeC shouldBe defined
       val typeC = maybeTypeC.get
 
-      val constructorC = m.getDefinition("api.outer.inner.C.c").get.asInstanceOf[TypeConstructor]
+      val constructorC = m.getDefinition("api.outer.inner.C.c").headOption.get.asInstanceOf[TypeConstructor]
       constructorC.versions.contains(1) shouldBe false
       constructorC.versions.contains(2) shouldBe true
 
-      val constructorCParent = m.getDefinition(constructorC.parent).get
+      val constructorCParent = m.getDefinition(constructorC.parent).headOption.get
       constructorCParent shouldBe a[Type]
       constructorCParent shouldBe typeC
     }
 
 
 
-  "accept traits as parents for type constructors" in {
-    val model = buildModel(
-      """
-        |schema api
-        |trait MyTrait
-        |
-        |type A {
-        |  consA <: MyTrait
-        |}
-      """.stripMargin
-    )
-    val myTrait = model.getDefinition("api.MyTrait").get
-    val maybeA = model.getDefinition("api.A")
-    maybeA shouldBe defined
-    val constructorA = maybeA.get.asInstanceOf[Type].constructors.head
-    constructorA shouldBe a[TypeConstructor]
-    constructorA.asInstanceOf[TypeConstructor].parents should contain(myTrait)
-  }
+    "accept traits as parents for type constructors" in {
+      val model = buildModel(
+        """
+          |schema api
+          |trait MyTrait
+          |
+          |type A {
+          |  consA <: MyTrait
+          |}
+        """.stripMargin
+      )
+      val myTrait = model.getDefinition("api.MyTrait").head
+      val maybeA = model.getDefinition("api.A")
+      maybeA should not be empty
+      val constructorA = maybeA.head.asInstanceOf[Type].constructors.head
+      constructorA shouldBe a[TypeConstructor]
+      constructorA.asInstanceOf[TypeConstructor].parents should contain(myTrait)
+    }
 
-  "accept constructors as an argument type" in {
-    val model = buildModel(
-      """
-        |schema api
-        |external type Int
-        |
-        |type A {
-        |  a ::
-        |    param: Int
-        |  b ::
-        |    param : a
-        |}
-      """.stripMargin
-    )
-    val maybeB = model.getDefinition("api.A.b")
-    maybeB shouldBe defined
-    maybeB.get shouldBe a[TypeConstructor]
-  }
+    "accept constructors as an argument type" in {
+      val model = buildModel(
+        """
+          |schema api
+          |external type Int
+          |
+          |type A {
+          |  a ::
+          |    param: Int
+          |  b ::
+          |    param : a
+          |}
+        """.stripMargin
+      )
+      val maybeB = model.getDefinition("api.A.b")
+      maybeB should have size 1
+      maybeB.head shouldBe a[TypeConstructor]
+    }
 
-  "handle http definitions" in {
-    val model = buildModel(
-      """
-        |schema api
-        |external type Int
-        |external type User
-        |
-        |@GET /api/users/{userId}
-        |call GetUser ::
-        |  userId: Int
-        |  => User
-      """.stripMargin
-    )
-    val maybeGetUser = model.getDefinition("api.GetUser")
-    maybeGetUser shouldBe defined
-    maybeGetUser.get shouldBe a[Call]
-    val getUser = maybeGetUser.get.asInstanceOf[Call]
-    getUser.httpRequest shouldBe defined
-    val http = getUser.httpRequest.get
-    http.method shouldBe Get()
-    http.url.path should have size 3
-    http.url.query shouldBe empty
-  }
-
-  "check http parameters" in {
-    an[Exception] shouldBe thrownBy {
-      buildModel(
+    "handle http definitions" in {
+      val model = buildModel(
         """
           |schema api
           |external type Int
           |external type User
           |
-          |@GET /api/users/{wrongParamName}
+          |@GET /api/users/{userId}
           |call GetUser ::
           |  userId: Int
           |  => User
         """.stripMargin
       )
+      val maybeGetUser = model.getDefinition("api.GetUser")
+      maybeGetUser should not be empty
+      maybeGetUser.head shouldBe a[Call]
+      val getUser = maybeGetUser.head.asInstanceOf[Call]
+      getUser.httpRequest shouldBe defined
+      val http = getUser.httpRequest.get
+      http.method shouldBe Get()
+      http.url.path should have size 3
+      http.url.query shouldBe empty
     }
-  }
+
+    "support slices" in {
+      val model = buildModel(
+        """
+          |schema api
+          |external type Int
+          |external type User
+          |
+          |call GetUser(1-2) ::
+          |  userId: Int
+          |  => User
+          |
+          |call GetUser(3-) ::
+          |  userId: Int
+          |  newParam: Int
+          |  => User
+          |
+          |call GetUserNew(3-4) ::
+          |  userId: Int
+          |  => User
+          |
+          |call GetUserNewest(5-) ::
+          |  userId: Int
+          |  => User
+          |
+        """.stripMargin
+      )
+      model.getDefinition("api.GetUser") should have size 2
+      model.getDefinition("api.GetUserNew") should have size 1
+      model.getDefinition("api.GetUserNewest") should have size 1
+
+      model.slice(2, 2).getDefinition("api.GetUser") should have size 1
+      model.slice(2, 2).getDefinition("api.GetUser").head.asInstanceOf[Call].arguments should have size 1
+
+      model.slice(3, 5).getDefinition("api.GetUser") should have size 1
+      model.slice(3, 5).getDefinition("api.GetUser").head.asInstanceOf[Call].arguments should have size 2
+      model.slice(3, 5).getDefinition("api.GetUserNew") should have size 1
+      model.slice(3, 5).getDefinition("api.GetUserNewest") should have size 1
+
+    }
+
+    "check http parameters" in {
+      an[Exception] shouldBe thrownBy {
+        buildModel(
+          """
+            |schema api
+            |external type Int
+            |external type User
+            |
+            |@GET /api/users/{wrongParamName}
+            |call GetUser ::
+            |  userId: Int
+            |  => User
+          """.stripMargin
+        )
+      }
+    }
   }
 
 }
