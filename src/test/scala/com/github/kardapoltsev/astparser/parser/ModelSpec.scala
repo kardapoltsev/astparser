@@ -377,6 +377,31 @@ class ModelSpec extends TestBase {
       }
     }
 
+    "validate layer ranges" ignore {
+      a[ModelValidationException] shouldBe thrownBy {
+        buildParserModel(
+          """
+            |schema api
+            |
+            |external type Int
+            |external type String
+            |
+            |package a {
+            |  call b(1-2) ::
+            |   param1: Int
+            |   param2: String
+            |   => Int
+            |
+            |  call b(2-2) ::
+            |   param1: Int
+            |   => Int
+            |}
+            |
+          """.stripMargin
+        )
+      }
+    }
+
     "accept external types as parents" in {
       val model = buildParserModel(
         """

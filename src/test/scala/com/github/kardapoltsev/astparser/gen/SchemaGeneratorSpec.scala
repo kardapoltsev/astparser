@@ -198,6 +198,30 @@ class SchemaGeneratorSpec extends TestBase {
           |  => Void""".stripMargin
     }
 
+    "generate calls with http definitions" in {
+      val g = generate(
+        """
+          |schema api
+          |external type Int
+          |external type Void
+          |@GET /api/call
+          |call myCall ::
+          |  param1: Int
+          |  => Void
+        """.stripMargin)
+
+      g.head.content shouldBe
+        """schema api
+          |
+          |external type Int
+          |external type Void
+          |
+          |@GET /api/call
+          |call myCall ::
+          |  param1 : Int
+          |  => Void""".stripMargin
+    }
+
     "generate packages" in {
       val g = generate("""
         |schema api

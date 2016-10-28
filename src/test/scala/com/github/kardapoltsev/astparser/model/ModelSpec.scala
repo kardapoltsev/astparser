@@ -141,7 +141,6 @@ class ModelSpec extends TestBase {
         """
           |schema api
           |external type Int
-          |external type User
           |
           |call GetUser(1-2) ::
           |  userId: Int
@@ -159,6 +158,14 @@ class ModelSpec extends TestBase {
           |call GetUserNewest(5-) ::
           |  userId: Int
           |  => User
+          |
+          |type User {
+          |  user (1-1) ::
+          |    id: Int
+          |  user (2-) ::
+          |    id: Int
+          |    param: Int
+          |}
           |
         """.stripMargin
       )

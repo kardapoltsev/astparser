@@ -63,7 +63,7 @@ private[astparser] sealed trait Element extends Positional with Logger {
   }
 
   def humanReadable: String = {
-    this.toString.take(80) + s" defined at $pos"
+    this.toString + s" defined at $pos"
   }
 
   def initParents(): Unit = {
@@ -80,7 +80,12 @@ private[astparser] case class VersionsInterval(
 ) extends Element
 
 
-private[astparser] trait TypeId {
+private[astparser] sealed trait Versioned {
+  def versions: VersionsInterval
+}
+
+
+private[astparser] trait TypeId extends Element {
   def maybeId: Option[Int]
   def idString: String
   def id: Int = maybeId.getOrElse {
@@ -89,6 +94,11 @@ private[astparser] trait TypeId {
     r
   }
   def idHex: String = f"$id%02x"
+
+  override def humanReadable: String = {
+    idString + s" defined at $pos"
+  }
+
 }
 
 private[astparser] sealed trait NamedElement extends Element {
@@ -137,7 +147,7 @@ private[astparser] final case class TypeConstructor(
   parents: Seq[Reference],
   versions: VersionsInterval,
   docs: Seq[Documentation]
-) extends TypeLike with TypeId with Documented {
+) extends TypeLike with TypeId with Documented with Versioned {
   children = typeArguments ++ arguments ++ parents
   def idString: String = {
     maybeParent match {
@@ -192,7 +202,7 @@ private[astparser] final case class Call(
   httpRequest: Option[String],
   versions: VersionsInterval,
   docs: Seq[Documentation]
-) extends TypeLike with TypeId {
+) extends TypeLike with TypeId with Versioned {
   children = (arguments :+ returnType) ++ parents
   def idString: String = {
     val packageNamePrefix =
@@ -313,7 +323,7 @@ trait Documented {
 
 private[astparser] final case class Schema(
   name: String,
-    definitions: Seq[Definition]
+  definitions: Seq[Definition]
 ) extends PackageLike {
   children = definitions
   //def name: String = ""
@@ -396,21 +406,24 @@ private[astparser] final case class Model(
       )
     }
 
-    val duplicateDefinitions = schemas.flatMap(_.deepDefinitions).map { definition =>
+    val duplicateDefinitions = deepDefinitions.map { definition =>
       val duplicates = definition.children.collect {
         case ne: NamedElement => ne
-      }.groupBy(_.name).filter { case (name, elems) => elems.size > 1 }.
-        map { case (name, elems) => elems}
-      definition -> duplicates
+      }.groupBy(_.name).
+        filter { case (name, elems) => elems.size > 1 }.
+        map { case (name, elems) => elems }.
+        filter { elems =>
+          !elems.forall(_.isInstanceOf[TypeConstructor]) &&
+            !elems.forall(_.isInstanceOf[Call])
+        }
+        definition -> duplicates
     }.filter { case (d, duplicates) => duplicates.nonEmpty}
 
     if(duplicateDefinitions.nonEmpty) {
       failValidation(
         "Model contains duplicate definitions:" + System.lineSeparator() +
           duplicateDefinitions.map { case (d, duplicates) =>
-            duplicates.map { sameElems =>
-              s"${sameElems.map(_.humanReadable)} defined at ${d.humanReadable}"
-            }.mkString(System.lineSeparator())
+            duplicates.flatten.map(_.humanReadable).mkString(System.lineSeparator())
           }.mkString(System.lineSeparator())
       )
     }
