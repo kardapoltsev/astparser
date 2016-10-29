@@ -35,6 +35,7 @@ class HttpParserSpec extends WordSpec with Matchers {
       parse(method, "POST") shouldBe Post()
       parse(method, "PATCH") shouldBe Patch()
       parse(method, "DELETE") shouldBe Delete()
+      parse(method, "PUT") shouldBe Put()
     }
 
     "not parse invalid method" in new HttpParserEnv {
