@@ -110,9 +110,10 @@ class SchemaGenerator(
     val ext = formatParents(c.parents)
     val args = generateArguments(c.arguments)
     val id = formatId(c.maybeId)
+    val v = formatVersion(c.versions)
     val escapedName = escaped(c.name)
     s"""$docs
-       |$escapedName$id$ext$args""".stripMargin
+       |$escapedName$id$v$ext$args""".stripMargin
   }
 
   private def generateCall(c: Call): String = {
@@ -123,9 +124,10 @@ class SchemaGenerator(
     }
     val ext = formatParents(c.parents)
     val id = formatId(c.maybeId)
+    val v = formatVersion(c.versions)
     val escapedName = escaped(c.name)
     s"""$docs$httpString
-       |${K.Call} $escapedName$id$ext${generateArguments(c.arguments)}
+       |${K.Call} $escapedName$id$v$ext${generateArguments(c.arguments)}
        |  => ${formatTypeStatement(c.returnType)}""".stripMargin
   }
 
@@ -207,6 +209,15 @@ class SchemaGenerator(
   private def formatId(maybeId: Option[Int]): String = {
     maybeId.map(id => f" #$id%02x").getOrElse("")
   }
+
+  private def formatVersion(version: VersionsInterval): String = {
+    if(version.start.isEmpty && version.end.isEmpty) {
+      ""
+    } else {
+      s" (${version.start.map(_.toString).getOrElse("")}-${version.end.map(_.toString).getOrElse("")})"
+    }
+  }
+
 }
 
 case class GeneratedFile(path: String, name: String, content: String) {
