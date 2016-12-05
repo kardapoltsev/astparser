@@ -12,8 +12,8 @@ val appVersion = {
 organization         := Organization
 name := "ast-parser"
 version              := appVersion
-scalaVersion         := "2.12.0"
-crossScalaVersions   := Seq("2.10.6", "2.11.8", scalaVersion.value)
+scalaVersion         := "2.11.8"
+crossScalaVersions   := Seq("2.10.6", scalaVersion.value, "2.12.0")
 organizationName     := Organization
 organizationHomepage := Some(url("https://github.com/kardapoltsev"))
 parallelExecution in Test := true
@@ -92,7 +92,7 @@ headers := Map(
 val slf4jApi        = "org.slf4j"                    % "slf4j-api"                      % "1.7.21"
 val scalaParsers    = "org.scala-lang.modules"       %% "scala-parser-combinators"      % "1.0.4"
 val logbackClassic  = "ch.qos.logback"               % "logback-classic"                % "1.1.7"         % "test"
-val scalatest       = "org.scalatest"                %% "scalatest"                     % "3.0.0"           % "test"
+val scalatest       = "org.scalatest"                %% "scalatest"                     % "3.0.1"         % "test"
 
 val baseDependencies = Seq(
   slf4jApi, logbackClassic, scalaParsers, scalatest
