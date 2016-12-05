@@ -183,6 +183,8 @@ class ModelSpec extends TestBase {
       model.slice(3, 5).getDefinition("api.GetUserNewest") should have size 1
 
       model.slice(11, 11).getDefinition("api.User") shouldBe empty
+      model.slice(2, 2).getDefinition("api.User").head.
+        asInstanceOf[Type].constructors should have size 1
     }
 
     "check http parameters" in {

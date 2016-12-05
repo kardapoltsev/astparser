@@ -189,7 +189,7 @@ sealed trait PackageLike extends Definition {
       case t: Type =>
         val sliced = t.slice(interval)
         if(sliced.constructors.nonEmpty) {
-          Some(t)
+          Some(sliced)
         } else {
           None
         }
