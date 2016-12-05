@@ -186,6 +186,13 @@ sealed trait PackageLike extends Definition {
 
   protected def sliceInt(interval: VersionsInterval): Seq[Definition] = {
     definitions flatMap {
+      case t: Type =>
+        val sliced = t.slice(interval)
+        if(sliced.constructors.nonEmpty) {
+          Some(t)
+        } else {
+          None
+        }
       case p: PackageLike =>
         Some(p.slice(interval))
       case c: Call =>

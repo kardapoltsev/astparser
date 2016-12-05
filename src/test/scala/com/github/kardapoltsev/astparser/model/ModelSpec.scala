@@ -162,9 +162,10 @@ class ModelSpec extends TestBase {
           |type User {
           |  user (1-1) ::
           |    id: Int
-          |  user (2-) ::
+          |  user (2-5) ::
           |    id: Int
           |    param: Int
+          |  userEmpty (5-10)
           |}
           |
         """.stripMargin
@@ -181,6 +182,7 @@ class ModelSpec extends TestBase {
       model.slice(3, 5).getDefinition("api.GetUserNew") should have size 1
       model.slice(3, 5).getDefinition("api.GetUserNewest") should have size 1
 
+      model.slice(11, 11).getDefinition("api.User") shouldBe empty
     }
 
     "check http parameters" in {
