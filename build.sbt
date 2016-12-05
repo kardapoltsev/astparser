@@ -1,8 +1,8 @@
 val Organization = "com.github.kardapoltsev"
 val SkipUpdate   = true
 val CacheUpdate  = true
-val isSnapshot   = true
-val baseVersion: String = "3.0.1"
+val isSnapshot   = false
+val baseVersion: String = "3.0.2"
 
 val appVersion = {
   if(isSnapshot) baseVersion + "-SNAPSHOT"
