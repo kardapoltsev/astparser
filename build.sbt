@@ -2,7 +2,7 @@ val Organization = "com.github.kardapoltsev"
 val SkipUpdate   = true
 val CacheUpdate  = true
 val isSnapshot   = true
-val baseVersion: String = "3.0.3"
+val baseVersion: String = "3.1.0"
 
 val appVersion = {
   if(isSnapshot) baseVersion + "-SNAPSHOT"
@@ -89,9 +89,9 @@ headers := Map(
   "scala" -> ( HeaderPattern.cStyleBlockComment, ScalaHeader )
 )
 
-val slf4jApi        = "org.slf4j"                    % "slf4j-api"                      % "1.7.21"
+val slf4jApi        = "org.slf4j"                    % "slf4j-api"                      % "1.7.22"
 val scalaParsers    = "org.scala-lang.modules"       %% "scala-parser-combinators"      % "1.0.4"
-val logbackClassic  = "ch.qos.logback"               % "logback-classic"                % "1.1.7"         % "test"
+val logbackClassic  = "ch.qos.logback"               % "logback-classic"                % "1.1.8"         % "test"
 val scalatest       = "org.scalatest"                %% "scalatest"                     % "3.0.1"         % "test"
 
 val baseDependencies = Seq(
