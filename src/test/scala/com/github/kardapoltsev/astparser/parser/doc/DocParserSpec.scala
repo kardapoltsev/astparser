@@ -15,7 +15,6 @@
 */
 package com.github.kardapoltsev.astparser.parser.doc
 
-import com.github.kardapoltsev.astparser.parser.Reference
 import org.scalatest.{Matchers, WordSpec}
 
 
@@ -36,12 +35,12 @@ class DocParserSpec extends WordSpec with Matchers {
     }
 
     "parse reference" in new DocParserEnv {
-      parse(reference, "`pkg.ref`") shouldBe DocReference("pkg.ref", Reference("pkg.ref"))
+      parse(reference, "`pkg.ref`") shouldBe DocReference("pkg.ref", "pkg.ref")
     }
 
     "parse docs" in new DocParserEnv {
       parse(docs, "word 2 `ref` next") shouldBe Docs(Seq(
-        DocString("word 2"), DocReference("ref", Reference("ref")), DocString("next")
+        DocString("word 2"), DocReference("ref", "ref"), DocString("next")
       ))
     }
 

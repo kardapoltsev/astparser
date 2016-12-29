@@ -41,7 +41,7 @@ sealed trait TypeId {
 }
 
 sealed trait Documented {
-  def docs: Seq[Documentation]
+  def docs: Documentation
 }
 
 sealed trait Versioned {
@@ -72,14 +72,18 @@ case class VersionsInterval(start: Option[Int], end: Option[Int]) {
 
 }
 
+sealed trait DocElement
+case class PlainDoc(content: String) extends DocElement
+case class DocReference(name: String, reference: TypeReference) extends DocElement
+
 case class Documentation(
-  content: String
+  content: Seq[DocElement]
 )
 
 case class Argument(
   name: String,
   `type`: TypeStatement,
-  docs: Seq[Documentation]
+  docs: Documentation
 ) extends Documented
 
 sealed trait Parent extends TypeLike
@@ -94,7 +98,7 @@ case class Type(
   typeArguments: Seq[TypeParameter],
   parents: Seq[Parent],
   constructors: Seq[TypeConstructor],
-  docs: Seq[Documentation]
+  docs: Documentation
 ) extends TypeLike with PackageLike with Documented {
   override def definitions: Seq[Definition] = constructors
 
@@ -136,7 +140,7 @@ case class TypeConstructor(
   arguments: Seq[Argument],
   parents: Seq[Parent],
   versions: VersionsInterval,
-  docs: Seq[Documentation]
+  docs: Documentation
 ) extends TypeLike with TypeId with Documented with Versioned {
   override def packageName = parent
   val typeReference = TypeReference(parent)
@@ -161,14 +165,14 @@ case class Call(
   parents: Seq[Parent],
   httpRequest: Option[HttpRequest],
   versions: VersionsInterval,
-  docs: Seq[Documentation]
+  docs: Documentation
 ) extends TypeLike with TypeId with Documented with Versioned
 
 case class Trait(
   parent: String,
   name: String,
   parents: Seq[Trait],
-  docs: Seq[Documentation]
+  docs: Documentation
 ) extends Parent with Documented
 
 sealed trait PackageLike extends Definition {

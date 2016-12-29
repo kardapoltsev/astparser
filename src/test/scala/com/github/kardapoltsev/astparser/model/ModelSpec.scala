@@ -203,6 +203,35 @@ class ModelSpec extends TestBase {
         )
       }
     }
+
+    "build documentation" in {
+      val model = buildModel(
+        """
+          |schema api
+          |external type Int
+          |external type ExternalClass
+          |
+          |/** Docs for type A */
+          |type A {
+          |  a ::
+          |    param1: Int -- docs for param1 with a link to `ExternalClass`
+          |}
+        """.stripMargin
+      )
+      val maybeA = model.getDefinition("api.A").headOption
+      maybeA shouldBe defined
+      val typeA = maybeA.get
+      typeA shouldBe a[Type]
+      typeA.asInstanceOf[Type].docs shouldBe Documentation(Seq(
+        PlainDoc("Docs for type A")
+      ))
+      val arg = typeA.asInstanceOf[Type].constructors.head.arguments.head
+      arg.docs.content should have size 2
+      arg.docs.content.head shouldBe PlainDoc("docs for param1 with a link to")
+      arg.docs.content(1).asInstanceOf[DocReference].name shouldBe "ExternalClass"
+      val ref = arg.docs.content(1).asInstanceOf[DocReference].reference
+      model.getType(ref) shouldBe an[ExternalType]
+    }
   }
 
 }

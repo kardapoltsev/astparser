@@ -17,6 +17,8 @@ package com.github.kardapoltsev.astparser.model
 
 import com.github.kardapoltsev.astparser.parser
 import com.github.kardapoltsev.astparser.parser.AstParser
+import com.github.kardapoltsev.astparser.parser.doc.{DocParser}
+import com.github.kardapoltsev.astparser.parser.doc
 import com.github.kardapoltsev.astparser.parser.http.{HttpParser, HttpRequest, PathParam}
 
 
@@ -57,6 +59,7 @@ case class Model(
 object Model {
   private val astParser = new AstParser()
   private val httpParser = new HttpParser()
+  private val docParser = new DocParser()
 
   def build(schemas: Seq[java.io.File]): Model = {
     val parsed = schemas.map(f => astParser.parse(f))
@@ -116,7 +119,7 @@ object Model {
       t.packageName,
       t.name,
       t.parents map resolveTrait map convertTrait,
-      t.docs map convertDocs
+      convertDocs(t.docs)
     )
   }
 
@@ -143,7 +146,7 @@ object Model {
       c.parents map resolve map convertParent,
       httpDefinition,
       convertVersionsInterval(c.versions),
-      c.docs map convertDocs
+      convertDocs(c.docs)
     )
   }
 
@@ -170,7 +173,7 @@ object Model {
     Argument(
       a.name,
       convertTypeStatement(a.`type`),
-      a.docs map convertDocs
+      convertDocs(a.docs)
     )
   }
 
@@ -238,7 +241,7 @@ object Model {
       typeArguments = t.typeArguments map convertTypeParameter,
       parents = t.parents map resolve map convertParent,
       constructors = t.constructors map convertTypeConstructor,
-      docs = t.docs map convertDocs
+      docs = convertDocs(t.docs)
     )
   }
 
@@ -298,14 +301,24 @@ object Model {
       arguments = c.arguments map convertArgument,
       parents = c.parents map resolve map convertParent,
       convertVersionsInterval(c.versions),
-      docs = c.docs map convertDocs
+      docs = convertDocs(c.docs)
     )
   }
 
   private def convertDocs(
-    d: parser.Documentation
+    docs: Seq[parser.Documentation]
   )(implicit m: parser.Model): Documentation = {
-    Documentation(d.content)
+    val elems = docs flatMap { d =>
+      docParser.parse(d.content, d.pos.toString()).docs map {
+        case plain: doc.DocString =>
+          PlainDoc(plain.value)
+        case r: doc.DocReference =>
+          val ref = parser.Reference(r.reference)
+          ref.maybeParent = Some(d)
+          DocReference(r.name, TypeReference(resolve(ref).fullName))
+      }
+    }
+    Documentation(elems)
   }
 
   private def convertVersionsInterval(

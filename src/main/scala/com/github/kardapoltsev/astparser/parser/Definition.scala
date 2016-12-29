@@ -120,7 +120,7 @@ private[astparser] final case class Type(
   constructors: Seq[TypeConstructor],
   docs: Seq[Documentation]
 ) extends TypeLike with PackageLike {
-  children = constructors ++ typeArguments ++ parents
+  children = constructors ++ typeArguments ++ parents ++ docs
   def definitions = constructors
   def isGeneric = typeArguments.nonEmpty
 }
@@ -148,7 +148,7 @@ private[astparser] final case class TypeConstructor(
   versions: VersionsInterval,
   docs: Seq[Documentation]
 ) extends TypeLike with TypeId with Documented with Versioned {
-  children = typeArguments ++ arguments ++ parents
+  children = typeArguments ++ arguments ++ parents ++ docs
   def idString: String = {
     maybeParent match {
       case Some(t: Type) =>
@@ -203,7 +203,7 @@ private[astparser] final case class Call(
   versions: VersionsInterval,
   docs: Seq[Documentation]
 ) extends TypeLike with TypeId with Versioned {
-  children = (arguments :+ returnType) ++ parents
+  children = (arguments :+ returnType) ++ parents ++ docs
   def idString: String = {
     val packageNamePrefix =
       if (packageName.isEmpty) ""
@@ -222,7 +222,7 @@ private[astparser] final case class Argument(
   `type`: TypeStatement,
   docs: Seq[Documentation]
 ) extends NamedElement with Documented {
-  children = Seq(`type`)
+  children = `type` +: docs
 
   def fullName: String = name
   def idString: String = s"$name:${`type`.idString}"
@@ -309,12 +309,12 @@ private[astparser] final case class Trait(
   parents: Seq[Reference],
   docs: Seq[Documentation]
 ) extends TypeLike {
-  children = parents
+  children = parents ++ docs
 }
 
 private[astparser] final case class Documentation(
   content: String
-) extends Positional
+) extends Element
 
 trait Documented {
   def docs: Seq[Documentation]

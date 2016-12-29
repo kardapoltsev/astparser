@@ -111,6 +111,7 @@ class ParserSpec extends WordSpec with Matchers {
     "parse full type definition" in new ParserTestEnv {
       val in =
         s"""
+           |/** Docs for type A */
            |type TypeA {
            |  consA #000001 <: ParentA ParentB ::
            |    param1: Int
@@ -144,7 +145,7 @@ class ParserSpec extends WordSpec with Matchers {
             docs = Seq.empty
           )
         ),
-        docs = Seq.empty
+        docs = Seq(Documentation(" Docs for type A "))
       )
 
       parsed shouldBe expected

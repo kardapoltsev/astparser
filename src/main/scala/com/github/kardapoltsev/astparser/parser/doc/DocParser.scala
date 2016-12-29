@@ -15,13 +15,13 @@
 */
 package com.github.kardapoltsev.astparser.parser.doc
 
-import com.github.kardapoltsev.astparser.parser.{BaseParser, ReaderWithSourcePosition, Reference}
+import com.github.kardapoltsev.astparser.parser.{BaseParser, ReaderWithSourcePosition}
 
 import scala.util.parsing.input.{CharSequenceReader, Positional}
 
 sealed trait DocElement extends Positional
 case class DocString(value: String) extends DocElement
-case class DocReference(name: String, value: Reference) extends DocElement
+case class DocReference(name: String, reference: String) extends DocElement
 case class Docs(docs: Seq[DocElement]) extends Positional
 
 
@@ -45,7 +45,7 @@ class DocParser(override protected val enableProfiling: Boolean = false) extends
   protected def reference: Parser[DocReference] = profile("reference") {
     BackTick() ~> rep1sep(identifier, Dot()) <~ BackTick() ^^ { segments =>
       val name = segments.mkString(".")
-      DocReference(name, Reference(name))
+      DocReference(name, name)
     }
   }
 

@@ -143,7 +143,7 @@ class AstParser(
   protected[astparser] def importDefinition: Parser[Import] = {
     positioned {
       ImportKeyword() ~ reference ^^ {
-        case kw ~ reference =>
+        case _ ~ reference =>
           Import(reference.name, reference)
       }
     }
@@ -200,7 +200,7 @@ class AstParser(
     positioned {
       repLeftDoc ~ opt(Dot()) ~ identifier ~ opt(hashId) ~ opt(versionsInterval) ~ typeExtensionExpr ~
         genericTypeParameters ~ argumentsExpr ~ repRightDoc ^^ {
-        case ld ~ dot ~ name ~ id ~ int ~ ext ~ ta ~ args ~ rd =>
+        case ld ~ _ ~ name ~ id ~ int ~ ext ~ ta ~ args ~ rd =>
           val i = int.getOrElse(VersionsInterval(None, None))
           TypeConstructor(
             name.name,
