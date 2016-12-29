@@ -15,7 +15,7 @@
 */
 package com.github.kardapoltsev.astparser.gen.doc
 
-import com.github.kardapoltsev.astparser.gen.{GeneratedFile, Generator}
+import com.github.kardapoltsev.astparser.gen.{GeneratedFile}
 import com.github.kardapoltsev.astparser.model._
 
 
@@ -23,20 +23,15 @@ import com.github.kardapoltsev.astparser.model._
 class AsciiDocGenerator(
   val model: Model,
   targetVersion: Int
-) extends Generator {
+) extends DocGenerator {
   import AsciiDocGenerator._
+
 
   override def generate(): Seq[GeneratedFile] = {
     model.schemas flatMap { s =>
       val target = s.slice(VersionsInterval(Some(targetVersion), Some(targetVersion)))
       generateSchema(target)
     }
-  }
-
-
-  def printDocsCoverage(schema: Schema): Unit = {
-    println(s"${schema.fullName} coverage:")
-    calculateDocsCoverage(schema) map(c => "\t" + c) foreach println
   }
 
 
@@ -68,9 +63,11 @@ class AsciiDocGenerator(
     }
   }
 
+
   private def packageDoc(p: Package): DocNode = {
     Header(p.fullName, 1)
   }
+
 
   private def methodDoc(m: Call): DocNode = {
     val docs =
@@ -85,6 +82,7 @@ class AsciiDocGenerator(
       Paragraph(paramsTable(m.arguments))
     )
   }
+
 
   private def typeDoc(t: Type): DocNode = {
     Paragraph(
@@ -102,35 +100,6 @@ class AsciiDocGenerator(
         Paragraph(paramsTable(c.arguments))
       )
     )
-  }
-
-
-
-
-  private def calculateDocsCoverage(schema: Schema): Seq[String] = {
-    val allDefinitions = schema.deepDefinitions
-    val constructors = allDefinitions.collect { case t: Type => t.constructors }.flatten
-    val constructorArguments = allDefinitions.collect { case t: Type => t.constructors.flatMap(_.arguments)}.flatten
-    val calls = allDefinitions.collect { case m: Call => m }
-    val callsParams = allDefinitions.collect { case m: Call => m.arguments }.flatten
-
-
-    Seq(
-      printCoverage("constructors", constructors),
-      printCoverage("constructors arguments", constructorArguments),
-      printCoverage("calls", calls),
-      printCoverage("calls params", callsParams)
-    )
-  }
-
-
-  private def printCoverage(label: String, definitions: Seq[Documented]): String = {
-    val documented = definitions.count(_.docs.content.nonEmpty)
-    val coverage =
-      if (definitions.nonEmpty)
-        documented.toDouble / definitions.size * 100
-      else 0
-    f"$label coverage: $coverage%.1f%%"
   }
 
 
@@ -169,7 +138,7 @@ class AsciiDocGenerator(
   }
 
 
-  private def paramsTable(params: Seq[Argument]): Table =
+  private def paramsTable(params: Seq[Argument]): Table = {
     Table("", None,
       params.map { p =>
         Seq(
@@ -179,6 +148,8 @@ class AsciiDocGenerator(
         )
       }
     )
+  }
+
 
   private def httpString(m: Call): DocNode = {
     m.httpRequest match {
@@ -188,7 +159,6 @@ class AsciiDocGenerator(
         Group(Seq.empty)
     }
   }
-
 
 }
 

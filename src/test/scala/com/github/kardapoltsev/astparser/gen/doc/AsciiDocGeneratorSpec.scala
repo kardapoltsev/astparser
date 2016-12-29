@@ -16,7 +16,8 @@
 package com.github.kardapoltsev.astparser.gen.doc
 
 import com.github.kardapoltsev.astparser.TestBase
-import com.github.kardapoltsev.astparser.gen.GeneratedFile
+
+
 
 class AsciiDocGeneratorSpec extends TestBase {
   "AsciiDocGenerator" should {
