@@ -19,14 +19,13 @@ import java.io.{File, FileWriter}
 import com.github.kardapoltsev.astparser.Hardcoded
 import com.github.kardapoltsev.astparser.parser._
 import com.github.kardapoltsev.astparser.model
-import com.github.kardapoltsev.astparser.util.Logger
 
 
 
 class SchemaGenerator(
   m: model.Model,
   filenameExtension: String
-) extends Logger {
+) extends Generator {
   import Hardcoded.{Keywords => K}
   private def ls = System.lineSeparator()
 

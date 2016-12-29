@@ -21,17 +21,47 @@ import scala.util.parsing.input.{CharSequenceReader, Positional}
 
 
 sealed trait PathElement extends Positional
-case class QueryParam(name: String)
-case class PathSegment(segment: String) extends PathElement
-case class PathParam(name: String) extends PathElement
-case class Url(path: Seq[PathElement], query: Seq[QueryParam]) extends Positional
+case class QueryParam(name: String) {
+  override def toString: String = {
+    "{" + name + "}"
+  }
+}
+case class PathSegment(segment: String) extends PathElement {
+  override def toString: String = {
+    segment
+  }
+}
+case class PathParam(name: String) extends PathElement {
+  override def toString: String = {
+    "{" + name + "}"
+  }
+}
+case class Url(path: Seq[PathElement], query: Seq[QueryParam]) extends Positional {
+  override def toString: String = {
+    path.mkString("/", "/", "") + query.mkString("?", "&", "")
+  }
+}
 sealed trait HttpMethod extends Positional
-case class Get() extends HttpMethod
-case class Put() extends HttpMethod
-case class Post() extends HttpMethod
-case class Delete() extends HttpMethod
-case class Patch() extends HttpMethod
-case class HttpRequest(method: HttpMethod, url: Url) extends Positional
+case class Get() extends HttpMethod {
+  override def toString: String = "GET"
+}
+case class Put() extends HttpMethod {
+  override def toString: String = "PUT"
+}
+case class Post() extends HttpMethod {
+  override def toString: String = "POST"
+}
+case class Delete() extends HttpMethod {
+  override def toString: String = "DELETE"
+}
+case class Patch() extends HttpMethod {
+  override def toString: String = "PATCH"
+}
+case class HttpRequest(method: HttpMethod, url: Url) extends Positional {
+  override def toString: String = {
+    method.toString + " " + url.toString
+  }
+}
 
 
 
