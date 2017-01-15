@@ -118,7 +118,7 @@ object Model {
     Trait(
       t.packageName,
       t.name,
-      t.parents map resolveTrait map convertTrait,
+      t.parents map resolve map convertParent,
       convertDocs(t.docs)
     )
   }
@@ -271,18 +271,10 @@ object Model {
 
   private def resolve(ref: parser.Reference)(implicit m: parser.Model): parser.TypeLike = {
     m.lookup(ref) match {
-      case Some(t: parser.Type) =>
-        t
-      case Some(et: parser.ExternalType) =>
-        et
-      case Some(t: parser.Trait) =>
-        t
-      case Some(ta: parser.TypeAlias) =>
-        ta
-      case Some(c: parser.TypeConstructor) =>
-        c
       case Some(i: parser.Import) =>
         resolve(i.reference)
+      case Some(tl: parser.TypeLike) =>
+        tl
       case Some(x: parser.Definition) =>
         throw new Exception(s"${ref.humanReadable} resolved to unexpected ${x.humanReadable}")
       case None =>
@@ -314,6 +306,7 @@ object Model {
           PlainDoc(plain.value)
         case r: doc.DocReference =>
           val ref = parser.Reference(r.reference)
+          ref.setPos(r.pos)
           ref.maybeParent = Some(d)
           DocReference(r.name, TypeReference(resolve(ref).fullName))
       }

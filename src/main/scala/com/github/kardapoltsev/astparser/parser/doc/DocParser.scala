@@ -35,7 +35,7 @@ class DocParser(override protected val enableProfiling: Boolean = false) extends
   def docs: Parser[Docs] = profile("request") {
     positioned {
       phrase {
-        rep(docString | reference) ^^ { elems =>
+        rep(Space()) ~> rep(docString | reference) <~ rep(Space()) ^^ { elems =>
           Docs(elems)
         }
       }
@@ -43,20 +43,31 @@ class DocParser(override protected val enableProfiling: Boolean = false) extends
   }
 
   protected def reference: Parser[DocReference] = profile("reference") {
-    BackTick() ~> rep1sep(identifier, Dot()) <~ BackTick() ^^ { segments =>
-      val name = segments.mkString(".")
-      DocReference(name, name)
+    positioned {
+      BackTick() ~> rep1sep(identifier, Dot()) <~ BackTick() ^^ { segments =>
+        val name = segments.mkString(".")
+        DocReference(name, name)
+      }
     }
   }
 
   protected def docString: Parser[DocString] = profile("docs") {
-    rep1(identifier) ^^ { words =>
-      DocString(words.mkString(" "))
+    positioned {
+      rep1(docWord) ^^ { words =>
+        DocString(words.mkString(""))
+      }
     }
   }
 
-  private def identifier: Parser[String] = accept("pathSegment", {
-    case Lexeme(chars) => chars.toString
+  private def docWord: Parser[String] = accept("doc word", {
+    case Identifier(chars) => chars
+    case SpecialCharacters(chars) => chars
+    case Dot() => "."
+    case Space() => " "
+  })
+
+  private def identifier: Parser[String] = accept("identifier", {
+    case Identifier(chars) => chars
   })
 
   def parse(input: CharSequence, sourceName: String): Docs = {

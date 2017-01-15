@@ -294,13 +294,17 @@ class AstParser(
     }
   }
 
-  protected def leftDoc = accept("prefix doc", {
-    case LeftDoc(d) => Documentation(d)
-  })
+  protected def leftDoc = positioned {
+    accept("prefix doc", {
+      case LeftDoc(d) => Documentation(d)
+    })
+  }
 
-  protected def rightDoc = accept("suffix doc", {
-    case RightDoc(d) => Documentation(d)
-  })
+  protected def rightDoc = positioned {
+    accept("suffix doc", {
+      case RightDoc(d) => Documentation(d)
+    })
+  }
 
   protected def identifierM: Parser[Elem] =
     acceptIf {

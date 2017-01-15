@@ -31,7 +31,6 @@ sealed trait NamedElement extends AstElement {
 }
 
 sealed trait Definition extends NamedElement {
-  def parent: String
   def packageName = parent
 }
 
@@ -142,7 +141,6 @@ case class TypeConstructor(
   versions: VersionsInterval,
   docs: Documentation
 ) extends TypeLike with TypeId with Documented with Versioned {
-  override def packageName = parent
   val typeReference = TypeReference(parent)
 }
 
@@ -171,7 +169,7 @@ case class Call(
 case class Trait(
   parent: String,
   name: String,
-  parents: Seq[Trait],
+  parents: Seq[Parent],
   docs: Documentation
 ) extends Parent with Documented
 

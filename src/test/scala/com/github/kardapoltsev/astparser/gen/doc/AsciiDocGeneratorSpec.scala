@@ -30,7 +30,7 @@ class AsciiDocGeneratorSpec extends TestBase {
            |external type Void
            |
            |package outer.inner {
-           |  /** Documentation for type A */
+           |  /**Documentation for type A*/
            |  type A {
            |    /**
            |     Multi line doc

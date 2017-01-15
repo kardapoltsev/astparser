@@ -15,6 +15,8 @@
 */
 package com.github.kardapoltsev.astparser.parser
 
+import java.awt.event.KeyEvent
+
 import scala.collection.mutable.ListBuffer
 import scala.util.parsing.combinator.Parsers
 import scala.util.parsing.combinator.lexical.Scanners
@@ -33,5 +35,13 @@ abstract class BaseLexer extends Scanners with Parsers {
   }
 
   def scan(input: CharSequence): List[Token] = scan(new CharSequenceReader(input))
+
+  protected def isPrintableChar(c: Char): Boolean = {
+    val block = Character.UnicodeBlock.of(c)
+    (!Character.isISOControl(c)) &&
+      c != KeyEvent.CHAR_UNDEFINED &&
+      block != null &&
+      block != Character.UnicodeBlock.SPECIALS
+  }
 
 }

@@ -30,13 +30,25 @@ class DocLexerSpec extends WordSpec with Matchers {
   "DocLexer" should {
     "parse docs" in {
       scan("ref to `pkg.test`") shouldBe List(
-        Lexeme("ref"),
-        Lexeme("to"),
+        Identifier("ref"),
+        Space(),
+        Identifier("to"),
+        Space(),
         BackTick(),
-        Lexeme("pkg"),
+        Identifier("pkg"),
         Dot(),
-        Lexeme("test"),
+        Identifier("test"),
         BackTick()
+      )
+    }
+    "parse special characters" in {
+      scan("word () wordWithCharacter[]") shouldBe List(
+        Identifier("word"),
+        Space(),
+        SpecialCharacters("()"),
+        Space(),
+        Identifier("wordWithCharacter"),
+        SpecialCharacters("[]")
       )
     }
   }

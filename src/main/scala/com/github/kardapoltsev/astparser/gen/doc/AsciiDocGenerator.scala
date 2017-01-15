@@ -127,12 +127,6 @@ class AsciiDocGenerator(
         Text(content)
       case DocReference(name, reference) =>
         AnchorLink(name, reference.fullName)
-    }.foldLeft(Seq.empty[DocNode]) { case (acc, elem) =>
-      if(acc.nonEmpty) {
-        acc :+ Text(" ") :+ elem
-      } else {
-        Seq(elem)
-      }
     }
     Group(nodes)
   }

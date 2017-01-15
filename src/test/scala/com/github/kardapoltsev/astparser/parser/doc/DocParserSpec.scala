@@ -39,8 +39,10 @@ class DocParserSpec extends WordSpec with Matchers {
     }
 
     "parse docs" in new DocParserEnv {
-      parse(docs, "word 2 `ref` next") shouldBe Docs(Seq(
-        DocString("word 2"), DocReference("ref", "ref"), DocString("next")
+      parse(docs, "word 2 `ref` next. Second sentence. characters: (){}[]-=/") shouldBe Docs(Seq(
+        DocString("word 2 "),
+        DocReference("ref", "ref"),
+        DocString(" next. Second sentence. characters: (){}[]-=/")
       ))
     }
 

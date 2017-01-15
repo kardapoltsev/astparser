@@ -211,7 +211,7 @@ class ModelSpec extends TestBase {
           |external type Int
           |external type ExternalClass
           |
-          |/** Docs for type A */
+          |/**Docs for type A*/
           |type A {
           |  a ::
           |    param1: Int -- docs for param1 with a link to `ExternalClass`
@@ -227,7 +227,7 @@ class ModelSpec extends TestBase {
       ))
       val arg = typeA.asInstanceOf[Type].constructors.head.arguments.head
       arg.docs.content should have size 2
-      arg.docs.content.head shouldBe PlainDoc("docs for param1 with a link to")
+      arg.docs.content.head shouldBe PlainDoc("docs for param1 with a link to ")
       arg.docs.content(1).asInstanceOf[DocReference].name shouldBe "ExternalClass"
       val ref = arg.docs.content(1).asInstanceOf[DocReference].reference
       model.getType(ref) shouldBe an[ExternalType]

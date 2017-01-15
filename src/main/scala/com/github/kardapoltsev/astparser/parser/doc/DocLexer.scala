@@ -30,17 +30,29 @@ class DocLexer extends BaseLexer {
   }
 
   override def token: Parser[Token] = {
-    backtick | dot | lexeme
+    backtick | dot | identifier | specialCharacters | space
   }
 
   override def whitespace: Parser[Any] = rep[Any] {
-    elem("whitespace", _.isWhitespace)
+    elem("whitespace", _ => false)
   }
+
 
   protected def backtick: Parser[Token] = '`' ^^^ BackTick()
   protected def dot = '.' ^^^ Dot()
-  protected def lexeme: Parser[Token] = rep1(lexemeChar) ^^ (x => Lexeme(x.mkString))
-  private def lexemeChar = elem("valid lexeme", x => x.isLetter || x.isDigit)
+
+  protected def identifier: Parser[Token] = {
+    rep1(identifierChar) ^^ (x => Identifier(x.mkString))
+  }
+  private def identifierChar = elem("valid lexeme", x => x.isLetterOrDigit)
+
+  protected def specialCharacters: Parser[Token] = rep1(specialChar) ^^ (x => SpecialCharacters(x.mkString))
+  private val allowedCharacters = Set(
+    '-', ',', '(', ')', '=', '[', ']', '{', '}', '_', ':', '/', ''', '"', '<', '>'
+  )
+  private def specialChar = elem("special character", x => x.isLetterOrDigit || allowedCharacters(x))
+
+  private def space = elem("space", x => x.isWhitespace) ^^^ Space()
 }
 
 
@@ -48,6 +60,8 @@ object DocLexer {
   sealed trait Token extends Positional
   case class BackTick() extends Token
   case class Dot() extends Token
-  case class Lexeme(chars: String) extends Token
+  case class Space() extends Token
+  case class Identifier(chars: String) extends Token
+  case class SpecialCharacters(chars: String) extends Token
   case class Error(msg: String) extends Token
 }
