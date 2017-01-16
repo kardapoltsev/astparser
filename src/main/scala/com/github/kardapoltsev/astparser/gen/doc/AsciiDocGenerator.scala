@@ -65,7 +65,7 @@ class AsciiDocGenerator(
 
 
   private def packageDoc(p: Package): DocNode = {
-    Header(p.fullName, 1)
+    Header(p.fullName, p.name, 1)
   }
 
 
@@ -76,7 +76,7 @@ class AsciiDocGenerator(
       else
         Seq.empty
     Group(
-      Header(m.name, 2),
+      Header(m.fullName, m.name, 2),
       Paragraph(docs),
       httpString(m),
       Paragraph(paramsTable(m.arguments))
@@ -86,7 +86,7 @@ class AsciiDocGenerator(
 
   private def typeDoc(t: Type): DocNode = {
     Paragraph(
-      Header(t.name, 2),
+      Header(t.fullName, t.name, 2),
       renderDocs(t.docs)
     )
   }
@@ -95,7 +95,7 @@ class AsciiDocGenerator(
   private def constructorDoc(t: Type, c: TypeConstructor): DocNode = {
     Group(
       Seq(
-        Header(c.name, 3),
+        Header(c.fullName, c.name, 3),
         Paragraph(renderDocs(c.docs)),
         Paragraph(paramsTable(c.arguments))
       )
@@ -126,7 +126,8 @@ class AsciiDocGenerator(
       case PlainDoc(content) =>
         Text(content)
       case DocReference(name, reference) =>
-        AnchorLink(name, reference.fullName)
+        val aType = model.getType(reference)
+        AnchorLink(name, aType.fullName)
     }
     Group(nodes)
   }
@@ -214,9 +215,8 @@ object AsciiDocGenerator {
   }
 
 
-  private[doc] case class Header(content: String, level: Int) extends DocNode {
+  private[doc] case class Header(anchor: String, content: String, level: Int) extends DocNode {
     override def render: String = {
-      val anchor = content.split("\\s+")(0)
       s"\n[[$anchor]]\n" + ("=" * (level + 1)) + " " + content + "\n"
     }
   }

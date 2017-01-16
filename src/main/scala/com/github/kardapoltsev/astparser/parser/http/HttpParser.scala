@@ -38,7 +38,8 @@ case class PathParam(name: String) extends PathElement {
 }
 case class Url(path: Seq[PathElement], query: Seq[QueryParam]) extends Positional {
   override def toString: String = {
-    path.mkString("/", "/", "") + query.mkString("?", "&", "")
+    val queryString = if(query.nonEmpty) query.mkString("?", "&", "") else ""
+    path.mkString("/", "/", "") + queryString
   }
 }
 sealed trait HttpMethod extends Positional

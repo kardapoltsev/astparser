@@ -72,16 +72,27 @@ class AsciiDocGeneratorSpec extends TestBase {
 
       val generated = generator.generate()
       generated should have size 1
+      //GeneratedFile.write(generated.head, ".")
       val apiDoc = generated.head.content
 
       apiDoc should include("= api")
 
       apiDoc should include(
        """|
-          |[[A]]
+          |[[api.outer.inner.A]]
           |=== A
           |Documentation for type A
-          |""".stripMargin)
+          |""".stripMargin
+      )
+      apiDoc should include(
+        "GET /api/x/{pathParam}?{param}"
+      )
+      apiDoc should include(
+        "POST /api/y\n"
+      )
+      apiDoc should include(
+        "Method returns type <<api.outer.inner.A,outer.inner.A>>"
+      )
     }
   }
 }
