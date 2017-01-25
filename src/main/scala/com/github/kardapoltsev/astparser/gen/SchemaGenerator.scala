@@ -81,7 +81,10 @@ class SchemaGenerator(
   }
 
   private def generateExternalType(et: ExternalType): String = {
-    s"${K.External} ${K.Type} ${et.fullName}${formatTypeParameters(et.typeArguments)}"
+    val docs = formatDocs(et.docs)
+    s"""$docs
+       |${K.External} ${K.Type} ${et.fullName}${formatTypeParameters(et.typeArguments)}
+       |""".stripMargin.trim
   }
 
   private def generateTypeAlias(ta: TypeAlias): String = {
@@ -89,8 +92,11 @@ class SchemaGenerator(
   }
 
   private def generateTrait(t: Trait): String = {
+    val docs = formatDocs(t.docs)
     val ext = formatParents(t.parents)
-    s"${K.Trait} ${t.name}$ext".trim
+    s"""$docs
+       |${K.Trait} ${t.name}$ext
+       |""".stripMargin.trim
   }
 
   private def generateType(t: Type): String = {

@@ -92,6 +92,8 @@ class SchemaGeneratorSpec extends TestBase {
       val sample =
         """schema api
           |
+          |/** Doc for trait A
+          |  */
           |trait A
           |trait B <: A""".stripMargin
 

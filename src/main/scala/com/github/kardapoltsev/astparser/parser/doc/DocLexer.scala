@@ -48,7 +48,9 @@ class DocLexer extends BaseLexer {
 
   protected def specialCharacters: Parser[Token] = rep1(specialChar) ^^ (x => SpecialCharacters(x.mkString))
   private val allowedCharacters = Set(
-    '-', ',', '(', ')', '=', '[', ']', '{', '}', '_', ':', '/', ''', '"', '<', '>'
+    '-', '+', '*', '=', ',', '_', ':', '~', ''', '"',
+    '(', ')', '[', ']', '{', '}', '<', '>',
+    '/', '|', '\\'
   )
   private def specialChar = elem("special character", x => x.isLetterOrDigit || allowedCharacters(x))
 
