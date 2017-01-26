@@ -100,9 +100,9 @@ class AstParser(
 
   protected def traitDefinition: Parser[Trait] = {
     positioned {
-      repLeftDoc ~ (TraitKeyword() ~> identifier) ~ typeExtensionExpr ^^ {
-        case ld ~ name ~ exts =>
-          Trait(name.name, exts, ld)
+      repLeftDoc ~ (TraitKeyword() ~> identifier) ~ typeExtensionExpr ~ argumentsExpr ^^ {
+        case ld ~ name ~ exts ~ arguments =>
+          Trait(name.name, arguments, exts, ld)
       }
     }
   }

@@ -151,6 +151,25 @@ class ParserSpec extends WordSpec with Matchers {
       parsed shouldBe expected
     }
 
+    "parse trait definition" in new ParserTestEnv {
+      val docString = "Documentation for MyTrait"
+      val in =
+        s"""
+           |/**$docString*/
+           |trait MyTrait <: ParentType ::
+           |  arg1: Int
+         """.stripMargin
+      val parsed = parse(traitDefinition, in)
+      val expected = Trait(
+        name = "MyTrait",
+        arguments = Seq(
+          Argument("arg1", TypeStatement(Reference("Int"), Seq.empty), Seq.empty)
+        ),
+        parents = Seq(Reference("ParentType")),
+        docs = Seq(Documentation(docString))
+      )
+    }
+
     "parse call definition" in new ParserTestEnv {
       val docString = "Documentation for myCall"
       val in =

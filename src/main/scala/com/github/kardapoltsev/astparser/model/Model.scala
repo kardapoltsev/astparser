@@ -117,6 +117,7 @@ object Model {
   )(implicit m: parser.Model): Trait = {
     Trait(
       t.packageName,
+      t.arguments map convertArgument,
       t.name,
       t.parents map resolve map convertParent,
       convertDocs(t.docs)

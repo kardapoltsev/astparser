@@ -168,6 +168,7 @@ case class Call(
 
 case class Trait(
   parent: String,
+  arguments: Seq[Argument],
   name: String,
   parents: Seq[Parent],
   docs: Documentation

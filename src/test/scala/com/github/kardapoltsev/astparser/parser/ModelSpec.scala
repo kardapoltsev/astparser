@@ -402,6 +402,25 @@ class ModelSpec extends TestBase {
       }
     }
 
+    "validate trait fields" in {
+      a[ModelValidationException] shouldBe thrownBy {
+        buildParserModel(
+          """
+            |schema api
+            |external type Int
+            |
+            |trait A ::
+            |  arg1: Int
+            |
+            |type B <: A {
+            |  b
+            |}
+            |
+          """.stripMargin
+        )
+      }
+    }
+
     "accept external types as parents" in {
       val model = buildParserModel(
         """

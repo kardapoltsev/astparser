@@ -113,6 +113,10 @@ private[astparser] sealed trait TypeLike extends Definition with Documented {
   def fullName = packageName ~ name
 }
 
+private[astparser] sealed trait Argumented {
+  def arguments: Seq[Argument]
+}
+
 private[astparser] final case class Type(
   name: String,
   typeArguments: Seq[TypeParameter],
@@ -147,7 +151,7 @@ private[astparser] final case class TypeConstructor(
   parents: Seq[Reference],
   versions: VersionsInterval,
   docs: Seq[Documentation]
-) extends TypeLike with TypeId with Documented with Versioned {
+) extends TypeLike with TypeId with Argumented with Versioned {
   children = typeArguments ++ arguments ++ parents ++ docs
   def idString: String = {
     maybeParent match {
@@ -202,7 +206,7 @@ private[astparser] final case class Call(
   httpRequest: Option[String],
   versions: VersionsInterval,
   docs: Seq[Documentation]
-) extends TypeLike with TypeId with Versioned {
+) extends TypeLike with TypeId with Versioned with Argumented {
   children = (arguments :+ returnType) ++ parents ++ docs
   def idString: String = {
     val packageNamePrefix =
@@ -306,9 +310,10 @@ private[astparser] final case class Package(
 
 private[astparser] final case class Trait(
   name: String,
+  arguments: Seq[Argument],
   parents: Seq[Reference],
   docs: Seq[Documentation]
-) extends TypeLike {
+) extends TypeLike with Argumented {
   children = parents ++ docs
 }
 
@@ -380,9 +385,12 @@ private[astparser] final case class Model(
   private[astparser] def validate(): Unit = loggingTime("validateModel") {
     val c = schemas.flatMap(allChildren)
     log.info(s"validating model containing ${c.size} elements")
-    val unresolvedReferences = c.collect {
-      case r: Reference if lookup(r).isEmpty => r
-    }
+    val allReferences = c.collect {
+      case r: Reference => r
+    } ++ deepDefinitions.collect {
+      case t: TypeLike => t.parents
+    }.flatten
+    val unresolvedReferences = allReferences.filter(lookup(_).isEmpty)
 
     if(unresolvedReferences.nonEmpty) {
       failValidation(
@@ -427,6 +435,36 @@ private[astparser] final case class Model(
           }.mkString(System.lineSeparator())
       )
     }
+
+    val traits = deepDefinitions.collect {
+      case t: Trait => t
+    }
+    def hasParent(t: Trait, parents: Seq[Reference]): Boolean = {
+      parents.exists { ref =>
+        lookup(ref).get == t
+      }
+    }
+    val typeWithMissedField = traits map { t =>
+      val inheritors = deepDefinitions.collect {
+        case tl: TypeLike with Argumented if hasParent(t, tl.parents) => Seq(tl)
+        case aType: Type if hasParent(t, aType.parents) => aType.constructors
+      }.flatten
+      t -> inheritors
+    } filter { case (t, inheritors) =>
+      !t.arguments.forall { a =>
+        inheritors.forall(_.arguments.contains(a))
+      }
+    }
+
+    if(typeWithMissedField.nonEmpty) {
+      failValidation(
+        "Models contains trait inheritors with missed fields:" + System.lineSeparator() +
+        typeWithMissedField.map { case (t, inheritors) =>
+            t.humanReadable + ": " + inheritors.map(_.humanReadable).mkString("")
+        }.mkString(System.lineSeparator())
+      )
+    }
+
   }
 
   private def failValidation(msg: String): Unit = {
