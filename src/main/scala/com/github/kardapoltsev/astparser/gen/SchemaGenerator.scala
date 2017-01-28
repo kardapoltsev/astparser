@@ -94,8 +94,9 @@ class SchemaGenerator(
   private def generateTrait(t: Trait): String = {
     val docs = formatDocs(t.docs)
     val ext = formatParents(t.parents)
+    val args = generateArguments(t.arguments)
     s"""$docs
-       |${K.Trait} ${t.name}$ext
+       |${K.Trait} ${t.name}$ext$args
        |""".stripMargin.trim
   }
 

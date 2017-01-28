@@ -176,6 +176,8 @@ private[astparser] final case class Reference(
 ) extends NamedElement {
   def name = fullName.simpleName
   assert(name.nonEmpty, "reference fullName couldn't be empty")
+
+  override def toString: String = packageName ~ fullName
 }
 
 private[astparser] final case class Import(
@@ -314,7 +316,7 @@ private[astparser] final case class Trait(
   parents: Seq[Reference],
   docs: Seq[Documentation]
 ) extends TypeLike with Argumented {
-  children = parents ++ docs
+  children = parents ++ arguments ++ docs
 }
 
 private[astparser] final case class Documentation(

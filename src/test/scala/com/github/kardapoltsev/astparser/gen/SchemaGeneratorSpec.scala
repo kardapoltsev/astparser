@@ -95,7 +95,9 @@ class SchemaGeneratorSpec extends TestBase {
           |/** Doc for trait A
           |  */
           |trait A
-          |trait B <: A""".stripMargin
+          |trait B <: A
+          |trait C ::
+          |  arg1 : A""".stripMargin
 
       generate(sample).head.content shouldBe sample
     }
