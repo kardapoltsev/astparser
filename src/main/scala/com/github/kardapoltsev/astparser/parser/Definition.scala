@@ -177,7 +177,7 @@ private[astparser] final case class Reference(
   def name = fullName.simpleName
   assert(name.nonEmpty, "reference fullName couldn't be empty")
 
-  override def toString: String = packageName ~ fullName
+  override def toString: String = fullName
 }
 
 private[astparser] final case class Import(
@@ -454,7 +454,7 @@ private[astparser] final case class Model(
       t -> inheritors
     } filter { case (t, inheritors) =>
       !t.arguments.forall { a =>
-        inheritors.forall(_.arguments.contains(a))
+        inheritors.forall(_.arguments.map(_.name).contains(a.name)) //check type here?
       }
     }
 
