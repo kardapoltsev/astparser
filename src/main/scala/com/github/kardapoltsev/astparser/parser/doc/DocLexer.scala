@@ -50,7 +50,8 @@ class DocLexer extends BaseLexer {
   private val allowedCharacters = Set(
     '-', '+', '*', '=', ',', '_', ':', '~', ''', '"',
     '(', ')', '[', ']', '{', '}', '<', '>',
-    '/', '|', '\\'
+    '/', '|', '\\',
+    '!', '?'
   )
   private def specialChar = elem("special character", x => x.isLetterOrDigit || allowedCharacters(x))
 
