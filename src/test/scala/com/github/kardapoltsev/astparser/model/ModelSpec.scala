@@ -62,10 +62,13 @@ class ModelSpec extends TestBase {
       val maybeTypeC = inner.asInstanceOf[Package].definitions.find(_.name == "C")
       maybeTypeC shouldBe defined
       val typeC = maybeTypeC.get
+      typeC.schemaName shouldBe "api"
 
       val constructorC = m.getDefinition("api.outer.inner.C.c").headOption.get.asInstanceOf[TypeConstructor]
       constructorC.versions.contains(1) shouldBe false
       constructorC.versions.contains(2) shouldBe true
+      constructorC.schemaName shouldBe "api"
+      constructorC.arguments.head.`type`.schemaName shouldBe "api"
 
       val constructorCParent = m.getDefinition(constructorC.parent).headOption.get
       constructorCParent shouldBe a[Type]

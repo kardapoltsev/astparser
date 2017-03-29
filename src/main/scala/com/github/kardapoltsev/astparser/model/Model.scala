@@ -191,6 +191,7 @@ object Model {
     ts: parser.TypeStatement
   )(implicit m: parser.Model): TypeStatement = {
     TypeStatement(
+      ts.packageName,
       TypeReference(resolve(ts.ref).fullName),
       ts.typeArguments map convertTypeStatement(isTypeArgument = true),
       isTypeArgument

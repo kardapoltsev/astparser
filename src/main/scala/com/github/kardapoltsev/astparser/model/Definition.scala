@@ -22,6 +22,7 @@ import com.github.kardapoltsev.astparser.util.StringUtil._
 
 sealed trait AstElement {
   def parent: String
+  def schemaName = parent.takeWhile(_ != '.')
 }
 
 sealed trait NamedElement extends AstElement {
@@ -145,10 +146,11 @@ case class TypeConstructor(
 }
 
 case class TypeStatement(
+  parent: String,
   typeReference: TypeReference,
   typeArguments: Seq[TypeStatement],
   isTypeArgument: Boolean
-)
+) extends AstElement
 
 case class TypeReference(
   fullName: String
