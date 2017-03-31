@@ -85,9 +85,9 @@ headers := Map(
   "scala" -> ( HeaderPattern.cStyleBlockComment, ScalaHeader )
 )
 
-val slf4jApi        = "org.slf4j"                    % "slf4j-api"                      % "1.7.22"
+val slf4jApi        = "org.slf4j"                    %  "slf4j-api"                     % "1.7.25"
 val scalaParsers    = "org.scala-lang.modules"       %% "scala-parser-combinators"      % "1.0.4"
-val logbackClassic  = "ch.qos.logback"               % "logback-classic"                % "1.1.8"         % "test"
+val logbackClassic  = "ch.qos.logback"               %  "logback-classic"               % "1.2.3"         % "test"
 val scalatest       = "org.scalatest"                %% "scalatest"                     % "3.0.1"         % "test"
 
 val baseDependencies = Seq(
