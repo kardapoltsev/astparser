@@ -55,6 +55,8 @@ class ModelSpec extends TestBase {
       val m = buildModel(s1)
       //println(m)
       m.schemas should have size 1
+      m.schemas.head.schemaName shouldBe "api"
+      m.schemas.head.name shouldBe "api"
       val maybeInner = m.getDefinition("api.outer.inner").headOption
       maybeInner shouldBe defined
       val inner = maybeInner.get

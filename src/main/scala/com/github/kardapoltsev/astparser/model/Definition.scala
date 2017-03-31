@@ -22,6 +22,7 @@ import com.github.kardapoltsev.astparser.util.StringUtil._
 
 sealed trait AstElement {
   def parent: String
+  //all elements except schema itself are inside a scheme
   def schemaName = parent.takeWhile(_ != '.')
 }
 
@@ -230,6 +231,9 @@ case class Schema(
   definitions: Seq[Definition]
 ) extends PackageLike {
   def parent = ""
+
+
+  override def schemaName: String = name
 
   override def slice(interval: VersionsInterval): Schema = {
     this.copy(
