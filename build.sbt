@@ -1,17 +1,9 @@
 val Organization = "com.github.kardapoltsev"
 val SkipUpdate   = true
 val CacheUpdate  = true
-val isSnapshot   = false
-val baseVersion: String = "3.1.7"
-
-val appVersion = {
-  if(isSnapshot) baseVersion + "-SNAPSHOT"
-  else baseVersion
-}
 
 organization         := Organization
 name := "ast-parser"
-version              := appVersion
 scalaVersion         := "2.11.8"
 crossScalaVersions   := Seq("2.10.6", scalaVersion.value, "2.12.1")
 organizationName     := Organization
@@ -41,6 +33,10 @@ scalacOptions <++= scalaVersion map { sv =>
     )
   }
 }
+
+//sbt-release configuration
+releasePublishArtifactsAction := PgpKeys.publishSigned.value
+releaseCrossBuild := true
 
 pomExtra := {
   <url>https://github.com/kardapoltsev/astparser</url>
