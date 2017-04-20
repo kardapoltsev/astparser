@@ -36,7 +36,7 @@ class ParserSpec extends WordSpec with Matchers {
         """
           |schema api
         """.stripMargin
-      val parsed = parse(schemaInfoExp, in)
+      parse(schemaInfoExp, in)
     }
 
     "parse reference" in new ParserTestEnv {
@@ -168,6 +168,7 @@ class ParserSpec extends WordSpec with Matchers {
         parents = Seq(Reference("ParentType")),
         docs = Seq(Documentation(docString))
       )
+      parsed shouldBe expected
     }
 
     "parse call definition" in new ParserTestEnv {

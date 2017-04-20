@@ -55,7 +55,7 @@ class LexerSpec extends WordSpec with Matchers {
     }
 
     "shouldn't parse invalid symbols" in {
-      val in = "asdf $a sdfadsf% *"
+      val in = s"asdf $$a sdfadsf% *"
       hasError(scan(in)) shouldBe true
     }
 

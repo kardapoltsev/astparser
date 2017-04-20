@@ -4,8 +4,8 @@ val CacheUpdate  = true
 
 organization         := Organization
 name := "ast-parser"
-scalaVersion         := "2.11.8"
-crossScalaVersions   := Seq("2.10.6", scalaVersion.value, "2.12.1")
+scalaVersion         := "2.11.11"
+crossScalaVersions   := Seq("2.10.6", scalaVersion.value, "2.12.2")
 organizationName     := Organization
 organizationHomepage := Some(url("https://github.com/kardapoltsev"))
 parallelExecution in Test := true
@@ -22,6 +22,7 @@ scalacOptions ++= Seq(
   "-deprecation",
   "-unchecked",
   "-feature",
+  "-Xfatal-warnings",
   "-Xlint"
 )
 scalacOptions <++= scalaVersion map { sv =>

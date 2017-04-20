@@ -318,6 +318,7 @@ class AstParser(
   protected def identifier: Parser[Identifier] = profile("identifier") {
     identifierM ^^ {
       case id: Lexeme => Identifier(id.chars).setPos(id.pos)
+      case _ => throw new IllegalArgumentException("Only Lexeme expected")
     }
   }
 
@@ -339,7 +340,7 @@ class AstParser(
   private def packagesFromString(
     fullName: String,
     definitions: Seq[Definition],
-    doc: Seq[Documentation] = Seq.empty,
+    doc: Seq[Documentation],
     position: Position
   ): Package = {
     val names = fullName.split("\\.").toSeq.reverse

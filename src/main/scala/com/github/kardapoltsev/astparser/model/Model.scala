@@ -219,7 +219,7 @@ object Model {
 
   private def convertExternalType(
     et: parser.ExternalType
-  )(implicit m: parser.Model): ExternalType = {
+  ): ExternalType = {
     ExternalType(
       et.packageName,
       et.fullName,
@@ -260,15 +260,6 @@ object Model {
     a: parser.TypeAlias
   )(implicit m: parser.Model): TypeAlias = {
     TypeAlias(a.packageName, a.name, convertTypeLike(resolve(a.reference)))
-  }
-
-  private def resolveTrait(ref: parser.Reference)(implicit m: parser.Model): parser.Trait = {
-    resolve(ref) match {
-      case t: parser.Trait =>
-        t
-      case x: parser.TypeLike =>
-        throw new Exception(s"expected trait for ${ref.humanReadable}, got ${x.humanReadable}")
-    }
   }
 
   private def resolve(ref: parser.Reference)(implicit m: parser.Model): parser.TypeLike = {
@@ -318,7 +309,7 @@ object Model {
 
   private def convertVersionsInterval(
     v: parser.VersionsInterval
-  )(implicit m: parser.Model): VersionsInterval = {
+  ): VersionsInterval = {
     VersionsInterval(v.start, v.end)
   }
 

@@ -168,9 +168,6 @@ class Lexer extends BaseLexer {
     | seq <~ eof ~ err("unclosed comment"))
   }
 
-  private def multilineComment: Parser[Any] =
-    ('/' ~ '*' ~ guard(not('*'))) ~> multilineCommentBody
-
   private def noneOf(xs: Elem*): Parser[Elem] = elem("", e => !xs.contains(e))
 
 }
