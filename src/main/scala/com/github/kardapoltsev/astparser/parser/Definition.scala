@@ -298,15 +298,12 @@ private[astparser] sealed trait PackageLike extends Definition with Logger {
           case Some(p: PackageLike) =>
             p.getDefinition(rest)
           case Some(i: Import) =>
-            log.error(s"found $i")
             lookup(i.reference) match {
               case Some(p: PackageLike) =>
-                log.error(s"found $p at import, rest: $rest")
                 p.getDefinition(rest)
               case Some(x) =>
                 throw new Exception(s"Unexpected $x, PackageLike expected")
               case None =>
-                log.error("import not found")
                 None
             }
           case Some(x) =>

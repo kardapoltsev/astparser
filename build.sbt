@@ -89,7 +89,7 @@ headers := Map(
 val slf4jApi        = "org.slf4j"                    %  "slf4j-api"                     % "1.7.25"
 val scalaParsers    = "org.scala-lang.modules"       %% "scala-parser-combinators"      % "1.0.4"
 val logbackClassic  = "ch.qos.logback"               %  "logback-classic"               % "1.2.3"         % "test"
-val scalatest       = "org.scalatest"                %% "scalatest"                     % "3.0.1"         % "test"
+val scalatest       = "org.scalatest"                %% "scalatest"                     % "3.0.2"         % "test"
 
 val baseDependencies = Seq(
   slf4jApi, logbackClassic, scalaParsers, scalatest
