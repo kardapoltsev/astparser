@@ -18,7 +18,7 @@ package com.github.kardapoltsev.astparser.parser
 import com.github.kardapoltsev.astparser.TestBase
 
 class ModelSpec extends TestBase {
-  "Model" should {
+  "Parser model" should {
 
     "resolve local references" in {
       val m = buildParserModel(

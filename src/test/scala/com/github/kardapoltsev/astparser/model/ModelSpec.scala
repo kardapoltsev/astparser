@@ -18,8 +18,6 @@ package com.github.kardapoltsev.astparser.model
 import com.github.kardapoltsev.astparser.TestBase
 import com.github.kardapoltsev.astparser.parser.http.{Get}
 
-
-
 class ModelSpec extends TestBase {
 
   "Model" should {
@@ -61,23 +59,27 @@ class ModelSpec extends TestBase {
       maybeInner shouldBe defined
       val inner = maybeInner.get
       inner shouldBe a[Package]
-      val maybeTypeC = inner.asInstanceOf[Package].definitions.find(_.name == "C")
+      val maybeTypeC =
+        inner.asInstanceOf[Package].definitions.find(_.name == "C")
       maybeTypeC shouldBe defined
       val typeC = maybeTypeC.get
       typeC.schemaName shouldBe "api"
 
-      val constructorC = m.getDefinition("api.outer.inner.C.c").headOption.get.asInstanceOf[TypeConstructor]
+      val constructorC = m
+        .getDefinition("api.outer.inner.C.c")
+        .headOption
+        .get
+        .asInstanceOf[TypeConstructor]
       constructorC.versions.contains(1) shouldBe false
       constructorC.versions.contains(2) shouldBe true
       constructorC.schemaName shouldBe "api"
       constructorC.arguments.head.`type`.schemaName shouldBe "api"
 
-      val constructorCParent = m.getDefinition(constructorC.parent).headOption.get
+      val constructorCParent =
+        m.getDefinition(constructorC.parent).headOption.get
       constructorCParent shouldBe a[Type]
       constructorCParent shouldBe typeC
     }
-
-
 
     "accept traits as parents for type constructors" in {
       val model = buildModel(
@@ -95,7 +97,8 @@ class ModelSpec extends TestBase {
       maybeA should not be empty
       val constructorA = maybeA.head.asInstanceOf[Type].constructors.head
       constructorA shouldBe a[TypeConstructor]
-      constructorA.asInstanceOf[TypeConstructor].parents should contain(myTrait)
+      constructorA.asInstanceOf[TypeConstructor].parents should contain(
+        myTrait)
     }
 
     "accept constructors as an argument type" in {
@@ -180,16 +183,30 @@ class ModelSpec extends TestBase {
       model.getDefinition("api.GetUserNewest") should have size 1
 
       model.slice(2, 2).getDefinition("api.GetUser") should have size 1
-      model.slice(2, 2).getDefinition("api.GetUser").head.asInstanceOf[Call].arguments should have size 1
+      model
+        .slice(2, 2)
+        .getDefinition("api.GetUser")
+        .head
+        .asInstanceOf[Call]
+        .arguments should have size 1
 
       model.slice(3, 5).getDefinition("api.GetUser") should have size 1
-      model.slice(3, 5).getDefinition("api.GetUser").head.asInstanceOf[Call].arguments should have size 2
+      model
+        .slice(3, 5)
+        .getDefinition("api.GetUser")
+        .head
+        .asInstanceOf[Call]
+        .arguments should have size 2
       model.slice(3, 5).getDefinition("api.GetUserNew") should have size 1
       model.slice(3, 5).getDefinition("api.GetUserNewest") should have size 1
 
       model.slice(11, 11).getDefinition("api.User") shouldBe empty
-      model.slice(2, 2).getDefinition("api.User").head.
-        asInstanceOf[Type].constructors should have size 1
+      model
+        .slice(2, 2)
+        .getDefinition("api.User")
+        .head
+        .asInstanceOf[Type]
+        .constructors should have size 1
     }
 
     "check http parameters" in {
@@ -227,16 +244,45 @@ class ModelSpec extends TestBase {
       maybeA shouldBe defined
       val typeA = maybeA.get
       typeA shouldBe a[Type]
-      typeA.asInstanceOf[Type].docs shouldBe Documentation(Seq(
-        PlainDoc("Docs for type A")
-      ))
+      typeA.asInstanceOf[Type].docs shouldBe Documentation(
+        Seq(
+          PlainDoc("Docs for type A")
+        ))
       val arg = typeA.asInstanceOf[Type].constructors.head.arguments.head
       arg.docs.content should have size 2
-      arg.docs.content.head shouldBe PlainDoc("docs for param1 with a link to ")
-      arg.docs.content(1).asInstanceOf[DocReference].name shouldBe "ExternalClass"
+      arg.docs.content.head shouldBe PlainDoc(
+        "docs for param1 with a link to ")
+      arg.docs
+        .content(1)
+        .asInstanceOf[DocReference]
+        .name shouldBe "ExternalClass"
       val ref = arg.docs.content(1).asInstanceOf[DocReference].reference
       model.getType(ref) shouldBe an[ExternalType]
     }
+
+    "resolve references from imports" in {
+      val m = buildModel("""
+          |schema api
+          |
+          |package p1 {
+          |  type A {
+          |    a
+          |  }
+          |}
+          |package p2 {
+          |  import p1.A
+          |  type B {
+          |    b -- reference from import: `A.a`
+          |  }
+          |}
+        """.stripMargin)
+      val maybeTypeB = m.getDefinition("api.p2.B").headOption
+      maybeTypeB shouldBe defined
+
+      val typeB = maybeTypeB.get.asInstanceOf[Type]
+      typeB.constructors.head.docs.content.last shouldBe a[DocReference]
+    }
+
   }
 
 }
