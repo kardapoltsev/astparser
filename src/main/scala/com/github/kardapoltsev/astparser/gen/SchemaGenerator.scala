@@ -20,11 +20,9 @@ import com.github.kardapoltsev.astparser.Hardcoded
 import com.github.kardapoltsev.astparser.parser._
 import com.github.kardapoltsev.astparser.model
 
-
-
 class SchemaGenerator(
-  m: model.Model,
-  filenameExtension: String
+    m: model.Model,
+    filenameExtension: String
 ) extends Generator {
   import Hardcoded.{Keywords => K}
   private def ls = System.lineSeparator()
@@ -32,7 +30,6 @@ class SchemaGenerator(
   def generate(): Seq[GeneratedFile] = loggingTime("formatting") {
     m.parsedModel.schemas map generateSchema
   }
-
 
   private def generateSchema(schema: Schema): GeneratedFile = {
     val filename = schema.name + "." + filenameExtension
@@ -66,9 +63,11 @@ class SchemaGenerator(
   }
 
   private def generatePackage(p: PackageLike): String = {
-    val c = p.definitions.flatMap {
-      d => generateDefinition(d)
-    }.mkString(System.lineSeparator())
+    val c = p.definitions
+      .flatMap { d =>
+        generateDefinition(d)
+      }
+      .mkString(System.lineSeparator())
     s"""
       |package ${p.name} {
       |${c.offset(2)}
@@ -83,7 +82,8 @@ class SchemaGenerator(
   private def generateExternalType(et: ExternalType): String = {
     val docs = formatDocs(et.docs)
     s"""$docs
-       |${K.External} ${K.Type} ${et.fullName}${formatTypeParameters(et.typeArguments)}
+       |${K.External} ${K.Type} ${et.fullName}${formatTypeParameters(
+         et.typeArguments)}
        |""".stripMargin.trim
   }
 
@@ -138,30 +138,38 @@ class SchemaGenerator(
   }
 
   private def generateArguments(args: Seq[Argument]): String = {
-    if(args.nonEmpty) {
+    if (args.nonEmpty) {
       val paramNameLength = args.map(n => escaped(n.name).length).max
       val typeLength = args.map(a => formatTypeStatement(a.`type`).length).max
-      s" ::$ls" + args.map { a =>
-        val escapedName = escaped(a.name)
-        val n = escapedName + " " * (paramNameLength - escapedName.length)
-        val ft = formatTypeStatement(a.`type`)
-        val ds = a.docs.map(_.content).mkString("").trim
-        val d = if(ds.nonEmpty) s" -- $ds" else ""
-        val t = if(ds.nonEmpty) ft + " " * (typeLength - ft.length) else ft
-        s"$n : $t$d"
-      }.mkString("", ls, "").offset(2)
+      s" ::$ls" + args
+        .map { a =>
+          val escapedName = escaped(a.name)
+          val n = escapedName + " " * (paramNameLength - escapedName.length)
+          val ft = formatTypeStatement(a.`type`)
+          val ds = a.docs.map(_.content).mkString("").trim
+          val d = if (ds.nonEmpty) s" -- $ds" else ""
+          val t = if (ds.nonEmpty) ft + " " * (typeLength - ft.length) else ft
+          s"$n : $t$d"
+        }
+        .mkString("", ls, "")
+        .offset(2)
     } else {
       ""
     }
   }
 
   private val keywords = Set(
-    K.Import, K.External, K.Trait, K.Call, K.Package,
-    K.Schema, K.Type
+    K.Import,
+    K.External,
+    K.Trait,
+    K.Call,
+    K.Package,
+    K.Schema,
+    K.Type
   )
 
   private def escaped(v: String): String = {
-    if(keywords(v)) {
+    if (keywords(v)) {
       s"`$v`"
     } else {
       v
@@ -169,8 +177,12 @@ class SchemaGenerator(
   }
 
   private def formatDocs(docs: Seq[Documentation]): String = {
-    if(docs.nonEmpty) {
-      val lines = docs.flatMap(_.content.split(ls)).map(_.trim).filterNot(_.isEmpty).mkString(ls)
+    if (docs.nonEmpty) {
+      val lines = docs
+        .flatMap(_.content.split(ls))
+        .map(_.trim)
+        .filterNot(_.isEmpty)
+        .mkString(ls + " " * "/** ".length)
       s"""
          |/** $lines
          |  */""".stripMargin
@@ -180,7 +192,7 @@ class SchemaGenerator(
   }
 
   private def formatParents(parents: Seq[Reference]): String = {
-    if(parents.nonEmpty) {
+    if (parents.nonEmpty) {
       parents.map(_.fullName).mkString(" <: ", " ", "")
     } else {
       ""
@@ -192,21 +204,25 @@ class SchemaGenerator(
   }
 
   private def formatTypeParameters(args: Seq[TypeParameter]): String = {
-    if(args.nonEmpty){
-      args.map { a =>
-        //a.ref.fullName + formatTypeArguments(a.typeArguments)
-        a.name
-      }.mkString("[", ",", "]")
+    if (args.nonEmpty) {
+      args
+        .map { a =>
+          //a.ref.fullName + formatTypeArguments(a.typeArguments)
+          a.name
+        }
+        .mkString("[", ",", "]")
     } else {
       ""
     }
   }
   private def formatTypeArguments(args: Seq[Reference]): String = {
-    if(args.nonEmpty){
-      args.map { a =>
-        //a.ref.fullName + formatTypeArguments(a.typeArguments)
-        a.fullName
-      }.mkString("[", ",", "]")
+    if (args.nonEmpty) {
+      args
+        .map { a =>
+          //a.ref.fullName + formatTypeArguments(a.typeArguments)
+          a.fullName
+        }
+        .mkString("[", ",", "]")
     } else {
       ""
     }
@@ -217,7 +233,7 @@ class SchemaGenerator(
   }
 
   private def formatVersion(version: VersionsInterval): String = {
-    if(version.start.isEmpty && version.end.isEmpty) {
+    if (version.start.isEmpty && version.end.isEmpty) {
       ""
     } else {
       s" (${version.start.map(_.toString).getOrElse("")}-${version.end.map(_.toString).getOrElse("")})"

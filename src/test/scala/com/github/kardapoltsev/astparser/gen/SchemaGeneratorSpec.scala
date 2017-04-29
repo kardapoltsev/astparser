@@ -161,7 +161,7 @@ class SchemaGeneratorSpec extends TestBase {
           |}
           |
           |/** Docs for type B
-          |Very long
+          |    Very long
           |  */
           |type B <: T {
           |
