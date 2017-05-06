@@ -50,6 +50,11 @@ class HttpParserSpec extends WordSpec with Matchers {
       parse(path, "/users/me") shouldBe Seq(PathSegment("users"), PathSegment("me"))
     }
 
+    "handle symbols in path segments" in new HttpParserEnv {
+      parse(path, "/p-s/") shouldBe Seq(PathSegment("p-s"))
+      parse(path, "/p_s/") shouldBe Seq(PathSegment("p_s"))
+    }
+
     "parse path parameters" in new HttpParserEnv {
       parse(path, "/users/{userId}") shouldBe Seq(PathSegment("users"), PathParam("userId"))
       parse(path, "/{param1}/{param2}/") shouldBe Seq(PathParam("param1"), PathParam("param2"))

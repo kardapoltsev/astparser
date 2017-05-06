@@ -19,8 +19,6 @@ import com.github.kardapoltsev.astparser.parser.BaseLexer
 
 import scala.util.parsing.input.Positional
 
-
-
 class HttpLexer extends BaseLexer {
   import HttpLexer._
 
@@ -34,25 +32,40 @@ class HttpLexer extends BaseLexer {
     method | leftBrace | rightBrace | questionMark | ampersand | slash | lexeme
   }
 
-  protected def lexeme: Parser[Lexeme] = rep1(lexemeChar) ^^ (x => Lexeme(x.mkString))
-  //TODO: fix valid http elems
-  private def lexemeChar = elem("valid lexeme", x => x.isLetter || x.isDigit)
+  protected def lexeme: Parser[Lexeme] =
+    rep1(lexemeChar) ^^ (x => Lexeme(x.mkString))
+  //TODO: improve valid http elems
+  private val specialCharacters = Set(
+    '-',
+    '_'
+  )
+  private def lexemeChar =
+    elem("valid lexeme", x => x.isLetterOrDigit || specialCharacters(x))
 
   protected def method: Parser[Token] = {
     get | post | put | patch | delete
   }
 
-  protected def get: Parser[Token] = acceptSeq("GET") ^^ { m => Method(m.mkString) }
-  protected def post: Parser[Token] = acceptSeq("POST") ^^ { m => Method(m.mkString) }
-  protected def put: Parser[Token] = acceptSeq("PUT") ^^ { m => Method(m.mkString) }
-  protected def patch: Parser[Token] = acceptSeq("PATCH") ^^ { m => Method(m.mkString) }
-  protected def delete: Parser[Token] = acceptSeq("DELETE") ^^ { m => Method(m.mkString) }
+  protected def get: Parser[Token] = acceptSeq("GET") ^^ { m =>
+    Method(m.mkString)
+  }
+  protected def post: Parser[Token] = acceptSeq("POST") ^^ { m =>
+    Method(m.mkString)
+  }
+  protected def put: Parser[Token] = acceptSeq("PUT") ^^ { m =>
+    Method(m.mkString)
+  }
+  protected def patch: Parser[Token] = acceptSeq("PATCH") ^^ { m =>
+    Method(m.mkString)
+  }
+  protected def delete: Parser[Token] = acceptSeq("DELETE") ^^ { m =>
+    Method(m.mkString)
+  }
   protected def leftBrace = '{' ^^^ LeftBrace()
   protected def rightBrace = '}' ^^^ RightBrace()
   protected def questionMark = '?' ^^^ QuestionMark()
   protected def ampersand = '&' ^^^ Ampersand()
   protected def slash = '/' ^^^ Slash()
-
 
   override def whitespace: Parser[Any] = rep[Any] {
     elem("whitespace", _.isWhitespace)
