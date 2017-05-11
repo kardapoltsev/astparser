@@ -283,6 +283,28 @@ class ModelSpec extends TestBase {
       typeB.constructors.head.docs.content.last shouldBe a[DocReference]
     }
 
+    "handle inheritance" in {
+      val m = buildModel("""
+                           |schema api
+                           |
+                           |trait A
+                           |trait B <: A
+                           |trait C <: B
+                           |trait D <: A
+                           |
+                         """.stripMargin)
+      val traitA = m.getDefinition("api.A").head.asInstanceOf[Trait]
+      val traitB = m.getDefinition("api.B").head.asInstanceOf[Trait]
+      val traitC = m.getDefinition("api.C").head.asInstanceOf[Trait]
+      val traitD = m.getDefinition("api.D").head.asInstanceOf[Trait]
+
+      traitA.isSubtypeOf(traitA) shouldBe false
+      traitB.isSubtypeOf(traitA) shouldBe true
+      traitC.isSubtypeOf(traitA) shouldBe true
+      traitD.isSubtypeOf(traitA) shouldBe true
+      traitD.isSubtypeOf(traitB) shouldBe false
+    }
+
   }
 
 }

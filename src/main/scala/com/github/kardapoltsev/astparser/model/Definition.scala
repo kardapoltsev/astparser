@@ -18,8 +18,6 @@ package com.github.kardapoltsev.astparser.model
 import com.github.kardapoltsev.astparser.parser.http.HttpRequest
 import com.github.kardapoltsev.astparser.util.StringUtil._
 
-
-
 sealed trait AstElement {
   def parent: String
   //all elements except schema itself are inside a scheme
@@ -75,32 +73,42 @@ case class VersionsInterval(start: Option[Int], end: Option[Int]) {
 
 sealed trait DocElement
 case class PlainDoc(content: String) extends DocElement
-case class DocReference(name: String, reference: TypeReference) extends DocElement
+case class DocReference(name: String, reference: TypeReference)
+    extends DocElement
 
 case class Documentation(
-  content: Seq[DocElement]
+    content: Seq[DocElement]
 )
 
 case class Argument(
-  name: String,
-  `type`: TypeStatement,
-  docs: Documentation
+    name: String,
+    `type`: TypeStatement,
+    docs: Documentation
 ) extends Documented
 
-sealed trait Parent extends TypeLike
+sealed trait Parent extends TypeLike {
+  def isSubtypeOf(other: Parent): Boolean = {
+    parents.contains(other) ||
+    parents.foldLeft(false) { (isSubtype, p) =>
+      isSubtype || p.isSubtypeOf(other)
+    }
+  }
+}
 
 sealed trait TypeLike extends Definition {
   def parents: Seq[Parent]
 }
 
 case class Type(
-  parent: String,
-  name: String,
-  typeArguments: Seq[TypeParameter],
-  parents: Seq[Parent],
-  constructors: Seq[TypeConstructor],
-  docs: Documentation
-) extends TypeLike with PackageLike with Documented {
+    parent: String,
+    name: String,
+    typeArguments: Seq[TypeParameter],
+    parents: Seq[Parent],
+    constructors: Seq[TypeConstructor],
+    docs: Documentation
+) extends TypeLike
+    with PackageLike
+    with Documented {
   override def definitions: Seq[Definition] = constructors
 
   override def slice(interval: VersionsInterval): Type = {
@@ -112,70 +120,77 @@ case class Type(
 }
 
 case class ExternalType(
-  parent: String,
-  name: String,
-  typeArguments: Seq[TypeParameter]
+    parent: String,
+    name: String,
+    typeArguments: Seq[TypeParameter]
 ) extends Parent {
   override def fullName = name
   def parents = Seq.empty
 }
 
 case class TypeParameter(
-  name: String,
-  typeParameters: Seq[TypeParameter]
+    name: String,
+    typeParameters: Seq[TypeParameter]
 )
 
 case class TypeAlias(
-  parent: String,
-  name: String,
-  `type`: TypeLike
+    parent: String,
+    name: String,
+    `type`: TypeLike
 ) extends TypeLike {
   def parents = Seq.empty
 }
 
 case class TypeConstructor(
-  parent: String,
-  name: String,
-  id: Int,
-  typeArguments: Seq[TypeParameter],
-  arguments: Seq[Argument],
-  parents: Seq[Parent],
-  versions: VersionsInterval,
-  docs: Documentation
-) extends TypeLike with TypeId with Documented with Versioned {
+    parent: String,
+    name: String,
+    id: Int,
+    typeArguments: Seq[TypeParameter],
+    arguments: Seq[Argument],
+    parents: Seq[Parent],
+    versions: VersionsInterval,
+    docs: Documentation
+) extends TypeLike
+    with TypeId
+    with Documented
+    with Versioned {
   val typeReference = TypeReference(parent)
 }
 
 case class TypeStatement(
-  parent: String,
-  typeReference: TypeReference,
-  typeArguments: Seq[TypeStatement],
-  isTypeArgument: Boolean
+    parent: String,
+    typeReference: TypeReference,
+    typeArguments: Seq[TypeStatement],
+    isTypeArgument: Boolean
 ) extends AstElement
 
 case class TypeReference(
-  fullName: String
+    fullName: String
 )
 
 case class Call(
-  parent: String,
-  name: String,
-  id: Int,
-  arguments: Seq[Argument],
-  returnType: TypeStatement,
-  parents: Seq[Parent],
-  httpRequest: Option[HttpRequest],
-  versions: VersionsInterval,
-  docs: Documentation
-) extends TypeLike with TypeId with Documented with Versioned
+    parent: String,
+    name: String,
+    id: Int,
+    arguments: Seq[Argument],
+    returnType: TypeStatement,
+    parents: Seq[Parent],
+    httpRequest: Option[HttpRequest],
+    versions: VersionsInterval,
+    docs: Documentation
+) extends TypeLike
+    with TypeId
+    with Documented
+    with Versioned
 
 case class Trait(
-  parent: String,
-  arguments: Seq[Argument],
-  name: String,
-  parents: Seq[Parent],
-  docs: Documentation
-) extends Parent with Documented
+    parent: String,
+    arguments: Seq[Argument],
+    name: String,
+    parents: Seq[Parent],
+    docs: Documentation
+) extends Parent
+    with Documented
 
 sealed trait PackageLike extends Definition {
   def name: String
@@ -194,7 +209,7 @@ sealed trait PackageLike extends Definition {
     definitions flatMap {
       case t: Type =>
         val sliced = t.slice(interval)
-        if(sliced.constructors.nonEmpty) {
+        if (sliced.constructors.nonEmpty) {
           Some(sliced)
         } else {
           None
@@ -202,7 +217,7 @@ sealed trait PackageLike extends Definition {
       case p: PackageLike =>
         Some(p.slice(interval))
       case c: Call =>
-        if(c.versions.isIntersect(interval)) {
+        if (c.versions.isIntersect(interval)) {
           Some(c)
         } else {
           None
@@ -215,9 +230,9 @@ sealed trait PackageLike extends Definition {
 }
 
 case class Package(
-  parent: String,
-  name: String,
-  definitions: Seq[Definition]
+    parent: String,
+    name: String,
+    definitions: Seq[Definition]
 ) extends PackageLike {
   override def slice(interval: VersionsInterval): Package = {
     this.copy(
@@ -227,11 +242,10 @@ case class Package(
 }
 
 case class Schema(
-  name: String,
-  definitions: Seq[Definition]
+    name: String,
+    definitions: Seq[Definition]
 ) extends PackageLike {
   def parent = ""
-
 
   override def schemaName: String = name
 
