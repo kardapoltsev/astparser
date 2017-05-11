@@ -86,17 +86,16 @@ case class Argument(
     docs: Documentation
 ) extends Documented
 
-sealed trait Parent extends TypeLike {
+sealed trait Parent extends TypeLike
+
+sealed trait TypeLike extends Definition {
+  def parents: Seq[Parent]
   def isSubtypeOf(other: Parent): Boolean = {
     parents.contains(other) ||
     parents.foldLeft(false) { (isSubtype, p) =>
       isSubtype || p.isSubtypeOf(other)
     }
   }
-}
-
-sealed trait TypeLike extends Definition {
-  def parents: Seq[Parent]
 }
 
 case class Type(
