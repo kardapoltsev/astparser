@@ -35,7 +35,7 @@ class AsciiDocGenerator(
   private def generateSchema(schema: Schema): Seq[GeneratedFile] = {
     log.debug(s"generating docs for `${schema.fullName}`")
     val fullDoc = generateDefinition(schema).get
-    Seq(GeneratedFile(".", schema.fullName + "_doc.ad", fullDoc.render))
+    Seq(GeneratedFile(".", schema.fullName + s"-v$targetVersion.ad", fullDoc.render))
   }
 
 
