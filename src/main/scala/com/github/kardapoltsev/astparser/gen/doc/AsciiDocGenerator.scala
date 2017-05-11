@@ -21,17 +21,14 @@ import com.github.kardapoltsev.astparser.model._
 
 
 class AsciiDocGenerator(
-  val model: Model,
+  m: Model,
   targetVersion: Int
 ) extends DocGenerator {
   import AsciiDocGenerator._
-
+  val model = m.slice(targetVersion, targetVersion)
 
   override def generate(): Seq[GeneratedFile] = {
-    model.schemas flatMap { s =>
-      val target = s.slice(VersionsInterval(Some(targetVersion), Some(targetVersion)))
-      generateSchema(target)
-    }
+    model.schemas flatMap generateSchema
   }
 
 

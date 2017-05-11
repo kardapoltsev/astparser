@@ -176,6 +176,15 @@ class ModelSpec extends TestBase {
           |  userEmpty (5-10)
           |}
           |
+          |call getUser(1-1) ::
+          |  id: Int
+          |  => User
+          |
+          |call getUser(2-) ::
+          |  id: Int
+          |  param: Int
+          |  => User
+          |
         """.stripMargin
       )
       model.getDefinition("api.GetUser") should have size 2
@@ -207,6 +216,8 @@ class ModelSpec extends TestBase {
         .head
         .asInstanceOf[Type]
         .constructors should have size 1
+
+      model.slice(3, 3).getDefinition("api.getUser") should have size 1
     }
 
     "check http parameters" in {
