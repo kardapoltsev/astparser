@@ -91,6 +91,9 @@ class AsciiDocGeneratorSpec extends TestBase {
         "POST /api/y\n"
       )
       apiDoc should include(
+        "Result type: <<api.outer.inner.A,A>>"
+      )
+      apiDoc should include(
         "Method returns type <<api.outer.inner.A,outer.inner.A>>"
       )
     }

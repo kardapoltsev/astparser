@@ -74,6 +74,7 @@ class AsciiDocGenerator(
         Seq.empty
     Group(
       Header(m.fullName, m.name, 2),
+      Paragraph(Text("Result type: "), linkified(m.returnType)),
       Paragraph(docs),
       httpString(m),
       Paragraph(paramsTable(m.arguments))
