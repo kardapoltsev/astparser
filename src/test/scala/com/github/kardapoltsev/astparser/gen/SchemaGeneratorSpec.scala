@@ -230,9 +230,10 @@ class SchemaGeneratorSpec extends TestBase {
           |schema api
           |external type Int
           |external type Void
-          |@GET /api/call
+          |@GET /api/call?{`type`}&{param2}
           |call myCall ::
-          |  param1: Int
+          |  `type`: Int
+          |  param2: Int
           |  => Void
         """.stripMargin)
 
@@ -242,9 +243,10 @@ class SchemaGeneratorSpec extends TestBase {
           |external type Int
           |external type Void
           |
-          |@GET /api/call
+          |@GET /api/call?{`type`}&{param2}
           |call myCall ::
-          |  param1 : Int
+          |  `type` : Int
+          |  param2 : Int
           |  => Void""".stripMargin
     }
 

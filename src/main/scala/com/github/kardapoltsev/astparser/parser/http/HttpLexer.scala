@@ -31,9 +31,9 @@ class HttpLexer extends BaseLexer {
   override def token: Parser[Token] = {
     method | leftBrace | rightBrace | questionMark | ampersand | slash | lexeme
   }
-
   protected def lexeme: Parser[Lexeme] =
-    rep1(lexemeChar) ^^ (x => Lexeme(x.mkString))
+    opt('`') ~> rep1(lexemeChar) <~ opt('`')^^ (x => Lexeme(x.mkString))
+
   //TODO: improve valid http elems
   private val specialCharacters = Set(
     '-',

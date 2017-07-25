@@ -44,6 +44,15 @@ class HttpLexerSpec extends WordSpec with Matchers {
       )
     }
 
+    "parse escaped route params" in {
+      scan("GET /api/{`type`}/") shouldBe List(
+        Method("GET"),
+        Slash(), Lexeme("api"),
+        Slash(), LeftBrace(), Lexeme("type"), RightBrace(),
+        Slash()
+      )
+    }
+
     "parse query params" in {
       scan("GET /api?{param1}&{param2}") shouldBe List(
         Method("GET"),
@@ -51,6 +60,15 @@ class HttpLexerSpec extends WordSpec with Matchers {
         QuestionMark(),
         LeftBrace(), Lexeme("param1"), RightBrace(), Ampersand(),
         LeftBrace(), Lexeme("param2"), RightBrace()
+      )
+    }
+
+    "parse escaped query params" in {
+      scan("GET /api?{`call`}") shouldBe List(
+        Method("GET"),
+        Slash(), Lexeme("api"),
+        QuestionMark(),
+        LeftBrace(), Lexeme("call"), RightBrace()
       )
     }
   }
