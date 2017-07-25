@@ -12,14 +12,12 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser.parser.doc
 
 import com.github.kardapoltsev.astparser.parser.BaseLexer
 
 import scala.util.parsing.input.Positional
-
-
 
 class DocLexer extends BaseLexer {
   import DocLexer._
@@ -37,34 +35,32 @@ class DocLexer extends BaseLexer {
     elem("whitespace", _ => false)
   }
 
-
   protected def backtick: Parser[Token] = '`' ^^^ BackTick()
-  protected def dot = '.' ^^^ Dot()
+  protected def dot                     = '.' ^^^ Dot()
 
   protected def identifier: Parser[Token] = {
     rep1(identifierChar) ^^ (x => Identifier(x.mkString))
   }
   private def identifierChar = elem("valid lexeme", x => x.isLetterOrDigit)
 
-  protected def specialCharacters: Parser[Token] = rep1(specialChar) ^^ (x => SpecialCharacters(x.mkString))
+  protected def specialCharacters: Parser[Token] =
+    rep1(specialChar) ^^ (x => SpecialCharacters(x.mkString))
   private val allowedCharacters = Set(
-    '-', '+', '*', '=', ',', '_', ':', '~', ''', '"',
-    '(', ')', '[', ']', '{', '}', '<', '>',
-    '/', '|', '\\',
-    '!', '?'
+    '-', '+', '*', '=', ',', '_', ':', '~', ''', '"', '(', ')', '[', ']', '{', '}', '<', '>', '/',
+    '|', '\\', '!', '?'
   )
-  private def specialChar = elem("special character", x => x.isLetterOrDigit || allowedCharacters(x))
+  private def specialChar =
+    elem("special character", x => x.isLetterOrDigit || allowedCharacters(x))
 
   private def space = elem("space", x => x.isWhitespace) ^^^ Space()
 }
 
-
 object DocLexer {
-  sealed trait Token extends Positional
-  case class BackTick() extends Token
-  case class Dot() extends Token
-  case class Space() extends Token
-  case class Identifier(chars: String) extends Token
+  sealed trait Token                          extends Positional
+  case class BackTick()                       extends Token
+  case class Dot()                            extends Token
+  case class Space()                          extends Token
+  case class Identifier(chars: String)        extends Token
   case class SpecialCharacters(chars: String) extends Token
-  case class Error(msg: String) extends Token
+  case class Error(msg: String)               extends Token
 }

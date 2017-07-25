@@ -12,29 +12,26 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser.gen.doc
 
 import com.github.kardapoltsev.astparser.gen.Generator
 import com.github.kardapoltsev.astparser.model._
 
-
-
 trait DocGenerator extends Generator {
 
   def printDocsCoverage(schema: Schema): Unit = {
     println(s"${schema.fullName} coverage:")
-    calculateDocsCoverage(schema) map(c => "\t" + c) foreach println
+    calculateDocsCoverage(schema) map (c => "\t" + c) foreach println
   }
 
-
   def calculateDocsCoverage(schema: Schema): Seq[String] = {
-    val allDefinitions = schema.deepDefinitions
-    val types = allDefinitions.collect { case t: Type => t }
-    val constructors = types.flatMap(_.constructors)
+    val allDefinitions       = schema.deepDefinitions
+    val types                = allDefinitions.collect { case t: Type => t }
+    val constructors         = types.flatMap(_.constructors)
     val constructorArguments = constructors.flatMap(_.arguments)
-    val calls = allDefinitions.collect { case m: Call => m }
-    val callsParams = calls.flatMap(_.arguments)
+    val calls                = allDefinitions.collect { case m: Call => m }
+    val callsParams          = calls.flatMap(_.arguments)
 
     Seq(
       coverage("types", types),
@@ -44,7 +41,6 @@ trait DocGenerator extends Generator {
       coverage("calls params", callsParams)
     )
   }
-
 
   private def coverage(label: String, definitions: Seq[Documented]): String = {
     val documented = definitions.count(_.docs.content.nonEmpty)

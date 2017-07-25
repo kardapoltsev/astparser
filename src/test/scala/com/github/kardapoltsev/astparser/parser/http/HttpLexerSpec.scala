@@ -12,7 +12,7 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser.parser.http
 
 import org.scalatest.{Matchers, WordSpec}
@@ -29,8 +29,10 @@ class HttpLexerSpec extends WordSpec with Matchers {
     "parse GET route" in {
       scan("GET /api/users/") shouldBe List(
         Method("GET"),
-        Slash(), Lexeme("api"),
-        Slash(), Lexeme("users"),
+        Slash(),
+        Lexeme("api"),
+        Slash(),
+        Lexeme("users"),
         Slash()
       )
     }
@@ -38,8 +40,12 @@ class HttpLexerSpec extends WordSpec with Matchers {
     "parse route params" in {
       scan("GET /api/{userId}/") shouldBe List(
         Method("GET"),
-        Slash(), Lexeme("api"),
-        Slash(), LeftBrace(), Lexeme("userId"), RightBrace(),
+        Slash(),
+        Lexeme("api"),
+        Slash(),
+        LeftBrace(),
+        Lexeme("userId"),
+        RightBrace(),
         Slash()
       )
     }
@@ -47,8 +53,12 @@ class HttpLexerSpec extends WordSpec with Matchers {
     "parse escaped route params" in {
       scan("GET /api/{`type`}/") shouldBe List(
         Method("GET"),
-        Slash(), Lexeme("api"),
-        Slash(), LeftBrace(), Lexeme("type"), RightBrace(),
+        Slash(),
+        Lexeme("api"),
+        Slash(),
+        LeftBrace(),
+        Lexeme("type"),
+        RightBrace(),
         Slash()
       )
     }
@@ -56,19 +66,28 @@ class HttpLexerSpec extends WordSpec with Matchers {
     "parse query params" in {
       scan("GET /api?{param1}&{param2}") shouldBe List(
         Method("GET"),
-        Slash(), Lexeme("api"),
+        Slash(),
+        Lexeme("api"),
         QuestionMark(),
-        LeftBrace(), Lexeme("param1"), RightBrace(), Ampersand(),
-        LeftBrace(), Lexeme("param2"), RightBrace()
+        LeftBrace(),
+        Lexeme("param1"),
+        RightBrace(),
+        Ampersand(),
+        LeftBrace(),
+        Lexeme("param2"),
+        RightBrace()
       )
     }
 
     "parse escaped query params" in {
       scan("GET /api?{`call`}") shouldBe List(
         Method("GET"),
-        Slash(), Lexeme("api"),
+        Slash(),
+        Lexeme("api"),
         QuestionMark(),
-        LeftBrace(), Lexeme("call"), RightBrace()
+        LeftBrace(),
+        Lexeme("call"),
+        RightBrace()
       )
     }
   }

@@ -12,14 +12,13 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser.parser
 
 import com.github.kardapoltsev.astparser.parser.TokenParsers.Identifier
 import com.github.kardapoltsev.astparser.util.Logger
 
 import scala.util.parsing.combinator.Parsers
-
 
 class BaseParser extends Parsers with Logger {
 
@@ -61,23 +60,21 @@ class BaseParser extends Parsers with Logger {
         println(s"{ $name --- start parsing")
         printerIndent()
         val start = System.currentTimeMillis
-        val res = p(in)
-        val end = System.currentTimeMillis
+        val res   = p(in)
+        val end   = System.currentTimeMillis
         val t = res match {
           case Success(xs: Iterable[_], _) => s"${xs.map(_.getClass.getSimpleName)}"
-          case Success(x: Definition, _) => s"${x.getClass.getSimpleName}: name = ${x.name}"
-          case Success(x: Argument, _) => s"${x.getClass.getSimpleName}: $x"
-          case Success(x: Identifier, _) => s"${x.getClass.getSimpleName}: $x"
-          case Success(x: Reference, _) => s"${x.getClass.getSimpleName}: ${x.fullName}"
-          case Success(x, _) => x.getClass.getSimpleName
-          case x @ NoSuccess(m, _) => s"${x.getClass.getSimpleName}: $m"
+          case Success(x: Definition, _)   => s"${x.getClass.getSimpleName}: name = ${x.name}"
+          case Success(x: Argument, _)     => s"${x.getClass.getSimpleName}: $x"
+          case Success(x: Identifier, _)   => s"${x.getClass.getSimpleName}: $x"
+          case Success(x: Reference, _)    => s"${x.getClass.getSimpleName}: ${x.fullName}"
+          case Success(x, _)               => x.getClass.getSimpleName
+          case x @ NoSuccess(m, _)         => s"${x.getClass.getSimpleName}: $m"
         }
         printerUnindent()
         println(s"} $name => $t - parse in ${end - start}ms")
         res
-      }
-    else p
+      } else p
   }
-
 
 }

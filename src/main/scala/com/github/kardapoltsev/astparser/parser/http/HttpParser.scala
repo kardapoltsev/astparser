@@ -12,13 +12,12 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser.parser.http
 
 import com.github.kardapoltsev.astparser.parser.{BaseParser, ReaderWithSourcePosition}
 
 import scala.util.parsing.input.{CharSequenceReader, Positional}
-
 
 sealed trait PathElement extends Positional
 case class QueryParam(name: String) {
@@ -38,7 +37,7 @@ case class PathParam(name: String) extends PathElement {
 }
 case class Url(path: Seq[PathElement], query: Seq[QueryParam]) extends Positional {
   override def toString: String = {
-    val queryString = if(query.nonEmpty) query.mkString("?", "&", "") else ""
+    val queryString = if (query.nonEmpty) query.mkString("?", "&", "") else ""
     path.mkString("/", "/", "") + queryString
   }
 }
@@ -64,8 +63,6 @@ case class HttpRequest(method: HttpMethod, url: Url) extends Positional {
   }
 }
 
-
-
 class HttpParser(override protected val enableProfiling: Boolean = false) extends BaseParser {
   override type Elem = HttpLexer.Token
   import HttpLexer._
@@ -75,21 +72,22 @@ class HttpParser(override protected val enableProfiling: Boolean = false) extend
   def request: Parser[HttpRequest] = profile("request") {
     positioned {
       phrase {
-        method ~ url ^^ { case m ~ url =>
-          HttpRequest(m, url)
+        method ~ url ^^ {
+          case m ~ url =>
+            HttpRequest(m, url)
         }
       }
     }
   }
 
-
-  protected def method: Parser[HttpMethod] = accept("HttpMethod", {
-    case Method("GET") => Get()
-    case Method("PUT") => Put()
-    case Method("POST") => Post()
-    case Method("PATCH") => Patch()
-    case Method("DELETE") => Delete()
-  })
+  protected def method: Parser[HttpMethod] =
+    accept("HttpMethod", {
+      case Method("GET")    => Get()
+      case Method("PUT")    => Put()
+      case Method("POST")   => Post()
+      case Method("PATCH")  => Patch()
+      case Method("DELETE") => Delete()
+    })
 
   private def url: Parser[Url] = profile("url") {
     positioned {
@@ -113,21 +111,24 @@ class HttpParser(override protected val enableProfiling: Boolean = false) extend
   }
 
   private def pathSegment: Parser[PathSegment] = {
-    identifier ^^ { s => PathSegment(s)}
+    identifier ^^ { s =>
+      PathSegment(s)
+    }
   }
 
-  private def identifier: Parser[String] = accept("pathSegment", {
-    case Lexeme(chars) => chars.toString
-  })
-
+  private def identifier: Parser[String] =
+    accept("pathSegment", {
+      case Lexeme(chars) => chars.toString
+    })
 
   private def query: Parser[Seq[QueryParam]] = profile("query") {
     opt(QuestionMark() ~> repsep(LeftBrace() ~> identifier <~ RightBrace(), Ampersand())) ^^ {
       querySegments =>
-        querySegments.getOrElse(Seq.empty) map { s => QueryParam(s) }
+        querySegments.getOrElse(Seq.empty) map { s =>
+          QueryParam(s)
+        }
     }
   }
-
 
   private def tryParse(input: CharSequence, sourceName: String): ParseResult[HttpRequest] = {
     //val reader = new ReaderWithSourcePosition(new CharSequenceReader(input), sourceName)
@@ -147,9 +148,11 @@ class HttpParser(override protected val enableProfiling: Boolean = false) extend
   }
 
   protected def tryParse[T](
-    parser: Parser[T], input: CharSequence, sourceName: String
+    parser: Parser[T],
+    input: CharSequence,
+    sourceName: String
   ): ParseResult[T] = {
-    val reader = new ReaderWithSourcePosition(new CharSequenceReader(input), sourceName)
+    val reader  = new ReaderWithSourcePosition(new CharSequenceReader(input), sourceName)
     val scanner = new lexer.Scanner(reader)
     parser(scanner)
   }

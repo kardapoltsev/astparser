@@ -12,7 +12,7 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser.parser.http
 
 import com.github.kardapoltsev.astparser.parser.BaseLexer
@@ -32,7 +32,7 @@ class HttpLexer extends BaseLexer {
     method | leftBrace | rightBrace | questionMark | ampersand | slash | lexeme
   }
   protected def lexeme: Parser[Lexeme] =
-    opt('`') ~> rep1(lexemeChar) <~ opt('`')^^ (x => Lexeme(x.mkString))
+    opt('`') ~> rep1(lexemeChar) <~ opt('`') ^^ (x => Lexeme(x.mkString))
 
   //TODO: improve valid http elems
   private val specialCharacters = Set(
@@ -61,11 +61,11 @@ class HttpLexer extends BaseLexer {
   protected def delete: Parser[Token] = acceptSeq("DELETE") ^^ { m =>
     Method(m.mkString)
   }
-  protected def leftBrace = '{' ^^^ LeftBrace()
-  protected def rightBrace = '}' ^^^ RightBrace()
+  protected def leftBrace    = '{' ^^^ LeftBrace()
+  protected def rightBrace   = '}' ^^^ RightBrace()
   protected def questionMark = '?' ^^^ QuestionMark()
-  protected def ampersand = '&' ^^^ Ampersand()
-  protected def slash = '/' ^^^ Slash()
+  protected def ampersand    = '&' ^^^ Ampersand()
+  protected def slash        = '/' ^^^ Slash()
 
   override def whitespace: Parser[Any] = rep[Any] {
     elem("whitespace", _.isWhitespace)
@@ -74,14 +74,14 @@ class HttpLexer extends BaseLexer {
 }
 
 object HttpLexer {
-  sealed trait Token extends Positional
-  case class LeftBrace() extends Token
-  case class RightBrace() extends Token
-  case class QuestionMark() extends Token
-  case class Ampersand() extends Token
-  case class Slash() extends Token
+  sealed trait Token               extends Positional
+  case class LeftBrace()           extends Token
+  case class RightBrace()          extends Token
+  case class QuestionMark()        extends Token
+  case class Ampersand()           extends Token
+  case class Slash()               extends Token
   case class Lexeme(chars: String) extends Token
-  case class Error(msg: String) extends Token
+  case class Error(msg: String)    extends Token
 
   case class Method(method: String) extends Token
 }

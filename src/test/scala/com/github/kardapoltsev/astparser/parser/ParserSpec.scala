@@ -12,12 +12,10 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser.parser
 
 import org.scalatest.{Matchers, WordSpec}
-
-
 
 class ParserSpec extends WordSpec with Matchers {
   "Parser" should {
@@ -120,7 +118,7 @@ class ParserSpec extends WordSpec with Matchers {
          """.stripMargin
       val parsed = parse(typeDefinition, in)
       val expected = Type(
-        name =  "TypeA",
+        name = "TypeA",
         typeArguments = Seq.empty,
         parents = Seq.empty,
         constructors = Seq(
@@ -200,7 +198,7 @@ class ParserSpec extends WordSpec with Matchers {
 
     "parse call definition with http request" in new ParserTestEnv {
       val docString = "Documentation for myCall"
-      val http = "GET /api/myCall/{param1}"
+      val http      = "GET /api/myCall/{param1}"
       val in =
         s"""
            |/**$docString*/
@@ -226,7 +224,7 @@ class ParserSpec extends WordSpec with Matchers {
     }
 
     "save positions for all elements" in new ParserTestEnv {
-      val src = """
+      val src    = """
         |schema api
         |external type Int
         |type UserId = Int

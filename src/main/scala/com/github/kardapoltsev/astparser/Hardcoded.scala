@@ -12,19 +12,19 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser
 
 object Hardcoded {
 
   object Keywords {
-    val Schema = "schema"
-    val Type = "type"
-    val Trait = "trait"
-    val Call = "call"
-    val Package = "package"
+    val Schema   = "schema"
+    val Type     = "type"
+    val Trait    = "trait"
+    val Call     = "call"
+    val Package  = "package"
     val External = "external"
-    val Import = "import"
+    val Import   = "import"
   }
 
 }

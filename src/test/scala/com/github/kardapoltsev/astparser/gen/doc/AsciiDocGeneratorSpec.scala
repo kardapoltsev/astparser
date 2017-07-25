@@ -12,18 +12,15 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser.gen.doc
 
 import com.github.kardapoltsev.astparser.TestBase
 
-
-
 class AsciiDocGeneratorSpec extends TestBase {
   "AsciiDocGenerator" should {
     "generate docs" in {
-      val model = buildModel(
-        s"""
+      val model = buildModel(s"""
            |schema api
            |external type Int
            |external type Long
@@ -78,7 +75,7 @@ class AsciiDocGeneratorSpec extends TestBase {
       apiDoc should include("= api")
 
       apiDoc should include(
-       """|
+        """|
           |[[api.outer.inner.A]]
           |=== A
           |Documentation for type A

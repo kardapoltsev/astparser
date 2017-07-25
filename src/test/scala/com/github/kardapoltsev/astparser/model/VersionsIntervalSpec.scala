@@ -12,13 +12,10 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser.model
 
 import org.scalatest.{Matchers, WordSpec}
-
-
-
 
 class VersionsIntervalSpec extends WordSpec with Matchers {
 
@@ -26,14 +23,17 @@ class VersionsIntervalSpec extends WordSpec with Matchers {
 
     "isIntersect" in {
       VersionsInterval(None, None).isIntersect(VersionsInterval(None, None)) shouldBe true
-      VersionsInterval(Some(2), Some(2)).isIntersect(VersionsInterval(Some(2), Some(3))) shouldBe true
-      VersionsInterval(Some(2), Some(3)).isIntersect(VersionsInterval(Some(3), Some(5))) shouldBe true
-      VersionsInterval(Some(2), Some(3)).isIntersect(VersionsInterval(Some(4), Some(5))) shouldBe false
+      VersionsInterval(Some(2), Some(2))
+        .isIntersect(VersionsInterval(Some(2), Some(3))) shouldBe true
+      VersionsInterval(Some(2), Some(3))
+        .isIntersect(VersionsInterval(Some(3), Some(5))) shouldBe true
+      VersionsInterval(Some(2), Some(3))
+        .isIntersect(VersionsInterval(Some(4), Some(5))) shouldBe false
     }
 
     "intersect" in {
-      VersionsInterval(Some(2), Some(5)).
-        intersect(VersionsInterval(Some(3), Some(10))) shouldBe VersionsInterval(Some(3), Some(5))
+      VersionsInterval(Some(2), Some(5))
+        .intersect(VersionsInterval(Some(3), Some(10))) shouldBe VersionsInterval(Some(3), Some(5))
     }
 
     "contains" in {

@@ -12,11 +12,10 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser.parser.doc
 
 import org.scalatest.{Matchers, WordSpec}
-
 
 trait DocParserEnv extends DocParser {
 
@@ -25,7 +24,6 @@ trait DocParserEnv extends DocParser {
   }
 
 }
-
 
 class DocParserSpec extends WordSpec with Matchers {
 
@@ -39,11 +37,12 @@ class DocParserSpec extends WordSpec with Matchers {
     }
 
     "parse docs" in new DocParserEnv {
-      parse(docs, "word 2 `ref` next. Second sentence. characters: (){}[]-=/") shouldBe Docs(Seq(
-        DocString("word 2 "),
-        DocReference("ref", "ref"),
-        DocString(" next. Second sentence. characters: (){}[]-=/")
-      ))
+      parse(docs, "word 2 `ref` next. Second sentence. characters: (){}[]-=/") shouldBe Docs(
+        Seq(
+          DocString("word 2 "),
+          DocReference("ref", "ref"),
+          DocString(" next. Second sentence. characters: (){}[]-=/")
+        ))
     }
 
   }

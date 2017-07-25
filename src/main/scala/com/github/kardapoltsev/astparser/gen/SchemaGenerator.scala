@@ -12,7 +12,7 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser.gen
 
 import java.io.{File, FileWriter}
@@ -21,8 +21,8 @@ import com.github.kardapoltsev.astparser.parser._
 import com.github.kardapoltsev.astparser.model
 
 class SchemaGenerator(
-    m: model.Model,
-    filenameExtension: String
+  m: model.Model,
+  filenameExtension: String
 ) extends Generator {
   import Hardcoded.{Keywords => K}
   private def ls = System.lineSeparator()
@@ -33,9 +33,9 @@ class SchemaGenerator(
 
   private def generateSchema(schema: Schema): GeneratedFile = {
     val filename = schema.name + "." + filenameExtension
-    val h = generateHeader(schema)
-    val c = (schema.definitions flatMap generateDefinition).mkString(ls)
-    val content = h + c
+    val h        = generateHeader(schema)
+    val c        = (schema.definitions flatMap generateDefinition).mkString(ls)
+    val content  = h + c
     GeneratedFile(
       path = "",
       name = filename,
@@ -49,25 +49,23 @@ class SchemaGenerator(
 
   private def generateDefinition(d: Definition): Option[String] = {
     d match {
-      case et: ExternalType => Some(generateExternalType(et))
-      case ta: TypeAlias => Some(generateTypeAlias(ta))
-      case t: Trait => Some(generateTrait(t))
-      case t: Type => Some(generateType(t))
-      case c: Call => Some(generateCall(c))
-      case i: Import => Some(generateImport(i))
-      case p: Package => Some(generatePackage(p))
+      case et: ExternalType   => Some(generateExternalType(et))
+      case ta: TypeAlias      => Some(generateTypeAlias(ta))
+      case t: Trait           => Some(generateTrait(t))
+      case t: Type            => Some(generateType(t))
+      case c: Call            => Some(generateCall(c))
+      case i: Import          => Some(generateImport(i))
+      case p: Package         => Some(generatePackage(p))
       case t: TypeConstructor => None //should be generated inside generateType
-      case s: Schema => None
-      case m: Model => None
+      case s: Schema          => None
+      case m: Model           => None
     }
   }
 
   private def generatePackage(p: PackageLike): String = {
-    val c = p.definitions
-      .flatMap { d =>
-        generateDefinition(d)
-      }
-      .mkString(System.lineSeparator())
+    val c = p.definitions.flatMap { d =>
+      generateDefinition(d)
+    }.mkString(System.lineSeparator())
     s"""
       |package ${p.name} {
       |${c.offset(2)}
@@ -82,8 +80,7 @@ class SchemaGenerator(
   private def generateExternalType(et: ExternalType): String = {
     val docs = formatDocs(et.docs)
     s"""$docs
-       |${K.External} ${K.Type} ${et.fullName}${formatTypeParameters(
-         et.typeArguments)}
+       |${K.External} ${K.Type} ${et.fullName}${formatTypeParameters(et.typeArguments)}
        |""".stripMargin.trim
   }
 
@@ -93,7 +90,7 @@ class SchemaGenerator(
 
   private def generateTrait(t: Trait): String = {
     val docs = formatDocs(t.docs)
-    val ext = formatParents(t.parents)
+    val ext  = formatParents(t.parents)
     val args = generateArguments(t.arguments)
     s"""$docs
        |${K.Trait} ${t.name}$ext$args
@@ -101,9 +98,9 @@ class SchemaGenerator(
   }
 
   private def generateType(t: Type): String = {
-    val docs = formatDocs(t.docs)
-    val c = t.constructors.map(generateConstructor).mkString(ls)
-    val ext = formatParents(t.parents)
+    val docs        = formatDocs(t.docs)
+    val c           = t.constructors.map(generateConstructor).mkString(ls)
+    val ext         = formatParents(t.parents)
     val escapedName = escaped(t.name)
     s"""$docs
        |${K.Type} $escapedName$ext {
@@ -112,11 +109,11 @@ class SchemaGenerator(
   }
 
   private def generateConstructor(c: TypeConstructor): String = {
-    val docs = formatDocs(c.docs)
-    val ext = formatParents(c.parents)
-    val args = generateArguments(c.arguments)
-    val id = formatId(c.maybeId)
-    val v = formatVersion(c.versions)
+    val docs        = formatDocs(c.docs)
+    val ext         = formatParents(c.parents)
+    val args        = generateArguments(c.arguments)
+    val id          = formatId(c.maybeId)
+    val v           = formatVersion(c.versions)
     val escapedName = escaped(c.name)
     s"""$docs
        |$escapedName$id$v$ext$args""".stripMargin
@@ -126,11 +123,11 @@ class SchemaGenerator(
     val docs = formatDocs(c.docs)
     val httpString = c.httpRequest match {
       case Some(http) => ls + "@" + http
-      case None => ""
+      case None       => ""
     }
-    val ext = formatParents(c.parents)
-    val id = formatId(c.maybeId)
-    val v = formatVersion(c.versions)
+    val ext         = formatParents(c.parents)
+    val id          = formatId(c.maybeId)
+    val v           = formatVersion(c.versions)
     val escapedName = escaped(c.name)
     s"""$docs$httpString
        |${K.Call} $escapedName$id$v$ext${generateArguments(c.arguments)}
@@ -140,18 +137,16 @@ class SchemaGenerator(
   private def generateArguments(args: Seq[Argument]): String = {
     if (args.nonEmpty) {
       val paramNameLength = args.map(n => escaped(n.name).length).max
-      val typeLength = args.map(a => formatTypeStatement(a.`type`).length).max
-      s" ::$ls" + args
-        .map { a =>
-          val escapedName = escaped(a.name)
-          val n = escapedName + " " * (paramNameLength - escapedName.length)
-          val ft = formatTypeStatement(a.`type`)
-          val ds = a.docs.map(_.content).mkString("").trim
-          val d = if (ds.nonEmpty) s" -- $ds" else ""
-          val t = if (ds.nonEmpty) ft + " " * (typeLength - ft.length) else ft
-          s"$n : $t$d"
-        }
-        .mkString("", ls, "")
+      val typeLength      = args.map(a => formatTypeStatement(a.`type`).length).max
+      s" ::$ls" + args.map { a =>
+        val escapedName = escaped(a.name)
+        val n           = escapedName + " " * (paramNameLength - escapedName.length)
+        val ft          = formatTypeStatement(a.`type`)
+        val ds          = a.docs.map(_.content).mkString("").trim
+        val d           = if (ds.nonEmpty) s" -- $ds" else ""
+        val t           = if (ds.nonEmpty) ft + " " * (typeLength - ft.length) else ft
+        s"$n : $t$d"
+      }.mkString("", ls, "")
         .offset(2)
     } else {
       ""
@@ -205,24 +200,20 @@ class SchemaGenerator(
 
   private def formatTypeParameters(args: Seq[TypeParameter]): String = {
     if (args.nonEmpty) {
-      args
-        .map { a =>
-          //a.ref.fullName + formatTypeArguments(a.typeArguments)
-          a.name
-        }
-        .mkString("[", ",", "]")
+      args.map { a =>
+        //a.ref.fullName + formatTypeArguments(a.typeArguments)
+        a.name
+      }.mkString("[", ",", "]")
     } else {
       ""
     }
   }
   private def formatTypeArguments(args: Seq[Reference]): String = {
     if (args.nonEmpty) {
-      args
-        .map { a =>
-          //a.ref.fullName + formatTypeArguments(a.typeArguments)
-          a.fullName
-        }
-        .mkString("[", ",", "]")
+      args.map { a =>
+        //a.ref.fullName + formatTypeArguments(a.typeArguments)
+        a.fullName
+      }.mkString("[", ",", "]")
     } else {
       ""
     }

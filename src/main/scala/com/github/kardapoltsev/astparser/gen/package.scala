@@ -12,7 +12,7 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser
 
 package object gen {
@@ -20,9 +20,7 @@ package object gen {
   implicit final class StringExt(val string: String) {
     def offset(count: Int): String = {
       require(count >= 0)
-      string.lines.map(l =>
-        if(l.isEmpty) l else " " * count + l
-      ).mkString(System.lineSeparator())
+      string.lines.map(l => if (l.isEmpty) l else " " * count + l).mkString(System.lineSeparator())
     }
   }
 

@@ -12,17 +12,15 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser.gen
 
 import com.github.kardapoltsev.astparser.TestBase
 
-
-
 class SchemaGeneratorSpec extends TestBase {
 
   private def generate(source: String, sources: String*): Seq[GeneratedFile] = {
-    val m =  buildModel(source, sources:_*)
+    val m = buildModel(source, sources: _*)
     new SchemaGenerator(m, "sl").generate()
   }
 
@@ -42,8 +40,7 @@ class SchemaGeneratorSpec extends TestBase {
     }
 
     "generate external types" in {
-      val g = generate(
-        """
+      val g = generate("""
           |schema api
           |
           |external type Int
@@ -55,8 +52,7 @@ class SchemaGeneratorSpec extends TestBase {
     }
 
     "generate imports" in {
-      val g = generate(
-        """
+      val g = generate("""
           |schema api
           |
           |package p1 {
@@ -103,8 +99,7 @@ class SchemaGeneratorSpec extends TestBase {
     }
 
     "generate type aliases" in {
-      val g = generate(
-        """
+      val g = generate("""
           |schema api
           |
           |external type Int
@@ -118,8 +113,7 @@ class SchemaGeneratorSpec extends TestBase {
     }
 
     "generate types" in {
-      val g = generate(
-        """
+      val g = generate("""
           |schema api
           |external type Int
           |external type String
@@ -177,8 +171,7 @@ class SchemaGeneratorSpec extends TestBase {
     }
 
     "generate calls" in {
-      val g = generate(
-        """
+      val g = generate("""
           |schema api
           |external type Int
           |external type String
@@ -203,8 +196,7 @@ class SchemaGeneratorSpec extends TestBase {
     }
 
     "generate versioned calls" in {
-      val g = generate(
-        """
+      val g = generate("""
           |schema api
           |external type Int
           |external type Void
@@ -225,8 +217,7 @@ class SchemaGeneratorSpec extends TestBase {
     }
 
     "generate calls with http definitions" in {
-      val g = generate(
-        """
+      val g = generate("""
           |schema api
           |external type Int
           |external type Void

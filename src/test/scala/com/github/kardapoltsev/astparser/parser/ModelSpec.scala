@@ -12,7 +12,7 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser.parser
 
 import com.github.kardapoltsev.astparser.TestBase
@@ -21,8 +21,7 @@ class ModelSpec extends TestBase {
   "Parser model" should {
 
     "resolve local references" in {
-      val m = buildParserModel(
-        """
+      val m          = buildParserModel("""
           |schema api
           |
           |package outer.inner {
@@ -41,8 +40,7 @@ class ModelSpec extends TestBase {
 
       val typeA = maybeTypeA.get
 
-      val typeBRef = typeA.asInstanceOf[Type].
-        constructors.head.arguments.head.`type`.ref
+      val typeBRef = typeA.asInstanceOf[Type].constructors.head.arguments.head.`type`.ref
 
       m.lookup(typeBRef) shouldBe defined
       m.lookup(typeBRef).get shouldBe a[Type]
@@ -76,8 +74,7 @@ class ModelSpec extends TestBase {
 
       val typeA = maybeTypeA.get
 
-      val typeBRef = typeA.asInstanceOf[Type].
-        constructors.head.arguments.head.`type`.ref
+      val typeBRef = typeA.asInstanceOf[Type].constructors.head.arguments.head.`type`.ref
 
       m.lookup(typeBRef) shouldBe defined
       m.lookup(typeBRef).get shouldBe a[Type]
@@ -86,8 +83,7 @@ class ModelSpec extends TestBase {
     }
 
     "resolve absolute references within one schema" in {
-      val m = buildParserModel(
-        """
+      val m          = buildParserModel("""
           |schema api
           |
           |package p1 {
@@ -108,8 +104,7 @@ class ModelSpec extends TestBase {
 
       val typeA = maybeTypeA.get
 
-      val typeBRef = typeA.asInstanceOf[Type].
-        constructors.head.arguments.head.`type`.ref
+      val typeBRef = typeA.asInstanceOf[Type].constructors.head.arguments.head.`type`.ref
 
       m.lookup(typeBRef) shouldBe defined
       m.lookup(typeBRef).get shouldBe a[Type]
@@ -140,14 +135,13 @@ class ModelSpec extends TestBase {
           |  }
           |}
         """.stripMargin
-      val m = buildParserModel(s1, s2)
+      val m          = buildParserModel(s1, s2)
       val maybeTypeA = m.findSchema("s1").flatMap(_.getDefinition("p1.A"))
       maybeTypeA shouldBe defined
 
       val typeA = maybeTypeA.get
 
-      val typeBRef = typeA.asInstanceOf[Type].
-        constructors.head.arguments.head.`type`.ref
+      val typeBRef = typeA.asInstanceOf[Type].constructors.head.arguments.head.`type`.ref
 
       m.lookup(typeBRef) shouldBe defined
       m.lookup(typeBRef).get shouldBe a[Type]
@@ -176,14 +170,13 @@ class ModelSpec extends TestBase {
           |  }
           |}
         """.stripMargin
-      val m = buildParserModel(s1, s2)
+      val m          = buildParserModel(s1, s2)
       val maybeTypeA = m.findSchema("s1").flatMap(_.getDefinition("p1.A"))
       maybeTypeA shouldBe defined
 
       val typeA = maybeTypeA.get
 
-      val argTypeRef = typeA.asInstanceOf[Type].
-        constructors.head.arguments.head.`type`.ref
+      val argTypeRef = typeA.asInstanceOf[Type].constructors.head.arguments.head.`type`.ref
 
       m.lookup(argTypeRef) shouldBe defined
       m.lookup(argTypeRef).get shouldBe a[Import]
@@ -208,8 +201,7 @@ class ModelSpec extends TestBase {
     }
 
     "handle imports" in {
-      val m = buildParserModel(
-        """
+      val m     = buildParserModel("""
           |schema api
           |
           |package p1 {
@@ -226,11 +218,10 @@ class ModelSpec extends TestBase {
           |  }
           |}
         """.stripMargin)
-      val api = m.findSchema("api").get
+      val api   = m.findSchema("api").get
       val typeA = api.getDefinition("p1.A").get
 
-      val typeBRef = typeA.asInstanceOf[Type].
-        constructors.head.arguments.head.`type`.ref
+      val typeBRef = typeA.asInstanceOf[Type].constructors.head.arguments.head.`type`.ref
 
       m.lookup(typeBRef) shouldBe defined
       m.lookup(typeBRef).get shouldBe a[Import]
@@ -271,7 +262,7 @@ class ModelSpec extends TestBase {
           |}
         """.stripMargin
       )
-      val api = m.findSchema("api").get
+      val api   = m.findSchema("api").get
       val typeA = api.getDefinition("p1.A").get.asInstanceOf[Type]
 
       val typeBRef = typeA.constructors.head.arguments.head.`type`.ref
@@ -294,7 +285,7 @@ class ModelSpec extends TestBase {
       m.lookup(parentRef).get shouldBe a[Trait]
       m.lookup(parentRef).get.asInstanceOf[Trait].fullName shouldBe "common.Object"
 
-      val b = m.getDefinition("api.p1.B").get.asInstanceOf[Type]
+      val b       = m.getDefinition("api.p1.B").get.asInstanceOf[Type]
       val bParent = m.lookup(b.parents.head)
       bParent shouldBe defined
       bParent.get.asInstanceOf[Trait].fullName shouldBe "api.Model"

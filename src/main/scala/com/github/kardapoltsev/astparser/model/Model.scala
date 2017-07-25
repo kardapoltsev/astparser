@@ -12,7 +12,7 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser.model
 
 import com.github.kardapoltsev.astparser.parser
@@ -21,17 +21,18 @@ import com.github.kardapoltsev.astparser.parser.doc.{DocParser}
 import com.github.kardapoltsev.astparser.parser.doc
 import com.github.kardapoltsev.astparser.parser.http.{HttpParser, HttpRequest, PathParam}
 
-
-
 case class Model(
   schemas: Seq[Schema],
   private[astparser] val parsedModel: parser.Model
 ) {
 
-  private val definitions = deepDefinitions.groupBy(_.fullName).map {
-    case (fullName, defs) =>
-      fullName -> defs
-  }.withDefaultValue(Seq.empty)
+  private val definitions = deepDefinitions
+    .groupBy(_.fullName)
+    .map {
+      case (fullName, defs) =>
+        fullName -> defs
+    }
+    .withDefaultValue(Seq.empty)
 
   def deepDefinitions: Seq[Definition] = {
     schemas ++ (schemas flatMap (_.deepDefinitions))
@@ -55,11 +56,10 @@ case class Model(
 
 }
 
-
 object Model {
-  private val astParser = new AstParser()
+  private val astParser  = new AstParser()
   private val httpParser = new HttpParser()
-  private val docParser = new DocParser()
+  private val docParser  = new DocParser()
 
   def build(schemas: Seq[java.io.File]): Model = {
     val parsed = schemas.map(f => astParser.parse(f))
@@ -184,7 +184,6 @@ object Model {
     convertTypeStatement(isTypeArgument = false)(ts)
   }
 
-
   private def convertTypeStatement(
     isTypeArgument: Boolean
   )(
@@ -249,10 +248,11 @@ object Model {
 
   private def convertParent(p: parser.TypeLike)(implicit m: parser.Model): Parent = {
     p match {
-      case t: parser.Trait => convertTrait(t)
+      case t: parser.Trait        => convertTrait(t)
       case e: parser.ExternalType => convertExternalType(e)
       case other =>
-        throw new Exception(s"expected trait or external type as parent, got ${other.humanReadable}")
+        throw new Exception(
+          s"expected trait or external type as parent, got ${other.humanReadable}")
     }
   }
 

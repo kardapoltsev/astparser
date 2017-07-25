@@ -12,13 +12,13 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser.util
 
 import org.slf4j.LoggerFactory
 
 object Logger {
-  val times = collection.mutable.Map[String, Long]()
+  val times  = collection.mutable.Map[String, Long]()
   val counts = collection.mutable.Map[String, Int]()
 }
 
@@ -31,20 +31,20 @@ trait Logger {
   }
 
   protected def loggingTime[A](tag: String)(f: => A): A = {
-    val start = System.currentTimeMillis()
-    val result = f
-    val time = System.currentTimeMillis() - start
-    val totalTime = Logger.times.getOrElse(tag, 0L) + time
+    val start      = System.currentTimeMillis()
+    val result     = f
+    val time       = System.currentTimeMillis() - start
+    val totalTime  = Logger.times.getOrElse(tag, 0L) + time
     val totalCount = Logger.counts.getOrElse(tag, 0) + 1
-    Logger.times += tag -> totalTime
+    Logger.times += tag  -> totalTime
     Logger.counts += tag -> totalCount
 
     val reportMessage = s"$tag took ${time}ms (${totalTime}ms total, $totalCount times)"
-    if(time < 10) {
+    if (time < 10) {
       //skip it
-    } else if(time < 100) {
+    } else if (time < 100) {
       log.debug(reportMessage)
-    } else if(time < 1000) {
+    } else if (time < 1000) {
       log.info(reportMessage)
     } else {
       log.warn(reportMessage)

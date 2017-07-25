@@ -2,15 +2,16 @@ val Organization = "com.github.kardapoltsev"
 val SkipUpdate   = true
 val CacheUpdate  = true
 
-organization         := Organization
+organization := Organization
 name := "ast-parser"
-scalaVersion         := "2.11.11"
-crossScalaVersions   := Seq("2.10.6", scalaVersion.value, "2.12.2")
-organizationName     := Organization
+scalaVersion := "2.11.11"
+crossScalaVersions := Seq("2.10.6", scalaVersion.value, "2.12.2")
+organizationName := Organization
 organizationHomepage := Some(url("https://github.com/kardapoltsev"))
 parallelExecution in Test := true
+scalafmtOnCompile in ThisBuild := true
 
-initialize                ~= { _ =>
+initialize ~= { _ =>
   if (sys.props("java.specification.version") < "1.7")
     sys.error("Java 7 is required for this project.")
 }
@@ -26,7 +27,7 @@ scalacOptions ++= Seq(
   "-Xlint"
 )
 scalacOptions <++= scalaVersion map { sv =>
-  if(sv.startsWith("2.10")) {
+  if (sv.startsWith("2.10")) {
     Seq.empty[String]
   } else {
     Seq(
@@ -60,7 +61,6 @@ pomExtra := {
     </developers>
 }
 
-
 import de.heikoseeberger.sbtheader.HeaderPattern
 import de.heikoseeberger.sbtheader.AutomateHeaderPlugin
 import de.heikoseeberger.sbtheader.HeaderKey.headers
@@ -79,26 +79,31 @@ val ScalaHeader =
     |  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     |  See the License for the specific language governing permissions and
     |  limitations under the License.
-    |*/
+    | */
     |""".stripMargin
 
 headers := Map(
-  "scala" -> ( HeaderPattern.cStyleBlockComment, ScalaHeader )
+  "scala" -> (HeaderPattern.cStyleBlockComment, ScalaHeader)
 )
 
-val slf4jApi        = "org.slf4j"                    %  "slf4j-api"                     % "1.7.25"
-val scalaParsers    = "org.scala-lang.modules"       %% "scala-parser-combinators"      % "1.0.4"
-val logbackClassic  = "ch.qos.logback"               %  "logback-classic"               % "1.2.3"         % "test"
-val scalatest       = "org.scalatest"                %% "scalatest"                     % "3.0.3"         % "test"
+val slf4jApi       = "org.slf4j"              % "slf4j-api"                 % "1.7.25"
+val scalaParsers   = "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
+val logbackClassic = "ch.qos.logback"         % "logback-classic"           % "1.2.3" % "test"
+val scalatest      = "org.scalatest"          %% "scalatest"                % "3.0.3" % "test"
 
 val baseDependencies = Seq(
-  slf4jApi, logbackClassic, scalaParsers, scalatest
+  slf4jApi,
+  logbackClassic,
+  scalaParsers,
+  scalatest
 )
 val scala210Dependencies = Seq(
-  slf4jApi, logbackClassic, scalatest
+  slf4jApi,
+  logbackClassic,
+  scalatest
 )
 
-scalacOptions in (Compile,doc) :=  Seq(
+scalacOptions in (Compile, doc) := Seq(
   "-encoding",
   "UTF-8",
   "-Xlint",
@@ -109,7 +114,7 @@ scalacOptions in (Compile,doc) :=  Seq(
   "-diagrams"
 )
 libraryDependencies <++= scalaVersion { sv =>
-  if(sv.startsWith("2.10"))
+  if (sv.startsWith("2.10"))
     scala210Dependencies
   else
     baseDependencies

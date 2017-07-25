@@ -12,7 +12,7 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser.parser
 
 import com.github.kardapoltsev.astparser.parser.TokenParsers.{Identifier, IntNumber}
@@ -20,16 +20,13 @@ import com.github.kardapoltsev.astparser.parser.TokenParsers.{Identifier, IntNum
 import scala.io.Source
 import scala.util.parsing.input._
 
-
-
 object TokenParsers {
   case class Identifier(name: String) extends Positional
-  case class IntNumber(value: Int) extends Positional
+  case class IntNumber(value: Int)    extends Positional
 }
 
-
-class ParseException(message: String, val pos: Position, cause: Throwable = null) extends Exception(message, cause)
-
+class ParseException(message: String, val pos: Position, cause: Throwable = null)
+    extends Exception(message, cause)
 
 class AstParser(
   override protected val enableProfiling: Boolean = false
@@ -38,8 +35,8 @@ class AstParser(
   override type Elem = Token
 
   protected val IdentifierRegexp = "^[a-zA-Z][a-zA-Z0-9]*$".r
-  protected val HexNumberRegexp = "^[0-9a-fA-F]+$".r
-  protected val IntNumberRegexp = "^[-]?[0-9]+$".r
+  protected val HexNumberRegexp  = "^[0-9a-fA-F]+$".r
+  protected val IntNumberRegexp  = "^[-]?[0-9]+$".r
 
   import com.github.kardapoltsev.astparser.parser.Tokens._
 
@@ -55,12 +52,11 @@ class AstParser(
 
   protected[astparser] def reference = profile("reference") {
     positioned {
-      path ^^ {
-        names =>
-          //log.debug(s"parsed ref names: $names at ${names.head.pos}")
-          Reference(
-            names.map(_.name).mkString(".")
-          )
+      path ^^ { names =>
+        //log.debug(s"parsed ref names: $names at ${names.head.pos}")
+        Reference(
+          names.map(_.name).mkString(".")
+        )
       }
     }
   }
@@ -171,8 +167,8 @@ class AstParser(
   }
 
   protected def genericTypeParameters: Parser[Seq[TypeParameter]] = {
-    opt(LeftBracket() ~> rep1(path) <~ RightBracket()) ^^ {
-      args => args.getOrElse(Seq.empty).map { path =>
+    opt(LeftBracket() ~> rep1(path) <~ RightBracket()) ^^ { args =>
+      args.getOrElse(Seq.empty).map { path =>
         TypeParameter(
           path.map(_.name).mkString("."),
           Seq.empty
@@ -182,8 +178,8 @@ class AstParser(
   }
 
   protected def typeExtensionExpr: Parser[Seq[Reference]] = {
-    opt(extendsOperator ~> rep1(reference)) ^^ {
-      exts => exts.getOrElse(Seq.empty)
+    opt(extendsOperator ~> rep1(reference)) ^^ { exts =>
+      exts.getOrElse(Seq.empty)
     }
   }
 
@@ -195,32 +191,22 @@ class AstParser(
     opt(modernArgumentsExpr) ^^ (_.getOrElse(Seq.empty))
   }
 
-
   protected def typeConstructor = profile("typeConstructor") {
     positioned {
       repLeftDoc ~ opt(Dot()) ~ identifier ~ opt(hashId) ~ opt(versionsInterval) ~ typeExtensionExpr ~
         genericTypeParameters ~ argumentsExpr ~ repRightDoc ^^ {
         case ld ~ _ ~ name ~ id ~ int ~ ext ~ ta ~ args ~ rd =>
           val i = int.getOrElse(VersionsInterval(None, None))
-          TypeConstructor(
-            name.name,
-            id.map(_.value),
-            ta,
-            args,
-            ext,
-            i,
-            docs = ld ++ rd)
+          TypeConstructor(name.name, id.map(_.value), ta, args, ext, i, docs = ld ++ rd)
       }
     }
   }
 
   protected def versionsInterval: Parser[VersionsInterval] = profile("versions interval") {
     positioned {
-      (
-        LeftParen() ~>
-          opt(intNumber)) ~ (opt(Dash()) ~> opt(intNumber)
-        <~ RightParen()
-        ) ^^ {
+      (LeftParen() ~>
+        opt(intNumber)) ~ (opt(Dash()) ~> opt(intNumber)
+        <~ RightParen()) ^^ {
         case maybeStart ~ maybeEnd =>
           VersionsInterval(maybeStart.map(_.value), maybeEnd.map(_.value))
       }
@@ -230,7 +216,8 @@ class AstParser(
   //TODO: fix copy
   protected def callDefinition: Parser[Call] = profile("callDefinition") {
     positioned {
-      repLeftDoc ~ opt(httpDefinition) ~ CallKeyword() ~ (callDefinitionExp | failure("call definition expected")) ~ repRightDoc ^^ {
+      repLeftDoc ~ opt(httpDefinition) ~ CallKeyword() ~ (callDefinitionExp | failure(
+        "call definition expected")) ~ repRightDoc ^^ {
         case ld ~ httpDef ~ kw ~ cd ~ rd => cd.copy(docs = ld ++ rd, httpRequest = httpDef)
       }
     }
@@ -269,7 +256,6 @@ class AstParser(
     }
   }
 
-
   def schema: Parser[Schema] = profile("schema") {
     positioned {
       phrase(schemaInfoExp ~ definitions) ^^ {
@@ -279,11 +265,9 @@ class AstParser(
     }
   }
 
-
   def schemaInfoExp = profile("schemaInfo") {
     SchemaKeyword() ~> identifier
   }
-
 
   def definitions: Parser[List[Definition]] = {
     profile("definitions") {
@@ -313,12 +297,14 @@ class AstParser(
           (x.charAt(0).isLetter || x.charAt(0) == '_') &&
           !x.drop(1).exists(c => !c.isLetterOrDigit)
       case _ => false
-    } { x => s"valid identifier expected but $x found" }
+    } { x =>
+      s"valid identifier expected but $x found"
+    }
 
   protected def identifier: Parser[Identifier] = profile("identifier") {
     identifierM ^^ {
       case id: Lexeme => Identifier(id.chars).setPos(id.pos)
-      case _ => throw new IllegalArgumentException("Only Lexeme expected")
+      case _          => throw new IllegalArgumentException("Only Lexeme expected")
     }
   }
 
@@ -330,11 +316,13 @@ class AstParser(
   }
 
   protected def hexNumber: Parser[IntNumber] = profile("hexNumber") {
-    accept("hex number", {
-      case l @ Lexeme(x) if HexNumberRegexp.unapplySeq(x).isDefined =>
-        //noinspection ScalaStyle
-        IntNumber(java.lang.Long.parseLong(x, 16).toInt).setPos(l.pos)
-    })
+    accept(
+      "hex number", {
+        case l @ Lexeme(x) if HexNumberRegexp.unapplySeq(x).isDefined =>
+          //noinspection ScalaStyle
+          IntNumber(java.lang.Long.parseLong(x, 16).toInt).setPos(l.pos)
+      }
+    )
   }
 
   private def packagesFromString(
@@ -352,16 +340,18 @@ class AstParser(
   }
 
   protected def tryParse[T](
-    parser: Parser[T], input: CharSequence, sourceName: String
+    parser: Parser[T],
+    input: CharSequence,
+    sourceName: String
   ): ParseResult[T] = {
-    parser(new lexer.Scanner(
-      new ReaderWithSourcePosition(new CharSequenceReader(input), sourceName)
-    ))
+    parser(
+      new lexer.Scanner(
+        new ReaderWithSourcePosition(new CharSequenceReader(input), sourceName)
+      ))
   }
 
-
   def tryParse(input: CharSequence, sourceName: String): ParseResult[Schema] = {
-    val reader = new ReaderWithSourcePosition(new CharSequenceReader(input), sourceName)
+    val reader  = new ReaderWithSourcePosition(new CharSequenceReader(input), sourceName)
     val scanner = new lexer.Scanner(reader)
     schema(scanner)
   }

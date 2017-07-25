@@ -12,7 +12,7 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser.util
 
 object StringUtil {
@@ -32,13 +32,13 @@ object StringUtil {
     //scalastyle:off method.name
     def ~(other: String): String = {
       val b = StringBuilder.newBuilder
-      if(self != ".") {
+      if (self != ".") {
         b.append(self)
       }
-      if(b.nonEmpty && b.last != '.' && other.nonEmpty && other != ".") {
+      if (b.nonEmpty && b.last != '.' && other.nonEmpty && other != ".") {
         b.append(".")
       }
-      if(other.headOption.exists(_ == '.')) { //scala 2.10 don't have a contains
+      if (other.headOption.exists(_ == '.')) { //scala 2.10 don't have a contains
         b.append(other.tail)
       } else {
         b.append(other)

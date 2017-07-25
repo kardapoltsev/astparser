@@ -12,7 +12,7 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser
 
 import com.github.kardapoltsev.astparser.model.Model
@@ -24,17 +24,18 @@ trait TestBase extends WordSpec with Matchers {
   protected val parser = new AstParser()
 
   protected def buildParserModel(source: String, sources: String*): ParsedModel = {
-    val schemas = (source +: sources).zipWithIndex map { case (src, idx) =>
-      parser.parse(src, "test_source_" + idx)
+    val schemas = (source +: sources).zipWithIndex map {
+      case (src, idx) =>
+        parser.parse(src, "test_source_" + idx)
     }
 
     ParsedModel(schemas)
   }
 
-
   protected def buildModel(source: String, sources: String*): Model = {
-    val schemas = (source +: sources).zipWithIndex map { case (src, idx) =>
-      src -> ("test_source_" + idx)
+    val schemas = (source +: sources).zipWithIndex map {
+      case (src, idx) =>
+        src -> ("test_source_" + idx)
     }
 
     Model.buildFromString(schemas)

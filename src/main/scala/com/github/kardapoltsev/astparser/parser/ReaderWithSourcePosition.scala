@@ -12,11 +12,10 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser.parser
 
 import scala.util.parsing.input.Reader
-
 
 final class ReaderWithSourcePosition[+T](reader: Reader[T], sourceName: String) extends Reader[T] {
   override def source: CharSequence = reader.source

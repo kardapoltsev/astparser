@@ -12,12 +12,10 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser.parser.doc
 
 import org.scalatest.{Matchers, WordSpec}
-
-
 
 class DocLexerSpec extends WordSpec with Matchers {
   import DocLexer._

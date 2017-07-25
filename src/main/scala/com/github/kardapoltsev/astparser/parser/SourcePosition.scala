@@ -12,7 +12,7 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser.parser
 
 import scala.util.parsing.input.{NoPosition, OffsetPosition, Position}
@@ -25,12 +25,12 @@ case class SourcePosition(position: Position, sourceName: String) extends Positi
   override def lineContents = position match {
     case p: OffsetPosition => p.lineContents
     case p: SourcePosition => p.lineContents
-    case NoPosition => ""
+    case NoPosition        => ""
   }
 
   override def <(that: Position) = that match {
     case that: SourcePosition => this.position < that.position
-    case that => this.position < that
+    case that                 => this.position < that
   }
 
   override def toString: String = s"$sourceName($line, $column)"

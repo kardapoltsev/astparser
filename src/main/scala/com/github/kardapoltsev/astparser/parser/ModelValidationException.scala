@@ -12,10 +12,8 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser.parser
-
-
 
 class ModelValidationException(msg: String, cause: Throwable) extends Exception(msg, cause) {
   def this(msg: String) = this(msg, null)

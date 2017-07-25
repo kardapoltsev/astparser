@@ -12,13 +12,12 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser.parser
 
 import org.scalatest.{Matchers, WordSpec}
 
 import scala.util.parsing.input.CharSequenceReader
-
 
 class LexerSpec extends WordSpec with Matchers {
   import Tokens._
@@ -28,7 +27,7 @@ class LexerSpec extends WordSpec with Matchers {
 
   def hasError(tokens: List[Token]): Boolean = tokens.exists {
     case Error(_) => true
-    case _ => false
+    case _        => false
   }
 
   "Lexer" should {
@@ -49,8 +48,17 @@ class LexerSpec extends WordSpec with Matchers {
     "should parse symbols" in {
       val in = ":#.{}[]=()-"
       scan(in) shouldBe List(
-        Colon(), Hash(), Dot(), LeftBrace(), RightBrace(),
-        LeftBracket(), RightBracket(), Eq(), LeftParen(), RightParen(), Dash()
+        Colon(),
+        Hash(),
+        Dot(),
+        LeftBrace(),
+        RightBrace(),
+        LeftBracket(),
+        RightBracket(),
+        Eq(),
+        LeftParen(),
+        RightParen(),
+        Dash()
       )
     }
 
@@ -94,13 +102,11 @@ class LexerSpec extends WordSpec with Matchers {
       hasError(res) shouldBe true
     }
 
-
     "should parse single line doc" in {
       val commentSample = " a - sdfads -- adfasdf "
-      val in = s"asdf --$commentSample"
+      val in            = s"asdf --$commentSample"
       scan(in) shouldBe List(Lexeme("asdf"), RightDoc(commentSample))
     }
-
 
     "should parse multiline doc" in {
       val commentSample =
@@ -129,10 +135,22 @@ class LexerSpec extends WordSpec with Matchers {
 
       val sample =
         List(
-          Lexeme("ASD"), LeftBrace(), LeftDoc(multiDocSample),
-          Lexeme("abc"), Dot(), Lexeme("abc"), Hash(), Lexeme("789"), Colon(),
-          Lexeme("T"), LeftBracket(), Lexeme("B"), RightBracket(),
-          RightDoc(lineDocSample), RightBrace())
+          Lexeme("ASD"),
+          LeftBrace(),
+          LeftDoc(multiDocSample),
+          Lexeme("abc"),
+          Dot(),
+          Lexeme("abc"),
+          Hash(),
+          Lexeme("789"),
+          Colon(),
+          Lexeme("T"),
+          LeftBracket(),
+          Lexeme("B"),
+          RightBracket(),
+          RightDoc(lineDocSample),
+          RightBrace()
+        )
 
       val in =
         s"""
@@ -148,7 +166,6 @@ class LexerSpec extends WordSpec with Matchers {
       res shouldBe sample
     }
 
-
     "should parse type aliases" in {
       val in =
         """
@@ -157,17 +174,30 @@ class LexerSpec extends WordSpec with Matchers {
         """.stripMargin
 
       scan(in) shouldBe List(
-        TypeKeyword(), Lexeme("MyType"), Eq(),
-        Lexeme("some"), Dot(), Lexeme("other"), Dot(), Lexeme("Type"),
-        TypeKeyword(), Lexeme("MyType2"), Eq(),
-        Lexeme("some"), Dot(), Lexeme("other"), Dot(), Lexeme("Type")
+        TypeKeyword(),
+        Lexeme("MyType"),
+        Eq(),
+        Lexeme("some"),
+        Dot(),
+        Lexeme("other"),
+        Dot(),
+        Lexeme("Type"),
+        TypeKeyword(),
+        Lexeme("MyType2"),
+        Eq(),
+        Lexeme("some"),
+        Dot(),
+        Lexeme("other"),
+        Dot(),
+        Lexeme("Type")
       )
     }
 
     "should parse identifiers containing keywords" in {
       val in = "type typeAliasForX"
       scan(in) shouldBe List(
-        TypeKeyword(), Lexeme("typeAliasForX")
+        TypeKeyword(),
+        Lexeme("typeAliasForX")
       )
     }
 
@@ -176,7 +206,6 @@ class LexerSpec extends WordSpec with Matchers {
         Lexeme("type")
       )
     }
-
 
   }
 }

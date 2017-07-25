@@ -12,7 +12,7 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser.model
 
 import com.github.kardapoltsev.astparser.TestBase
@@ -93,12 +93,11 @@ class ModelSpec extends TestBase {
         """.stripMargin
       )
       val myTrait = model.getDefinition("api.MyTrait").head
-      val maybeA = model.getDefinition("api.A")
+      val maybeA  = model.getDefinition("api.A")
       maybeA should not be empty
       val constructorA = maybeA.head.asInstanceOf[Type].constructors.head
       constructorA shouldBe a[TypeConstructor]
-      constructorA.asInstanceOf[TypeConstructor].parents should contain(
-        myTrait)
+      constructorA.asInstanceOf[TypeConstructor].parents should contain(myTrait)
     }
 
     "accept constructors as an argument type" in {
@@ -261,8 +260,7 @@ class ModelSpec extends TestBase {
         ))
       val arg = typeA.asInstanceOf[Type].constructors.head.arguments.head
       arg.docs.content should have size 2
-      arg.docs.content.head shouldBe PlainDoc(
-        "docs for param1 with a link to ")
+      arg.docs.content.head shouldBe PlainDoc("docs for param1 with a link to ")
       arg.docs
         .content(1)
         .asInstanceOf[DocReference]
@@ -272,7 +270,7 @@ class ModelSpec extends TestBase {
     }
 
     "resolve references from imports" in {
-      val m = buildModel("""
+      val m          = buildModel("""
           |schema api
           |
           |package p1 {
@@ -295,7 +293,7 @@ class ModelSpec extends TestBase {
     }
 
     "handle inheritance" in {
-      val m = buildModel("""
+      val m      = buildModel("""
                            |schema api
                            |
                            |trait A

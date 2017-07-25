@@ -12,13 +12,11 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser.gen.doc
 
 import com.github.kardapoltsev.astparser.gen.{GeneratedFile}
 import com.github.kardapoltsev.astparser.model._
-
-
 
 class AsciiDocGenerator(
   m: Model,
@@ -31,13 +29,11 @@ class AsciiDocGenerator(
     model.schemas flatMap generateSchema
   }
 
-
   private def generateSchema(schema: Schema): Seq[GeneratedFile] = {
     log.debug(s"generating docs for `${schema.fullName}`")
     val fullDoc = generateDefinition(schema).get
     Seq(GeneratedFile(".", schema.fullName + s"-v$targetVersion.ad", fullDoc.render))
   }
-
 
   private def generateDefinition(d: Definition): Option[DocNode] = {
     d match {
@@ -47,28 +43,28 @@ class AsciiDocGenerator(
         Some(Group(schemaDoc +: innerDocs))
       case p: Package =>
         val innerDocs = p.definitions flatMap generateDefinition
-        val pd = packageDoc(p)
+        val pd        = packageDoc(p)
         Some(Paragraph(pd +: innerDocs))
       case c: Call =>
         Some(methodDoc(c))
       case t: Type =>
         val td = typeDoc(t)
-        val cd = t.constructors map { c => constructorDoc(t, c) }
+        val cd = t.constructors map { c =>
+          constructorDoc(t, c)
+        }
         Some(Group(td +: cd))
       case _ =>
         None
     }
   }
 
-
   private def packageDoc(p: Package): DocNode = {
     Header(p.fullName, p.name, 1)
   }
 
-
   private def methodDoc(m: Call): DocNode = {
     val docs =
-      if(m.docs.content.nonEmpty)
+      if (m.docs.content.nonEmpty)
         Seq(renderDocs(m.docs))
       else
         Seq.empty
@@ -76,13 +72,14 @@ class AsciiDocGenerator(
       Header(m.fullName, m.name, 2),
       Paragraph(
         Seq(
-          Text("Result type: "), linkified(m.returnType), LineBreak
+          Text("Result type: "),
+          linkified(m.returnType),
+          LineBreak
         ) ++ docs),
       httpString(m),
       Paragraph(paramsTable(m.arguments))
     )
   }
-
 
   private def typeDoc(t: Type): DocNode = {
     Paragraph(
@@ -90,7 +87,6 @@ class AsciiDocGenerator(
       renderDocs(t.docs)
     )
   }
-
 
   private def constructorDoc(t: Type, c: TypeConstructor): DocNode = {
     Group(
@@ -102,15 +98,13 @@ class AsciiDocGenerator(
     )
   }
 
-
   private def linkified(definition: Definition): DocNode = {
     AnchorLink(definition.name, definition.fullName)
   }
 
-
   private def linkified(`type`: TypeStatement): DocNode = {
     val aType = model.getType(`type`.typeReference)
-    if(`type`.typeArguments.nonEmpty) {
+    if (`type`.typeArguments.nonEmpty) {
       val links = `type`.typeArguments map linkified
       Group(
         linkified(aType) +: Text("[") +: links :+ Text("]")
@@ -119,7 +113,6 @@ class AsciiDocGenerator(
       linkified(aType)
     }
   }
-
 
   private def renderDocs(docs: Documentation): DocNode = {
     val nodes = docs.content.map {
@@ -132,19 +125,15 @@ class AsciiDocGenerator(
     Group(nodes)
   }
 
-
   private def paramsTable(params: Seq[Argument]): Table = {
-    Table("", None,
-      params.map { p =>
-        Seq(
-          Text(p.name),
-          linkified(p.`type`),
-          renderDocs(p.docs)
-        )
-      }
-    )
+    Table("", None, params.map { p =>
+      Seq(
+        Text(p.name),
+        linkified(p.`type`),
+        renderDocs(p.docs)
+      )
+    })
   }
-
 
   private def httpString(m: Call): DocNode = {
     m.httpRequest match {
@@ -156,8 +145,6 @@ class AsciiDocGenerator(
   }
 
 }
-
-
 
 object AsciiDocGenerator {
   private[doc] sealed trait DocNode {
@@ -214,7 +201,6 @@ object AsciiDocGenerator {
          |""".stripMargin
   }
 
-
   private[doc] case class Header(anchor: String, content: String, level: Int) extends DocNode {
     override def render: String = {
       s"\n[[$anchor]]\n" + ("=" * (level + 1)) + " " + content + "\n"
@@ -239,8 +225,10 @@ object AsciiDocGenerator {
 
   }
 
-
-  private[doc] case class Table(name: String, headers: Option[Seq[DocNode]], rows: Seq[Seq[DocNode]]) extends DocNode {
+  private[doc] case class Table(name: String,
+                                headers: Option[Seq[DocNode]],
+                                rows: Seq[Seq[DocNode]])
+      extends DocNode {
     val width = headers.map(_.size).getOrElse(0) max
       (if (rows.isEmpty) 0 else rows.maxBy(_.size).size)
     override def render: String = {
@@ -250,7 +238,8 @@ object AsciiDocGenerator {
         s"""[width="100%",cols="$width",frame="topbot",grid="rows"]""",
         s"""[options="autowidth${headers.fold("")(_ => ",header")}"]""",
         "|======"
-      ) ++ (headers.map(h => h ++ Seq.fill(width - h.length)(" ")) ++ rows.map(_.map(_.render))).map(_.mkString("|", "|", "")) :+
+      ) ++ (headers.map(h => h ++ Seq.fill(width - h.length)(" ")) ++ rows.map(_.map(_.render)))
+        .map(_.mkString("|", "|", "")) :+
         "|======"
       lines.mkString("\n", "\n", "")
     }
@@ -259,7 +248,6 @@ object AsciiDocGenerator {
   private[doc] case object LineBreak extends DocNode {
     override def render: String = " +\n"
   }
-
 
   private[doc] case class Page(title: String, body: DocNode)
 

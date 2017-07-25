@@ -12,7 +12,7 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser.parser
 
 import java.awt.event.KeyEvent
@@ -25,7 +25,7 @@ import scala.util.parsing.input.{CharSequenceReader, Reader}
 abstract class BaseLexer extends Scanners with Parsers {
 
   def scan(input: Reader[Char]): List[Token] = {
-    var r = new Scanner(input)
+    var r   = new Scanner(input)
     val buf = ListBuffer[Token]()
     while (!r.atEnd) {
       buf += r.first
@@ -39,9 +39,9 @@ abstract class BaseLexer extends Scanners with Parsers {
   protected def isPrintableChar(c: Char): Boolean = {
     val block = Character.UnicodeBlock.of(c)
     (!Character.isISOControl(c)) &&
-      c != KeyEvent.CHAR_UNDEFINED &&
-      block != null &&
-      block != Character.UnicodeBlock.SPECIALS
+    c != KeyEvent.CHAR_UNDEFINED &&
+    block != null &&
+    block != Character.UnicodeBlock.SPECIALS
   }
 
 }

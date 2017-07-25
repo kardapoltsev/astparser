@@ -12,7 +12,7 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/
+ */
 package com.github.kardapoltsev.astparser.parser
 
 import com.github.kardapoltsev.astparser.util.{CRC32Helper, Logger}
@@ -20,7 +20,7 @@ import com.github.kardapoltsev.astparser.util.StringUtil._
 import scala.util.parsing.input.Positional
 
 private[astparser] sealed trait Element extends Positional with Logger {
-  var maybeParent: Option[Element] = None
+  var maybeParent: Option[Element]                = None
   protected[astparser] var children: Seq[Element] = Seq.empty
 
   def maybeSchema: Option[Schema] = {
@@ -30,8 +30,8 @@ private[astparser] sealed trait Element extends Positional with Logger {
       case _ =>
         maybeParent match {
           case Some(s: Schema) => Some(s)
-          case Some(element) => element.maybeSchema
-          case None => None
+          case Some(element)   => element.maybeSchema
+          case None            => None
         }
     }
   }
@@ -47,8 +47,8 @@ private[astparser] sealed trait Element extends Positional with Logger {
   def maybePackage: Option[PackageLike] = {
     maybeParent match {
       case Some(p: PackageLike) => Some(p)
-      case Some(element) => element.maybePackage
-      case None => None
+      case Some(element)        => element.maybePackage
+      case None                 => None
     }
   }
 
@@ -74,8 +74,8 @@ private[astparser] sealed trait Element extends Positional with Logger {
 }
 
 private[astparser] case class VersionsInterval(
-    start: Option[Int],
-    end: Option[Int]
+  start: Option[Int],
+  end: Option[Int]
 ) extends Element
 
 private[astparser] sealed trait Versioned {
@@ -115,40 +115,40 @@ private[astparser] sealed trait Argumented {
 }
 
 private[astparser] final case class Type(
-    name: String,
-    typeArguments: Seq[TypeParameter],
-    parents: Seq[Reference],
-    constructors: Seq[TypeConstructor],
-    docs: Seq[Documentation]
+  name: String,
+  typeArguments: Seq[TypeParameter],
+  parents: Seq[Reference],
+  constructors: Seq[TypeConstructor],
+  docs: Seq[Documentation]
 ) extends TypeLike
     with PackageLike {
   children = constructors ++ typeArguments ++ parents ++ docs
   def definitions = constructors
-  def isGeneric = typeArguments.nonEmpty
+  def isGeneric   = typeArguments.nonEmpty
 }
 
 private[astparser] final case class ExternalType(
-    override val fullName: String,
-    typeArguments: Seq[TypeParameter]
+  override val fullName: String,
+  typeArguments: Seq[TypeParameter]
 ) extends TypeLike {
-  def docs = Seq.empty
+  def docs    = Seq.empty
   def parents = Seq.empty
-  def name = fullName.simpleName
+  def name    = fullName.simpleName
 }
 
 private[astparser] final case class TypeParameter(
-    name: String,
-    typeParameters: Seq[TypeParameter]
+  name: String,
+  typeParameters: Seq[TypeParameter]
 ) extends Element
 
 private[astparser] final case class TypeConstructor(
-    name: String,
-    maybeId: Option[Int],
-    typeArguments: Seq[TypeParameter],
-    arguments: Seq[Argument],
-    parents: Seq[Reference],
-    versions: VersionsInterval,
-    docs: Seq[Documentation]
+  name: String,
+  maybeId: Option[Int],
+  typeArguments: Seq[TypeParameter],
+  arguments: Seq[Argument],
+  parents: Seq[Reference],
+  versions: VersionsInterval,
+  docs: Seq[Documentation]
 ) extends TypeLike
     with TypeId
     with Argumented
@@ -162,18 +162,17 @@ private[astparser] final case class TypeConstructor(
           else " " + arguments.map(_.idString).mkString(" ")
 
         val packageName = t.packageName
-        val fullName = t.fullName
+        val fullName    = t.fullName
         "type " + packageName ~ name + argString + " = " + fullName
       case x =>
-        throw new Exception(
-          s"parent of constructor should be `Type`, but $x found")
+        throw new Exception(s"parent of constructor should be `Type`, but $x found")
     }
 
   }
 }
 
 private[astparser] final case class Reference(
-    fullName: String
+  fullName: String
 ) extends NamedElement {
   def name = fullName.simpleName
   assert(name.nonEmpty, "reference fullName couldn't be empty")
@@ -182,32 +181,32 @@ private[astparser] final case class Reference(
 }
 
 private[astparser] final case class Import(
-    name: String,
-    reference: Reference
+  name: String,
+  reference: Reference
 ) extends Definition {
   children = Seq(reference)
   def fullName = packageName ~ name
 }
 
 private[astparser] final case class TypeAlias(
-    name: String,
-    reference: Reference
+  name: String,
+  reference: Reference
 ) extends TypeLike {
   children = Seq(reference)
-  def docs = Seq.empty
+  def docs    = Seq.empty
   def parents = Seq.empty
   //def fullName = packageName ~ name
 }
 
 private[astparser] final case class Call(
-    name: String,
-    maybeId: Option[Int],
-    arguments: Seq[Argument],
-    returnType: TypeStatement,
-    parents: Seq[Reference],
-    httpRequest: Option[String],
-    versions: VersionsInterval,
-    docs: Seq[Documentation]
+  name: String,
+  maybeId: Option[Int],
+  arguments: Seq[Argument],
+  returnType: TypeStatement,
+  parents: Seq[Reference],
+  httpRequest: Option[String],
+  versions: VersionsInterval,
+  docs: Seq[Documentation]
 ) extends TypeLike
     with TypeId
     with Versioned
@@ -227,9 +226,9 @@ private[astparser] final case class Call(
 }
 
 private[astparser] final case class Argument(
-    name: String,
-    `type`: TypeStatement,
-    docs: Seq[Documentation]
+  name: String,
+  `type`: TypeStatement,
+  docs: Seq[Documentation]
 ) extends NamedElement
     with Documented {
   children = `type` +: docs
@@ -239,8 +238,8 @@ private[astparser] final case class Argument(
 }
 
 private[astparser] final case class TypeStatement(
-    ref: Reference,
-    typeArguments: Seq[TypeStatement]
+  ref: Reference,
+  typeArguments: Seq[TypeStatement]
 ) extends Element {
   children = ref +: typeArguments
   def idString: String = {
@@ -259,8 +258,7 @@ private[astparser] final case class TypeStatement(
         case Some(d) => d
         case None =>
           log.error("unable to lookup {}", r.humanReadable)
-          throw new Exception(
-            s"couldn't generate idString for ${this.humanReadable}")
+          throw new Exception(s"couldn't generate idString for ${this.humanReadable}")
       }
     }
     val resolved = resolve(ref)
@@ -275,7 +273,7 @@ private[astparser] sealed trait PackageLike extends Definition with Logger {
   def deepDefinitions: Seq[Definition] = {
     definitions flatMap {
       case p: PackageLike => p +: p.deepDefinitions
-      case d => Seq(d)
+      case d              => Seq(d)
     }
   }
 
@@ -348,25 +346,25 @@ private[astparser] sealed trait PackageLike extends Definition with Logger {
 }
 
 private[astparser] final case class Package(
-    name: String,
-    definitions: Seq[Definition]
+  name: String,
+  definitions: Seq[Definition]
 ) extends PackageLike {
   children = definitions
   def fullName = packageName ~ name
 }
 
 private[astparser] final case class Trait(
-    name: String,
-    arguments: Seq[Argument],
-    parents: Seq[Reference],
-    docs: Seq[Documentation]
+  name: String,
+  arguments: Seq[Argument],
+  parents: Seq[Reference],
+  docs: Seq[Documentation]
 ) extends TypeLike
     with Argumented {
   children = parents ++ arguments ++ docs
 }
 
 private[astparser] final case class Documentation(
-    content: String
+  content: String
 ) extends Element
 
 trait Documented {
@@ -374,8 +372,8 @@ trait Documented {
 }
 
 private[astparser] final case class Schema(
-    name: String,
-    definitions: Seq[Definition]
+  name: String,
+  definitions: Seq[Definition]
 ) extends PackageLike {
   children = definitions
   //def name: String = ""
@@ -383,7 +381,7 @@ private[astparser] final case class Schema(
 }
 
 private[astparser] final case class Model(
-    private val _schemas: Seq[Schema]
+  private val _schemas: Seq[Schema]
 ) extends PackageLike
     with Logger {
   val schemas = _schemas
@@ -400,8 +398,8 @@ private[astparser] final case class Model(
   validate()
 
   def definitions = schemas
-  def fullName = ""
-  def name = ""
+  def fullName    = ""
+  def name        = ""
 
   def findSchema(name: String): Option[Schema] = {
     schemas.find(_.name == name)
@@ -425,13 +423,11 @@ private[astparser] final case class Model(
     }
 
     val duplicateIds = schemas flatMap { s =>
-      s.deepDefinitions
-        .collect {
-          case ti: TypeId => ti.id -> ti
-        }
-        .groupBy { case (id, t) => id }
-        .filter { case (id, types) => types.size > 1 }
-        .flatMap { case (id, types) => types.map(_._2) }
+      s.deepDefinitions.collect {
+        case ti: TypeId => ti.id -> ti
+      }.groupBy { case (id, t) => id }.filter { case (id, types) => types.size > 1 }.flatMap {
+        case (id, types) => types.map(_._2)
+      }
     }
 
     if (duplicateIds.nonEmpty) {
@@ -441,34 +437,28 @@ private[astparser] final case class Model(
       )
     }
 
-    val duplicateDefinitions = deepDefinitions
-      .map { definition =>
-        val duplicates = definition.children
-          .collect {
-            case ne: NamedElement => ne
-          }
-          .groupBy(_.name)
-          .filter { case (name, elems) => elems.size > 1 }
-          .map { case (name, elems) => elems }
-          .filter { elems =>
-            !elems.forall(_.isInstanceOf[TypeConstructor]) &&
-            !elems.forall(_.isInstanceOf[Call])
-          }
-        definition -> duplicates
-      }
-      .filter { case (d, duplicates) => duplicates.nonEmpty }
+    val duplicateDefinitions = deepDefinitions.map { definition =>
+      val duplicates = definition.children.collect {
+        case ne: NamedElement => ne
+      }.groupBy(_.name)
+        .filter { case (name, elems) => elems.size > 1 }
+        .map { case (name, elems) => elems }
+        .filter { elems =>
+          !elems.forall(_.isInstanceOf[TypeConstructor]) &&
+          !elems.forall(_.isInstanceOf[Call])
+        }
+      definition -> duplicates
+    }.filter { case (d, duplicates) => duplicates.nonEmpty }
 
     if (duplicateDefinitions.nonEmpty) {
       failValidation(
         "Model contains duplicate definitions:" + System.lineSeparator() +
-          duplicateDefinitions
-            .map {
-              case (d, duplicates) =>
-                duplicates.flatten
-                  .map(_.humanReadable)
-                  .mkString(System.lineSeparator())
-            }
-            .mkString(System.lineSeparator())
+          duplicateDefinitions.map {
+            case (d, duplicates) =>
+              duplicates.flatten
+                .map(_.humanReadable)
+                .mkString(System.lineSeparator())
+          }.mkString(System.lineSeparator())
       )
     }
 
@@ -499,14 +489,12 @@ private[astparser] final case class Model(
       failValidation(
         "Models contains trait inheritors with missed fields:" + System
           .lineSeparator() +
-          typeWithMissedField
-            .map {
-              case (t, inheritors) =>
-                t.humanReadable + ": " + inheritors
-                  .map(_.humanReadable)
-                  .mkString("")
-            }
-            .mkString(System.lineSeparator())
+          typeWithMissedField.map {
+            case (t, inheritors) =>
+              t.humanReadable + ": " + inheritors
+                .map(_.humanReadable)
+                .mkString("")
+          }.mkString(System.lineSeparator())
       )
     }
 
