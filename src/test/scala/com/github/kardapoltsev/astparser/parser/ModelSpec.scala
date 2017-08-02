@@ -368,6 +368,28 @@ class ModelSpec extends TestBase {
       }
     }
 
+    "allow to import same statements multiple times" in {
+      noException shouldBe thrownBy {
+        buildParserModel(
+          """
+            |schema common
+            |external type Int
+            |
+          """.stripMargin,
+          """
+            |schema a
+            |import common.Int
+            |
+          """.stripMargin,
+          """
+            |schema b
+            |import common.Int
+            |
+          """.stripMargin
+        )
+      }
+    }
+
     "validate layer ranges" ignore {
       a[ModelValidationException] shouldBe thrownBy {
         buildParserModel(

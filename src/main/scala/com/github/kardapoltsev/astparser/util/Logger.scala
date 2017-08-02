@@ -18,13 +18,14 @@ package com.github.kardapoltsev.astparser.util
 import org.slf4j.LoggerFactory
 
 object Logger {
-  val times  = collection.mutable.Map[String, Long]()
-  val counts = collection.mutable.Map[String, Int]()
+  import scala.collection.concurrent.{TrieMap => MMap}
+  val times  = MMap[String, Long]()
+  val counts = MMap[String, Int]()
 }
 
 trait Logger {
 
-  protected def log = LoggerFactory.getLogger(getClass)
+  protected val log = LoggerFactory.getLogger(getClass)
 
   protected def loggingTimeMuted[A](tag: String)(f: => A): A = {
     f
