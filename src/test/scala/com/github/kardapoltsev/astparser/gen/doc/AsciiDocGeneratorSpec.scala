@@ -78,7 +78,7 @@ class AsciiDocGeneratorSpec extends TestBase {
       apiDoc should include(
         """|
           |[[api.outer.inner.A]]
-          |=== A
+          |== A
           |Documentation for type A
           |""".stripMargin
       )

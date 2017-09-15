@@ -60,7 +60,7 @@ class AsciiDocGenerator(
   }
 
   private def packageDoc(p: Package): DocNode = {
-    Header(p.fullName, p.name, 1)
+    Header(p.fullName, p.name, 0)
   }
 
   private def methodDoc(m: Call): DocNode = {
@@ -70,7 +70,7 @@ class AsciiDocGenerator(
       else
         Seq.empty
     Group(
-      Header(m.fullName, m.name, 2),
+      Header(m.fullName, m.name, 1),
       Paragraph(
         Seq(
           Text("Result type: "),
@@ -84,7 +84,7 @@ class AsciiDocGenerator(
 
   private def typeDoc(t: Type): DocNode = {
     Paragraph(
-      Header(t.fullName, t.name, 2),
+      Header(t.fullName, t.name, 1),
       renderDocs(t.docs)
     )
   }
@@ -92,7 +92,7 @@ class AsciiDocGenerator(
   private def constructorDoc(t: Type, c: TypeConstructor): DocNode = {
     Group(
       Seq(
-        Header(c.fullName, c.name, 3),
+        Header(c.fullName, c.name, 2),
         Paragraph(renderDocs(c.docs)),
         Paragraph(paramsTable(c.arguments))
       )
