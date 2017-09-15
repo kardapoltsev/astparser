@@ -39,7 +39,12 @@ scalacOptions <++= scalaVersion map { sv =>
 //sbt-release configuration
 releasePublishArtifactsAction := PgpKeys.publishSigned.value
 releaseCrossBuild := true
-publishTo := Some(Resolver.sonatypeRepo("snapshots")) //isn't used but checked during release
+publishTo := Some(
+  if (isSnapshot.value)
+    Opts.resolver.sonatypeSnapshots
+  else
+    Opts.resolver.sonatypeStaging
+)
 
 pomExtra := {
   <url>https://github.com/kardapoltsev/astparser</url>
