@@ -46,30 +46,24 @@ publishTo := Some(
     Opts.resolver.sonatypeStaging
 )
 
-pomExtra := {
-  <url>https://github.com/kardapoltsev/astparser</url>
-    <licenses>
-      <license>
-        <name>Apache 2</name>
-        <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      </license>
-    </licenses>
-    <scm>
-      <connection>scm:git:git@github.com:kardapoltsev/astparser.git</connection>
-      <url>github.com/kardapoltsev/astparser</url>
-    </scm>
-    <developers>
-      <developer>
-        <name>Alexey Kardapoltsev</name>
-        <url>https://github.com/kardapoltsev</url>
-        <email>alexey.kardapoltsev@gmail.com</email>
-      </developer>
-    </developers>
-}
+homepage := Some(url("https://github.com/kardapoltsev/astparser"))
+scmInfo := Some(
+  ScmInfo(
+    url("https://github.com/kardapoltsev/astparser"),
+    "scm:git@github.com:kardapoltsev/astparser.git"
+  )
+)
+developers := List(
+  Developer(
+    id = "kardapoltsev",
+    name = "Alexey Kardapoltsev",
+    email = "alexey.kardapoltsev@gmail.com",
+    url = url("https://github.com/kardapoltsev"))
+)
+licenses := Seq(("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-2.0.txt")))
 
 import de.heikoseeberger.sbtheader.AutomateHeaderPlugin
 startYear := Some(2016)
-licenses += ("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-2.0.txt"))
 
 val slf4jApi       = "org.slf4j"              % "slf4j-api"                 % "1.7.25"
 val scalaParsers   = "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
