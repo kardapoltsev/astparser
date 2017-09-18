@@ -39,13 +39,15 @@ scalacOptions <++= scalaVersion map { sv =>
 //sbt-release configuration
 releasePublishArtifactsAction := PgpKeys.publishSigned.value
 releaseCrossBuild := true
+
+//publish configuration
+publishMavenStyle := true
 publishTo := Some(
   if (isSnapshot.value)
     Opts.resolver.sonatypeSnapshots
   else
     Opts.resolver.sonatypeStaging
 )
-
 homepage := Some(url("https://github.com/kardapoltsev/astparser"))
 scmInfo := Some(
   ScmInfo(
