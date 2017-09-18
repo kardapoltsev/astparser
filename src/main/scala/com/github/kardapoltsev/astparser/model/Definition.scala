@@ -150,21 +150,29 @@ case class TypeAlias(
 case class TypeConstructor(
   parent: String,
   name: String,
-  parents: Seq[Parent],
   versions: Seq[TypeConstructorVersion]
 ) extends TypeLike {
   val typeReference = TypeReference(parent)
+  def parents: Seq[Parent] = {
+    versions
+      .map(_.parents)
+      .reduceLeftOption { (p1, p2) =>
+        p1.intersect(p2)
+      }
+      .getOrElse(Seq.empty)
+  }
 }
 
 case class TypeConstructorVersion(
   parent: String,
   name: String,
+  parents: Seq[Parent],
   id: Int,
   typeArguments: Seq[TypeParameter],
   arguments: Seq[Argument],
   versions: VersionsInterval,
   docs: Documentation
-) extends Definition
+) extends TypeLike
     with TypeId
     with Documented
     with Versioned

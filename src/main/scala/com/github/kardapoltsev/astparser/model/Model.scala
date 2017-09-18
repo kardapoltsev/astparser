@@ -295,13 +295,13 @@ object Model {
     assert(c.nonEmpty, "couldn't convert empty list of constructors")
     val name = c.head.name
     assert(c.forall(_.name == name), "constructors passed to convert should have the same name")
-    val parents = c.head.parents
-    assert(c.forall(_.parents == parents), "constructor versions should have the same parents")
     val packageName = c.head.packageName
     val versions = c.map { constructor =>
+      val parents = constructor.parents.map(resolve).map(_.head) map convertParent
       TypeConstructorVersion(
         parent = packageName,
         name = constructor.name,
+        parents = parents,
         id = constructor.id,
         typeArguments = constructor.typeArguments map convertTypeParameter,
         arguments = constructor.arguments map convertArgument,
@@ -312,7 +312,6 @@ object Model {
     TypeConstructor(
       parent = packageName,
       name = name,
-      parents = parents map resolve map (_.head) map convertParent,
       versions = versions
     )
   }
