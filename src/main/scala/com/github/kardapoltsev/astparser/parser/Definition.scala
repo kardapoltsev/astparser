@@ -468,7 +468,7 @@ private[astparser] final case class Model(
     }
     def hasParent(t: Trait, parents: Seq[Reference]): Boolean = {
       parents.exists { ref =>
-        lookup(ref).headOption.contains(t)
+        lookup(ref).contains(t)
       }
     }
     val typeWithMissedField = traits map { t =>
