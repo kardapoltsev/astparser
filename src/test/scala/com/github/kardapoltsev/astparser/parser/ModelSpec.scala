@@ -339,6 +339,11 @@ class ModelSpec extends TestBase {
             |    /** docs with a link to constructor `E.e` */
             |    f
             |  }
+            |
+            |  type G {
+            |    g ::
+            |     x: E.e
+            |  }
             |}
           """.stripMargin
         )

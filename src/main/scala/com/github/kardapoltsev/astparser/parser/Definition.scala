@@ -252,13 +252,18 @@ private[astparser] final case class TypeStatement(
     val m = schema.maybeParent.get.asInstanceOf[Model]
     def resolve(r: Reference): Definition = {
       m.lookup(r) match {
-        //case a: TypeAlias =>
-        //  resolve(a.reference)
         case Seq(i: Import) =>
           resolve(i.reference)
-        case Seq(found) => found
-        case x: Seq[_] =>
-          log.error(s"unable to lookup ${r.humanReadable}, got $x")
+        case found if found.nonEmpty =>
+          val pn = found.head.packageName
+          val n  = found.head.name
+          assume(
+            found.forall(_.packageName == pn),
+            s"${r.humanReadable} resolved to unexpected $found")
+          assume(found.forall(_.name == n), s"${r.humanReadable} resolved to unexpected $found")
+          found.head
+        case _ =>
+          log.error(s"unable to lookup ${r.humanReadable}")
           throw new Exception(s"couldn't generate idString for ${this.humanReadable}")
       }
     }
