@@ -29,7 +29,7 @@ trait DocGenerator extends Generator {
   def calculateDocsCoverage(schema: Schema): Seq[String] = {
     val allDefinitions       = schema.deepDefinitions
     val types                = allDefinitions.collect { case t: Type => t }
-    val constructors         = types.flatMap(_.constructors)
+    val constructors         = types.flatMap(_.constructors.flatMap(_.versions))
     val constructorArguments = constructors.flatMap(_.arguments)
     val calls                = allDefinitions.collect { case m: Call => m }
     val callsParams          = calls.flatMap(_.arguments)

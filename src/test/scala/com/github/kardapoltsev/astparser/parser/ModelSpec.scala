@@ -36,16 +36,16 @@ class ModelSpec extends TestBase {
           |  }
           |}
         """.stripMargin)
-      val maybeTypeA = m.findSchema("api").flatMap(_.getDefinition("outer.inner.A"))
+      val maybeTypeA = m.findSchema("api").flatMap(_.getDefinition("outer.inner.A").headOption)
       maybeTypeA shouldBe defined
 
       val typeA = maybeTypeA.get
 
       val typeBRef = typeA.asInstanceOf[Type].constructors.head.arguments.head.`type`.ref
 
-      m.lookup(typeBRef) shouldBe defined
-      m.lookup(typeBRef).get shouldBe a[Type]
-      m.lookup(typeBRef).get.asInstanceOf[Type].name shouldBe "B"
+      m.lookup(typeBRef).headOption shouldBe defined
+      m.lookup(typeBRef).head shouldBe a[Type]
+      m.lookup(typeBRef).head.asInstanceOf[Type].name shouldBe "B"
 
     }
 
@@ -70,16 +70,16 @@ class ModelSpec extends TestBase {
           |}
         """.stripMargin
       )
-      val maybeTypeA = m.getDefinition("api.outer.inner.A")
+      val maybeTypeA = m.getDefinition("api.outer.inner.A").headOption
       maybeTypeA shouldBe defined
 
       val typeA = maybeTypeA.get
 
       val typeBRef = typeA.asInstanceOf[Type].constructors.head.arguments.head.`type`.ref
 
-      m.lookup(typeBRef) shouldBe defined
-      m.lookup(typeBRef).get shouldBe a[Type]
-      m.lookup(typeBRef).get.asInstanceOf[Type].fullName shouldBe "api.outer.inner2.C"
+      m.lookup(typeBRef).headOption shouldBe defined
+      m.lookup(typeBRef).head shouldBe a[Type]
+      m.lookup(typeBRef).head.asInstanceOf[Type].fullName shouldBe "api.outer.inner2.C"
 
     }
 
@@ -100,16 +100,16 @@ class ModelSpec extends TestBase {
           |  }
           |}
         """.stripMargin)
-      val maybeTypeA = m.findSchema("api").flatMap(_.getDefinition("p1.A"))
+      val maybeTypeA = m.findSchema("api").flatMap(_.getDefinition("p1.A").headOption)
       maybeTypeA shouldBe defined
 
       val typeA = maybeTypeA.get
 
       val typeBRef = typeA.asInstanceOf[Type].constructors.head.arguments.head.`type`.ref
 
-      m.lookup(typeBRef) shouldBe defined
-      m.lookup(typeBRef).get shouldBe a[Type]
-      m.lookup(typeBRef).get.asInstanceOf[Type].name shouldBe "B"
+      m.lookup(typeBRef).headOption shouldBe defined
+      m.lookup(typeBRef).head shouldBe a[Type]
+      m.lookup(typeBRef).head.asInstanceOf[Type].name shouldBe "B"
 
     }
 
@@ -137,16 +137,16 @@ class ModelSpec extends TestBase {
           |}
         """.stripMargin
       val m          = buildParserModel(s1, s2)
-      val maybeTypeA = m.findSchema("s1").flatMap(_.getDefinition("p1.A"))
+      val maybeTypeA = m.findSchema("s1").flatMap(_.getDefinition("p1.A").headOption)
       maybeTypeA shouldBe defined
 
       val typeA = maybeTypeA.get
 
       val typeBRef = typeA.asInstanceOf[Type].constructors.head.arguments.head.`type`.ref
 
-      m.lookup(typeBRef) shouldBe defined
-      m.lookup(typeBRef).get shouldBe a[Type]
-      m.lookup(typeBRef).get.asInstanceOf[Type].name shouldBe "C"
+      m.lookup(typeBRef).headOption shouldBe defined
+      m.lookup(typeBRef).head shouldBe a[Type]
+      m.lookup(typeBRef).head.asInstanceOf[Type].name shouldBe "C"
     }
 
     "resolve absolute reference to import from another schema" in {
@@ -172,16 +172,16 @@ class ModelSpec extends TestBase {
           |}
         """.stripMargin
       val m          = buildParserModel(s1, s2)
-      val maybeTypeA = m.findSchema("s1").flatMap(_.getDefinition("p1.A"))
+      val maybeTypeA = m.findSchema("s1").flatMap(_.getDefinition("p1.A").headOption)
       maybeTypeA shouldBe defined
 
       val typeA = maybeTypeA.get
 
       val argTypeRef = typeA.asInstanceOf[Type].constructors.head.arguments.head.`type`.ref
 
-      m.lookup(argTypeRef) shouldBe defined
-      m.lookup(argTypeRef).get shouldBe a[Import]
-      m.lookup(argTypeRef).get.asInstanceOf[Import].name shouldBe "C"
+      m.lookup(argTypeRef).headOption shouldBe defined
+      m.lookup(argTypeRef).head shouldBe a[Import]
+      m.lookup(argTypeRef).head.asInstanceOf[Import].name shouldBe "C"
     }
 
     "validate arguments in call" in {
@@ -219,16 +219,16 @@ class ModelSpec extends TestBase {
           |  }
           |}
         """.stripMargin)
-      val api   = m.findSchema("api").get
-      val typeA = api.getDefinition("p1.A").get
+      val api   = m.findSchema("api").head
+      val typeA = api.getDefinition("p1.A").head
 
       val typeBRef = typeA.asInstanceOf[Type].constructors.head.arguments.head.`type`.ref
 
-      m.lookup(typeBRef) shouldBe defined
-      m.lookup(typeBRef).get shouldBe a[Import]
-      m.lookup(typeBRef).get.asInstanceOf[Import].name shouldBe "B"
-      val i = m.lookup(typeBRef).get.asInstanceOf[Import]
-      m.lookup(i.reference) shouldBe defined
+      m.lookup(typeBRef).headOption shouldBe defined
+      m.lookup(typeBRef).head shouldBe a[Import]
+      m.lookup(typeBRef).head.asInstanceOf[Import].name shouldBe "B"
+      val i = m.lookup(typeBRef).head.asInstanceOf[Import]
+      m.lookup(i.reference).headOption shouldBe defined
 
     }
 
@@ -263,18 +263,18 @@ class ModelSpec extends TestBase {
           |}
         """.stripMargin
       )
-      val api   = m.findSchema("api").get
-      val typeA = api.getDefinition("p1.A").get.asInstanceOf[Type]
+      val api   = m.findSchema("api").head
+      val typeA = api.getDefinition("p1.A").head.asInstanceOf[Type]
 
       val typeBRef = typeA.constructors.head.arguments.head.`type`.ref
 
-      m.lookup(typeBRef) shouldBe defined
-      m.lookup(typeBRef).get shouldBe a[TypeAlias]
-      m.lookup(typeBRef).get.asInstanceOf[TypeAlias].name shouldBe "UserId"
-      val i = m.lookup(typeBRef).get.asInstanceOf[TypeAlias]
-      m.lookup(i.reference) shouldBe defined
+      m.lookup(typeBRef).headOption shouldBe defined
+      m.lookup(typeBRef).head shouldBe a[TypeAlias]
+      m.lookup(typeBRef).head.asInstanceOf[TypeAlias].name shouldBe "UserId"
+      val i = m.lookup(typeBRef).head.asInstanceOf[TypeAlias]
+      m.lookup(i.reference).headOption shouldBe defined
 
-      val maybeObject = m.getDefinition("api.Object")
+      val maybeObject = m.getDefinition("api.Object").headOption
       maybeObject shouldBe defined
       val obj = maybeObject.get
       obj shouldBe a[Trait]
@@ -282,24 +282,24 @@ class ModelSpec extends TestBase {
       val objParent = obj.asInstanceOf[Trait].parents.head
       objParent shouldBe a[Reference]
       val parentRef = objParent.asInstanceOf[Reference]
-      m.lookup(parentRef) shouldBe defined
-      m.lookup(parentRef).get shouldBe a[Trait]
-      m.lookup(parentRef).get.asInstanceOf[Trait].fullName shouldBe "common.Object"
+      m.lookup(parentRef).headOption shouldBe defined
+      m.lookup(parentRef).head shouldBe a[Trait]
+      m.lookup(parentRef).head.asInstanceOf[Trait].fullName shouldBe "common.Object"
 
-      val b       = m.getDefinition("api.p1.B").get.asInstanceOf[Type]
-      val bParent = m.lookup(b.parents.head)
+      val b       = m.getDefinition("api.p1.B").head.asInstanceOf[Type]
+      val bParent = m.lookup(b.parents.head).headOption
       bParent shouldBe defined
       bParent.get.asInstanceOf[Trait].fullName shouldBe "api.Model"
 
-      val model = m.getDefinition("api.Model").get
+      val model = m.getDefinition("api.Model").head
       model.asInstanceOf[Trait].parents should have size 2
       val objModelParent = model.asInstanceOf[Trait].parents.find(_.name == "Object").get
-      m.lookup(objModelParent) shouldBe defined
-      m.lookup(objModelParent).get.fullName shouldBe "api.Object"
+      m.lookup(objModelParent).headOption shouldBe defined
+      m.lookup(objModelParent).head.fullName shouldBe "api.Object"
 
-      val typeC = m.getDefinition("api.p1.inner.inner2.C").get.asInstanceOf[Type]
+      val typeC = m.getDefinition("api.p1.inner.inner2.C").head.asInstanceOf[Type]
       typeC.parents should have size 1
-      m.lookup(typeC.parents.head).map(_.fullName) shouldBe Some("api.Model")
+      m.lookup(typeC.parents.head).map(_.fullName) shouldBe Seq("api.Model")
     }
 
     "resolve any valid references" in {
@@ -317,12 +317,27 @@ class ModelSpec extends TestBase {
             |
             |package p1 {
             |  trait C
+            |
             |  type A {
             |    a(2-) ::
             |      param1: UserId
             |  }
+            |
             |  type D <: C {
             |    d(1-1)
+            |  }
+            |
+            |  type E {
+            |    e (1-1) ::
+            |     x: Int
+            |
+            |    e (2-) ::
+            |     y: Int
+            |  }
+            |
+            |  type F {
+            |    /** docs with a link to constructor `E.e` */
+            |    f
             |  }
             |}
           """.stripMargin
@@ -447,7 +462,7 @@ class ModelSpec extends TestBase {
           |}
         """.stripMargin
       )
-      val maybeA = model.getDefinition("api.A")
+      val maybeA = model.getDefinition("api.A").headOption
       maybeA shouldBe defined
       val typeA = maybeA.get
       typeA shouldBe a[Type]
@@ -468,13 +483,13 @@ class ModelSpec extends TestBase {
           |}
         """.stripMargin
       )
-      val maybeA = model.getDefinition("api.A")
+      val maybeA = model.getDefinition("api.A").headOption
       maybeA shouldBe defined
       val typeA = maybeA.get
       typeA shouldBe a[Type]
       typeA.asInstanceOf[Type].constructors should have size 2
 
-      model.getDefinition("api.A.a") shouldBe defined
+      model.getDefinition("api.A.a").headOption shouldBe defined
     }
   }
 

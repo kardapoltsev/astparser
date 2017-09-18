@@ -254,11 +254,11 @@ private[astparser] final case class TypeStatement(
       m.lookup(r) match {
         //case a: TypeAlias =>
         //  resolve(a.reference)
-        case Some(i: Import) =>
+        case Seq(i: Import) =>
           resolve(i.reference)
-        case Some(d) => d
-        case None =>
-          log.error("unable to lookup {}", r.humanReadable)
+        case Seq(found) => found
+        case x: Seq[_] =>
+          log.error(s"unable to lookup ${r.humanReadable}, got $x")
           throw new Exception(s"couldn't generate idString for ${this.humanReadable}")
       }
     }
@@ -278,50 +278,50 @@ private[astparser] sealed trait PackageLike extends Definition with Logger {
     }
   }
 
-  def getDefinition(ref: Reference): Option[Definition] = {
+  def getDefinition(ref: Reference): Seq[Definition] = {
     getDefinition(ref.fullName.toPath)
   }
 
-  def getDefinition(fullName: String): Option[Definition] = {
+  def getDefinition(fullName: String): Seq[Definition] = {
     getDefinition(fullName.toPath)
   }
 
-  final protected def getDefinition(path: List[String]): Option[Definition] = {
+  final protected def getDefinition(path: List[String]): Seq[Definition] = {
     path match {
       case Nil =>
-        None //or throw?
+        Seq.empty //or throw?
       case name :: Nil =>
-        definitions.find(_.name == name)
+        definitions.filter(_.name == name)
       case name :: rest =>
         definitions.find(_.name == name) match {
           case Some(p: PackageLike) =>
             p.getDefinition(rest)
           case Some(i: Import) =>
             lookup(i.reference) match {
-              case Some(p: PackageLike) =>
+              case Seq(p: PackageLike) =>
                 p.getDefinition(rest)
-              case Some(x) =>
+              case x if x.nonEmpty =>
                 throw new Exception(s"Unexpected $x, PackageLike expected")
-              case None =>
-                None
+              case empty =>
+                empty
             }
           case Some(x) =>
             throw new Exception(s"Unexpected $x, PackageLike expected")
           case None =>
-            None
+            Seq.empty
         }
     }
   }
 
-  final def lookup(ref: Reference): Option[Definition] =
+  final def lookup(ref: Reference): Seq[Definition] =
     loggingTime("lookup") {
-      def lookupInScope(packageName: String): Option[Definition] = {
-        getDefinition(packageName) match {
+      def lookupInScope(packageName: String): Seq[Definition] = {
+        getDefinition(packageName).headOption match {
           case Some(p: PackageLike) =>
             p.getDefinition(ref) match {
-              case found @ Some(_) =>
+              case found if found.nonEmpty =>
                 found
-              case None =>
+              case _ =>
                 p.maybePackage match {
                   case Some(_) =>
                     lookupInScope(p.packageName)
@@ -334,9 +334,9 @@ private[astparser] sealed trait PackageLike extends Definition with Logger {
               s"expected package for name `$packageName`, found ${x.humanReadable}")
           case None =>
             getDefinition(ref) match {
-              case found @ Some(_) => found
-              case None =>
-                maybePackage flatMap (_.lookup(ref))
+              case found if found.nonEmpty => found
+              case _ =>
+                maybePackage.toSeq flatMap (_.lookup(ref))
             }
         }
       }
@@ -468,7 +468,7 @@ private[astparser] final case class Model(
     }
     def hasParent(t: Trait, parents: Seq[Reference]): Boolean = {
       parents.exists { ref =>
-        lookup(ref).get == t
+        lookup(ref).headOption.contains(t)
       }
     }
     val typeWithMissedField = traits map { t =>

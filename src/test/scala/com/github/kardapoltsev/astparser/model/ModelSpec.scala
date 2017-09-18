@@ -71,6 +71,8 @@ class ModelSpec extends TestBase {
         .headOption
         .get
         .asInstanceOf[TypeConstructor]
+        .versions
+        .head
       constructorC.versions.contains(1) shouldBe false
       constructorC.versions.contains(2) shouldBe true
       constructorC.schemaName shouldBe "api"
@@ -259,7 +261,7 @@ class ModelSpec extends TestBase {
         Seq(
           PlainDoc("Docs for type A")
         ))
-      val arg = typeA.asInstanceOf[Type].constructors.head.arguments.head
+      val arg = typeA.asInstanceOf[Type].constructors.head.versions.head.arguments.head
       arg.docs.content should have size 2
       arg.docs.content.head shouldBe PlainDoc("docs for param1 with a link to ")
       arg.docs
@@ -271,7 +273,7 @@ class ModelSpec extends TestBase {
     }
 
     "resolve references from imports" in {
-      val m          = buildModel("""
+      val m = buildModel("""
           |schema api
           |
           |package p1 {
@@ -286,15 +288,16 @@ class ModelSpec extends TestBase {
           |  }
           |}
         """.stripMargin)
+
       val maybeTypeB = m.getDefinition("api.p2.B").headOption
       maybeTypeB shouldBe defined
 
       val typeB = maybeTypeB.get.asInstanceOf[Type]
-      typeB.constructors.head.docs.content.last shouldBe a[DocReference]
+      typeB.constructors.head.versions.head.docs.content.last shouldBe a[DocReference]
     }
 
     "handle inheritance" in {
-      val m      = buildModel("""
+      val m = buildModel("""
                            |schema api
                            |
                            |trait A
@@ -303,6 +306,7 @@ class ModelSpec extends TestBase {
                            |trait D <: A
                            |
                          """.stripMargin)
+
       val traitA = m.getDefinition("api.A").head.asInstanceOf[Trait]
       val traitB = m.getDefinition("api.B").head.asInstanceOf[Trait]
       val traitC = m.getDefinition("api.C").head.asInstanceOf[Trait]
@@ -313,6 +317,34 @@ class ModelSpec extends TestBase {
       traitC.isSubtypeOf(traitA) shouldBe true
       traitD.isSubtypeOf(traitA) shouldBe true
       traitD.isSubtypeOf(traitB) shouldBe false
+    }
+
+    "group constructor versions" in {
+      val m = buildModel("""
+                           |schema api
+                           |external type Int
+                           |
+                           |type A {
+                           |  aImpl(1-1) ::
+                           |    x: Int
+                           |
+                           |  aImpl(2-) ::
+                           |    y: Int
+                           |
+                           |  aEmpty(1-)
+                           |
+                           |}
+                           |
+                         """.stripMargin)
+
+      val typeA = m.getDefinition("api.A").head.asInstanceOf[Type]
+      typeA.constructors should have size 2
+
+      val constructorImpl = m.getDefinition("api.A.aImpl").head.asInstanceOf[TypeConstructor]
+      constructorImpl.versions should have size 2
+
+      val constructorEmpty = m.getDefinition("api.A.aEmpty").head.asInstanceOf[TypeConstructor]
+      constructorEmpty.versions should have size 1
     }
 
   }

@@ -90,13 +90,16 @@ class AsciiDocGenerator(
   }
 
   private def constructorDoc(t: Type, c: TypeConstructor): DocNode = {
-    Group(
-      Seq(
-        Header(c.fullName, c.name, 3),
-        Paragraph(renderDocs(c.docs)),
-        Paragraph(paramsTable(c.arguments))
+    val docs = c.versions map { constructor =>
+      Group(
+        Seq(
+          Header(c.fullName, c.name, 3),
+          Paragraph(renderDocs(constructor.docs)),
+          Paragraph(paramsTable(constructor.arguments))
+        )
       )
-    )
+    }
+    Group(docs)
   }
 
   private def linkified(definition: Definition): DocNode = {

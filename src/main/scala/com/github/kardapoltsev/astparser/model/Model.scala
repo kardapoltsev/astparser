@@ -120,7 +120,7 @@ object Model {
       t.packageName,
       t.arguments map convertArgument,
       t.name,
-      t.parents map resolve map convertParent,
+      t.parents map resolve map (_.head) map convertParent,
       convertDocs(t.docs)
     )
   }
@@ -145,7 +145,7 @@ object Model {
       c.id,
       c.arguments map convertArgument,
       convertTypeStatement(c.returnType),
-      c.parents map resolve map convertParent,
+      c.parents map resolve map (_.head) map convertParent,
       httpDefinition,
       convertVersionsInterval(c.versions),
       convertDocs(c.docs)
@@ -192,28 +192,37 @@ object Model {
   )(implicit m: parser.Model): TypeStatement = {
     TypeStatement(
       ts.packageName,
-      TypeReference(resolve(ts.ref).fullName),
+      TypeReference(resolve(ts.ref).head.fullName),
       ts.typeArguments map convertTypeStatement(isTypeArgument = true),
       isTypeArgument
     )
   }
 
   private def convertTypeLike(
-    tl: parser.TypeLike
+    tl: Seq[parser.TypeLike]
   )(implicit m: parser.Model): TypeLike = {
-    tl match {
-      case t: parser.Type =>
-        convertType(t)
-      case c: parser.TypeConstructor =>
-        convertTypeConstructor(c)
-      case t: parser.Trait =>
-        convertTrait(t)
-      case ta: parser.TypeAlias =>
-        convertTypeAlias(ta)
-      case et: parser.ExternalType =>
-        convertExternalType(et)
-      case c: parser.Call =>
-        convertCall(c)
+    if (tl.size == 1) {
+      tl.head match {
+        case t: parser.Type =>
+          convertType(t)
+        case c: parser.TypeConstructor =>
+          convertTypeConstructor(Seq(c))
+        case t: parser.Trait =>
+          convertTrait(t)
+        case ta: parser.TypeAlias =>
+          convertTypeAlias(ta)
+        case et: parser.ExternalType =>
+          convertExternalType(et)
+        case c: parser.Call =>
+          convertCall(c)
+      }
+    } else {
+      assume(
+        tl.forall(_.isInstanceOf[parser.TypeConstructor]),
+        "only Seq[TypeLike] of TypeConstructors may have size > 1")
+      convertTypeConstructor(
+        tl.collect { case tc: parser.TypeConstructor => tc }
+      )
     }
   }
 
@@ -241,8 +250,10 @@ object Model {
       t.packageName,
       name = t.name,
       typeArguments = t.typeArguments map convertTypeParameter,
-      parents = t.parents map resolve map convertParent,
-      constructors = t.constructors map convertTypeConstructor,
+      parents = t.parents map resolve map (_.head) map convertParent,
+      constructors = t.constructors.groupBy(_.name).toSeq map {
+        case (_, constructors) => convertTypeConstructor(constructors)
+      },
       docs = convertDocs(t.docs)
     )
   }
@@ -263,31 +274,46 @@ object Model {
     TypeAlias(a.packageName, a.name, convertTypeLike(resolve(a.reference)))
   }
 
-  private def resolve(ref: parser.Reference)(implicit m: parser.Model): parser.TypeLike = {
+  private def resolve(ref: parser.Reference)(implicit m: parser.Model): Seq[parser.TypeLike] = {
     m.lookup(ref) match {
-      case Some(i: parser.Import) =>
+      case Seq(i: parser.Import) =>
         resolve(i.reference)
-      case Some(tl: parser.TypeLike) =>
-        tl
-      case Some(x: parser.Definition) =>
-        throw new Exception(s"${ref.humanReadable} resolved to unexpected ${x.humanReadable}")
-      case None =>
+      case Seq(tl: parser.TypeLike) =>
+        Seq(tl)
+      case found if found.nonEmpty && found.forall(_.isInstanceOf[parser.TypeConstructor]) =>
+        found.collect { case tc: parser.TypeConstructor => tc }
+      case found if found.nonEmpty =>
+        throw new Exception(s"${ref.humanReadable} resolved to unexpected $found")
+      case _ =>
         throw new Exception(s"unresolved ${ref.humanReadable}")
     }
   }
 
   private def convertTypeConstructor(
-    c: parser.TypeConstructor
+    c: Seq[parser.TypeConstructor]
   )(implicit m: parser.Model): TypeConstructor = {
+    assert(c.nonEmpty, "couldn't convert empty list of constructors")
+    val name = c.head.name
+    assert(c.forall(_.name == name), "constructors passed to convert should have the same name")
+    val parents = c.head.parents
+    assert(c.forall(_.parents == parents), "constructor versions should have the same parents")
+    val packageName = c.head.packageName
+    val versions = c.map { constructor =>
+      TypeConstructorVersion(
+        parent = packageName,
+        name = constructor.name,
+        id = constructor.id,
+        typeArguments = constructor.typeArguments map convertTypeParameter,
+        arguments = constructor.arguments map convertArgument,
+        versions = convertVersionsInterval(constructor.versions),
+        docs = convertDocs(constructor.docs)
+      )
+    }
     TypeConstructor(
-      c.packageName,
-      name = c.name,
-      id = c.id,
-      typeArguments = c.typeArguments map convertTypeParameter,
-      arguments = c.arguments map convertArgument,
-      parents = c.parents map resolve map convertParent,
-      convertVersionsInterval(c.versions),
-      docs = convertDocs(c.docs)
+      parent = packageName,
+      name = name,
+      parents = parents map resolve map (_.head) map convertParent,
+      versions = versions
     )
   }
 
@@ -302,7 +328,7 @@ object Model {
           val ref = parser.Reference(r.reference)
           ref.setPos(r.pos)
           ref.maybeParent = Some(d)
-          DocReference(r.name, TypeReference(resolve(ref).fullName))
+          DocReference(r.name, TypeReference(resolve(ref).head.fullName))
       }
     }
     Documentation(elems)

@@ -111,8 +111,15 @@ case class Type(
   override def definitions: Seq[Definition] = constructors
 
   override def slice(interval: VersionsInterval): Type = {
-    val filtered = constructors.filter { c =>
-      c.versions.isIntersect(interval)
+    val filtered = constructors.flatMap { c =>
+      val filteredVersions = c.versions.filter { v =>
+        v.versions.isIntersect(interval)
+      }
+      if (filteredVersions.nonEmpty) {
+        Some(c.copy(versions = filteredVersions))
+      } else {
+        None
+      }
     }
     this.copy(constructors = filtered)
   }
@@ -143,18 +150,24 @@ case class TypeAlias(
 case class TypeConstructor(
   parent: String,
   name: String,
+  parents: Seq[Parent],
+  versions: Seq[TypeConstructorVersion]
+) extends TypeLike {
+  val typeReference = TypeReference(parent)
+}
+
+case class TypeConstructorVersion(
+  parent: String,
+  name: String,
   id: Int,
   typeArguments: Seq[TypeParameter],
   arguments: Seq[Argument],
-  parents: Seq[Parent],
   versions: VersionsInterval,
   docs: Documentation
-) extends TypeLike
+) extends Definition
     with TypeId
     with Documented
-    with Versioned {
-  val typeReference = TypeReference(parent)
-}
+    with Versioned
 
 case class TypeStatement(
   parent: String,
