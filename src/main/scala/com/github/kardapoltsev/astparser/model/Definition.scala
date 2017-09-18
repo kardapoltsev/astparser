@@ -175,7 +175,9 @@ case class TypeConstructorVersion(
 ) extends TypeLike
     with TypeId
     with Documented
-    with Versioned
+    with Versioned {
+  val typeReference = TypeReference(parent)
+}
 
 case class TypeStatement(
   parent: String,
