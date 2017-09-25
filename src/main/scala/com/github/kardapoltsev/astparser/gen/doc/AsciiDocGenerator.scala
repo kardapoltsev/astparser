@@ -196,12 +196,14 @@ object AsciiDocGenerator {
 
   private[doc] case class DocumentInfo(title: String, version: Int) extends DocNode {
     override def render: String =
-      s"""== $title
+      s"""= $title
          |:version: $version
          |:toc2:
-         |:toclevels: 4
+         |:toclevels: 2
          |:icons:
          |:max-width: 60em
+         |
+         |== $title
          |""".stripMargin
   }
 
