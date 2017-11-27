@@ -78,13 +78,24 @@ class ParserSpec extends WordSpec with Matchers {
       parsed shouldBe ExternalType("Int", Seq.empty)
     }
 
-    "parse external type definition with type params" in new ParserTestEnv {
+    "parse external vector definition with type params" in new ParserTestEnv {
       val in =
         """
           |external type Vector[T]
         """.stripMargin
       val parsed = parse(externalTypeDefinition, in)
       parsed shouldBe ExternalType("Vector", Seq(TypeParameter("T", Seq.empty)))
+    }
+
+    "parse external map definition with type params" in new ParserTestEnv {
+      val in =
+        """
+          |external type Map[K,V]
+        """.stripMargin
+      val parsed = parse(externalTypeDefinition, in)
+      parsed shouldBe ExternalType(
+        "Map",
+        Seq(TypeParameter("K", Seq.empty), TypeParameter("V", Seq.empty)))
     }
 
     "parse simple package definition" in new ParserTestEnv {

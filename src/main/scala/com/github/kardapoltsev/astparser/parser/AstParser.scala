@@ -168,7 +168,7 @@ class AstParser(
   }
 
   protected def genericTypeParameters: Parser[Seq[TypeParameter]] = {
-    opt(LeftBracket() ~> rep1(path) <~ RightBracket()) ^^ { args =>
+    opt(LeftBracket() ~> rep1sep(path, Comma()) <~ RightBracket()) ^^ { args =>
       args.getOrElse(Seq.empty).map { path =>
         TypeParameter(
           path.map(_.name).mkString("."),

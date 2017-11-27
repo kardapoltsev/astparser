@@ -34,6 +34,7 @@ object Tokens {
   case class Dash()  extends Token
   case class Hash()  extends Token
   case class Dot()   extends Token
+  case class Comma() extends Token
 
   case class LeftBrace()    extends Token
   case class RightBrace()   extends Token
@@ -86,6 +87,7 @@ class Lexer extends BaseLexer {
   protected def dash  = '-' ^^^ Dash()
   protected def hash  = '#' ^^^ Hash()
   protected def dot   = '.' ^^^ Dot()
+  protected def comma = ',' ^^^ Comma()
 
   protected def leftBrace  = '{' ^^^ LeftBrace()
   protected def rightBrace = '}' ^^^ RightBrace()
@@ -139,7 +141,7 @@ class Lexer extends BaseLexer {
   private def eof = EofCh ^^^ EOF
 
   private def symbol: Parser[Token] =
-    eq | colon | hash | dot | leftBrace | rightBrace | leftBracket | rightBracket |
+    eq | colon | hash | dot | comma | leftBrace | rightBrace | leftBracket | rightBracket |
       leftParen | rightParen | dash | lessSign | greaterSign
 
   private def lexemeChar = elem("valid lexeme", x => x != EofCh && (x.isLetter || x.isDigit))
