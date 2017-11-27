@@ -74,7 +74,7 @@ class AstParser(
 
   protected[astparser] def typeStatement: Parser[TypeStatement] = profile("typeStatement") {
     positioned {
-      reference ~ opt(LeftBracket() ~> rep(typeStatement) <~ RightBracket()) ^^ {
+      reference ~ opt(LeftBracket() ~> rep1sep(typeStatement, Comma()) <~ RightBracket()) ^^ {
         case ref ~ ts =>
           TypeStatement(
             ref,

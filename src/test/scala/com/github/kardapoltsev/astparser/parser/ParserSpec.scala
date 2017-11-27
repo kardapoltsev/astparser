@@ -126,6 +126,7 @@ class ParserSpec extends WordSpec with Matchers {
            |  consA #000001 <: ParentA ParentB ::
            |    param1: Int
            |    param2: String
+           |    param3: Map[String, Int]
            |}
          """.stripMargin
       val parsed = parse(typeDefinition, in)
@@ -147,6 +148,15 @@ class ParserSpec extends WordSpec with Matchers {
               Argument(
                 name = "param2",
                 `type` = TypeStatement(Reference("String"), Seq.empty),
+                docs = Seq.empty
+              ),
+              Argument(
+                name = "param3",
+                `type` = TypeStatement(
+                  Reference("Map"),
+                  Seq(
+                    TypeStatement(Reference("String"), Seq.empty),
+                    TypeStatement(Reference("Int"), Seq.empty))),
                 docs = Seq.empty
               )
             ),
