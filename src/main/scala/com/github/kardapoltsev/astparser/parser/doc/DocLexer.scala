@@ -29,7 +29,7 @@ class DocLexer extends BaseLexer {
   }
 
   override def token: Parser[Token] = {
-    backtick | dot | identifier | specialCharacters | space
+    backtick | dot | identifier | specialCharacters | newline | space
   }
 
   override def whitespace: Parser[Any] = rep[Any] {
@@ -38,6 +38,7 @@ class DocLexer extends BaseLexer {
 
   protected def backtick: Parser[Token] = '`' ^^^ BackTick()
   protected def dot                     = '.' ^^^ Dot()
+  protected def newline: Parser[Token]  = '\n' ^^^ Newline()
 
   protected def identifier: Parser[Token] = {
     rep1(identifierChar) ^^ (x => Identifier(x.mkString))
@@ -63,5 +64,6 @@ object DocLexer {
   case class Space()                          extends Token
   case class Identifier(chars: String)        extends Token
   case class SpecialCharacters(chars: String) extends Token
+  case class Newline()                        extends Token
   case class Error(msg: String)               extends Token
 }

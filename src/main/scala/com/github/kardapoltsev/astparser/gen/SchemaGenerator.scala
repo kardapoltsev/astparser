@@ -177,7 +177,9 @@ class SchemaGenerator(
       val lines = docs
         .flatMap(_.content.split(ls))
         .map(_.trim)
-        .filterNot(_.isEmpty)
+        .reverse
+        .dropWhile(_.trim.isEmpty) //drop empty lines at the end
+        .reverse
         .mkString(ls + " " * "/** ".length)
       s"""
          |/** $lines

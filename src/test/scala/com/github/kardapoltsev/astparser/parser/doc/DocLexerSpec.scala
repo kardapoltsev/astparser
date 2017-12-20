@@ -50,6 +50,41 @@ class DocLexerSpec extends WordSpec with Matchers {
         SpecialCharacters("[]")
       )
     }
+    "parse multiline docs" in {
+      scan(
+        """line one
+          |line two
+          |    third line with spaces at the beginning""".stripMargin
+      ) shouldBe (
+        List(
+          Identifier("line"),
+          Space(),
+          Identifier("one"),
+          Newline(),
+          Identifier("line"),
+          Space(),
+          Identifier("two"),
+          Newline(),
+          Space(),
+          Space(),
+          Space(),
+          Space(),
+          Identifier("third"),
+          Space(),
+          Identifier("line"),
+          Space(),
+          Identifier("with"),
+          Space(),
+          Identifier("spaces"),
+          Space(),
+          Identifier("at"),
+          Space(),
+          Identifier("the"),
+          Space(),
+          Identifier("beginning")
+        )
+      )
+    }
   }
 
 }

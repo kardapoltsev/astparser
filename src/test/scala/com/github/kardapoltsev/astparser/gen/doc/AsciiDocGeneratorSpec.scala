@@ -30,9 +30,8 @@ class AsciiDocGeneratorSpec extends TestBase {
            |package outer.inner {
            |  /**Documentation for type A*/
            |  type A {
-           |    /**
-           |     Multi line doc
-           |     for constructor a
+           |    /** Multi line doc
+           |        for constructor a
            |     */
            |    a ::
            |      param1: Int -- docs for type parameter
@@ -57,7 +56,7 @@ class AsciiDocGeneratorSpec extends TestBase {
            |}
            |
            |package p1 {
-           |  /** Method returns type `outer.inner.A` */
+           |  /** Method returns type `outer.inner.A` with trailing spaces       */
            |  @POST /api/y
            |  call Y ::
            |    param: Int -- docs for call parameter
@@ -92,7 +91,11 @@ class AsciiDocGeneratorSpec extends TestBase {
         "Result type: <<api.outer.inner.A,A>>"
       )
       apiDoc should include(
-        "Method returns type <<api.outer.inner.A,outer.inner.A>>"
+        "Method returns type <<api.outer.inner.A,outer.inner.A>> with trailing spaces"
+      )
+      apiDoc should include(
+        s"""Multi line doc
+           |        for constructor a""".stripMargin
       )
     }
   }

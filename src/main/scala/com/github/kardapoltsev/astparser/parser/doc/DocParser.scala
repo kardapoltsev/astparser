@@ -63,6 +63,7 @@ class DocParser(override protected val enableProfiling: Boolean = false) extends
       case Identifier(chars)        => chars
       case SpecialCharacters(chars) => chars
       case Dot()                    => "."
+      case Newline()                => "\n"
       case Space()                  => " "
     })
 
