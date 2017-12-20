@@ -4,8 +4,8 @@ val CacheUpdate  = true
 
 organization := Organization
 name := "ast-parser"
-scalaVersion := "2.11.11"
-crossScalaVersions := Seq("2.10.6", scalaVersion.value, "2.12.3")
+scalaVersion := "2.11.12"
+crossScalaVersions := Seq("2.10.7", scalaVersion.value, "2.12.4")
 organizationName := "Alexey Kardapoltsev"
 organizationHomepage := Some(url("https://github.com/kardapoltsev"))
 parallelExecution in Test := true
