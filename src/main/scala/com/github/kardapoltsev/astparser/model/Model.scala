@@ -201,7 +201,7 @@ object Model {
   private def convertTypeLike(
     tl: Seq[parser.TypeLike]
   )(implicit m: parser.Model): TypeLike = {
-    if (tl.size == 1) {
+    if (tl.lengthCompare(1) == 0) {
       tl.head match {
         case t: parser.Type =>
           convertType(t)
@@ -282,6 +282,8 @@ object Model {
         Seq(tl)
       case found if found.nonEmpty && found.forall(_.isInstanceOf[parser.TypeConstructor]) =>
         found.collect { case tc: parser.TypeConstructor => tc }
+      case found if found.nonEmpty && found.forall(_.isInstanceOf[parser.Call]) =>
+        found.collect { case c: parser.Call => c }
       case found if found.nonEmpty =>
         throw new Exception(s"${ref.humanReadable} resolved to unexpected $found")
       case _ =>
