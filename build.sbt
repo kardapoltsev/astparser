@@ -5,7 +5,7 @@ val CacheUpdate  = true
 organization := Organization
 name := "ast-parser"
 scalaVersion := "2.11.12"
-crossScalaVersions := Seq("2.10.7", scalaVersion.value, "2.12.4")
+crossScalaVersions := Seq("2.10.7", scalaVersion.value, "2.12.5")
 organizationName := "Alexey Kardapoltsev"
 organizationHomepage := Some(url("https://github.com/kardapoltsev"))
 parallelExecution in Test := true
@@ -70,7 +70,7 @@ startYear := Some(2016)
 val slf4jApi       = "org.slf4j"              % "slf4j-api"                 % "1.7.25"
 val scalaParsers   = "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
 val logbackClassic = "ch.qos.logback"         % "logback-classic"           % "1.2.3" % "test"
-val scalatest      = "org.scalatest"          %% "scalatest"                % "3.0.4" % "test"
+val scalatest      = "org.scalatest"          %% "scalatest"                % "3.0.5" % "test"
 
 val baseDependencies = Seq(
   slf4jApi,
