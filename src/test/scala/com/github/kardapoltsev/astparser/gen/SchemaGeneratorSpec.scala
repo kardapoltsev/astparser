@@ -118,12 +118,15 @@ class SchemaGeneratorSpec extends TestBase {
           |schema api
           |external type Int
           |external type String
+          |external type Vector
+          |external type Map
           |trait T
           |
           |type MyType {
           |  myType ::
           |    param1: Int -- docs
           |    paramWithVeryLongName: String -- comment
+          |    mapParam: Map[Int, Vector[Int]]
           |}
           |
           |/** Docs for type B
@@ -146,13 +149,16 @@ class SchemaGeneratorSpec extends TestBase {
           |
           |external type Int
           |external type String
+          |external type Vector
+          |external type Map
           |trait T
           |
           |type MyType {
           |
           |  myType ::
-          |    param1                : Int    -- docs
-          |    paramWithVeryLongName : String -- comment
+          |    param1                : Int                   -- docs
+          |    paramWithVeryLongName : String                -- comment
+          |    mapParam              : Map[Int, Vector[Int]]
           |}
           |
           |/** Docs for type B

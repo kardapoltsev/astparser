@@ -198,25 +198,23 @@ class SchemaGenerator(
   }
 
   private def formatTypeStatement(ts: TypeStatement): String = {
-    s"${ts.ref.fullName}${formatTypeArguments(ts.typeArguments.map(_.ref))}"
+    s"${ts.ref.fullName}${formatTypeArguments(ts.typeArguments)}"
   }
 
   private def formatTypeParameters(args: Seq[TypeParameter]): String = {
     if (args.nonEmpty) {
       args.map { a =>
-        //a.ref.fullName + formatTypeArguments(a.typeArguments)
-        a.name
-      }.mkString("[", ",", "]")
+        a.name + formatTypeParameters(a.typeParameters)
+      }.mkString("[", ", ", "]")
     } else {
       ""
     }
   }
-  private def formatTypeArguments(args: Seq[Reference]): String = {
+  private def formatTypeArguments(args: Seq[TypeStatement]): String = {
     if (args.nonEmpty) {
       args.map { a =>
-        //a.ref.fullName + formatTypeArguments(a.typeArguments)
-        a.fullName
-      }.mkString("[", ",", "]")
+        a.ref.fullName + formatTypeArguments(a.typeArguments)
+      }.mkString("[", ", ", "]")
     } else {
       ""
     }
