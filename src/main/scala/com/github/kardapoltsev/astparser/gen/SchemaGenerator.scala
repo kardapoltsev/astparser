@@ -86,7 +86,7 @@ class SchemaGenerator(
   }
 
   private def generateTypeAlias(ta: TypeAlias): String = {
-    s"${K.Type} ${ta.name} = ${ta.reference.fullName}"
+    s"${K.Type} ${ta.name} = ${formatTypeStatement(ta.`type`)}"
   }
 
   private def generateTrait(t: Trait): String = {

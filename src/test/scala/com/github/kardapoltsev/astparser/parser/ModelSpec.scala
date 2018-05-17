@@ -272,7 +272,7 @@ class ModelSpec extends TestBase {
       m.lookup(typeBRef).head shouldBe a[TypeAlias]
       m.lookup(typeBRef).head.asInstanceOf[TypeAlias].name shouldBe "UserId"
       val i = m.lookup(typeBRef).head.asInstanceOf[TypeAlias]
-      m.lookup(i.reference).headOption shouldBe defined
+      m.lookup(i.`type`.ref).headOption shouldBe defined
 
       val maybeObject = m.getDefinition("api.Object").headOption
       maybeObject shouldBe defined
@@ -314,6 +314,8 @@ class ModelSpec extends TestBase {
             |schema api
             |import common.Int
             |type UserId = Int
+            |external type Map
+            |type MyMapAlias = Map[Int, UserId]
             |
             |package p1 {
             |  trait C

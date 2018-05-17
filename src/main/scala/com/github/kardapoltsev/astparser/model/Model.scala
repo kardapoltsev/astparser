@@ -66,6 +66,7 @@ object Model {
     val parsed = schemas.map(f => astParser.parse(f))
     build(parser.Model(parsed))
   }
+
   //src -> src name
   def buildFromString(schemas: Seq[(String, String)]): Model = {
     val parsed = schemas.map { case (source, sourceName) => astParser.parse(source, sourceName) }
@@ -187,43 +188,13 @@ object Model {
 
   private def convertTypeStatement(
     isTypeArgument: Boolean
-  )(
-    ts: parser.TypeStatement
-  )(implicit m: parser.Model): TypeStatement = {
+  )(ts: parser.TypeStatement)(implicit m: parser.Model): TypeStatement = {
     TypeStatement(
       ts.packageName,
       TypeReference(resolve(ts.ref).head.fullName),
       ts.typeArguments map convertTypeStatement(isTypeArgument = true),
       isTypeArgument
     )
-  }
-
-  private def convertTypeLike(
-    tl: Seq[parser.TypeLike]
-  )(implicit m: parser.Model): TypeLike = {
-    if (tl.lengthCompare(1) == 0) {
-      tl.head match {
-        case t: parser.Type =>
-          convertType(t)
-        case c: parser.TypeConstructor =>
-          convertTypeConstructor(Seq(c))
-        case t: parser.Trait =>
-          convertTrait(t)
-        case ta: parser.TypeAlias =>
-          convertTypeAlias(ta)
-        case et: parser.ExternalType =>
-          convertExternalType(et)
-        case c: parser.Call =>
-          convertCall(c)
-      }
-    } else {
-      assume(
-        tl.forall(_.isInstanceOf[parser.TypeConstructor]),
-        "only Seq[TypeLike] of TypeConstructors may have size > 1")
-      convertTypeConstructor(
-        tl.collect { case tc: parser.TypeConstructor => tc }
-      )
-    }
   }
 
   private def convertExternalType(
@@ -271,7 +242,7 @@ object Model {
   private def convertTypeAlias(
     a: parser.TypeAlias
   )(implicit m: parser.Model): TypeAlias = {
-    TypeAlias(a.packageName, a.name, convertTypeLike(resolve(a.reference)))
+    TypeAlias(a.packageName, a.name, convertTypeStatement(a.`type`))
   }
 
   private def resolve(ref: parser.Reference)(implicit m: parser.Model): Seq[parser.TypeLike] = {

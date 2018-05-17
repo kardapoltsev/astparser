@@ -191,12 +191,11 @@ private[astparser] final case class Import(
 
 private[astparser] final case class TypeAlias(
   name: String,
-  reference: Reference
+  `type`: TypeStatement
 ) extends TypeLike {
-  children = Seq(reference)
+  children = Seq(`type`)
   def docs    = Seq.empty
   def parents = Seq.empty
-  //def fullName = packageName ~ name
 }
 
 private[astparser] final case class Call(
@@ -240,7 +239,7 @@ private[astparser] final case class Argument(
 
 private[astparser] final case class TypeStatement(
   ref: Reference,
-  typeArguments: Seq[TypeStatement]
+  typeArguments: Seq[TypeStatement] = Seq.empty
 ) extends Element {
   children = ref +: typeArguments
   def idString: String = {

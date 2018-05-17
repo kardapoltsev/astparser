@@ -142,7 +142,7 @@ case class TypeParameter(
 case class TypeAlias(
   parent: String,
   name: String,
-  `type`: TypeLike
+  `type`: TypeStatement
 ) extends TypeLike {
   def parents = Seq.empty
 }

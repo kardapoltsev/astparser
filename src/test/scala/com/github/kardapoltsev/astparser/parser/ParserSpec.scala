@@ -66,7 +66,19 @@ class ParserSpec extends WordSpec with Matchers {
           |type myAlias = api.User
         """.stripMargin
       val parsed = parse(typeAlias, in)
-      parsed shouldBe TypeAlias("myAlias", Reference("api.User"))
+      parsed shouldBe TypeAlias("myAlias", TypeStatement(Reference("api.User")))
+    }
+
+    "parse complex type alias" in new ParserTestEnv {
+      val in =
+        """
+          |type myAlias = Vector[api.User]
+        """.stripMargin
+      val parsed = parse(typeAlias, in)
+      val t = TypeStatement(
+        ref = Reference("Vector"),
+        typeArguments = Seq(TypeStatement(Reference("api.User"))))
+      parsed shouldBe TypeAlias("myAlias", t)
     }
 
     "parse external type definition" in new ParserTestEnv {
@@ -269,7 +281,7 @@ class ParserSpec extends WordSpec with Matchers {
       val parsed = parse(src, "source_name")
 
       parsed.pos shouldBe a[SourcePosition]
-      parsed.pos.asInstanceOf[SourcePosition].lineContents shouldBe "schema api\n"
+      parsed.pos.asInstanceOf[SourcePosition].lineContents should include("schema api")
 
       def checkPosition(e: Element): Unit = {
         //println(s"checking ${e.humanReadable}")

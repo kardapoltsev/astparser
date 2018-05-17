@@ -130,9 +130,9 @@ class AstParser(
 
   protected def typeAlias: Parser[TypeAlias] = {
     profile("typeAliasExp") {
-      (TypeKeyword() ~> identifier <~ Eq()) ~ reference ^^ {
-        case name ~ ref =>
-          TypeAlias(name.name, ref)
+      (TypeKeyword() ~> identifier <~ Eq()) ~ typeStatement ^^ {
+        case name ~ aType =>
+          TypeAlias(name.name, aType)
       }
     }
   }
