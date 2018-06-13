@@ -16,7 +16,7 @@ initialize ~= { _ =>
     sys.error("Java 7 is required for this project.")
 }
 updateOptions := updateOptions.value.withCachedResolution(CacheUpdate)
-incOptions := incOptions.value.withNameHashing(true)
+//incOptions := incOptions.value.withNameHashing(true)
 scalacOptions ++= Seq(
   "-encoding",
   "UTF-8",
@@ -26,8 +26,8 @@ scalacOptions ++= Seq(
   "-Xfatal-warnings",
   "-Xlint"
 )
-scalacOptions <++= scalaVersion map { sv =>
-  if (sv.startsWith("2.10")) {
+scalacOptions ++= {
+  if (scalaVersion.value.startsWith("2.10")) {
     Seq.empty[String]
   } else {
     Seq(
@@ -67,20 +67,23 @@ licenses := Seq(("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-
 import de.heikoseeberger.sbtheader.AutomateHeaderPlugin
 startYear := Some(2016)
 
-val slf4jApi       = "org.slf4j"              % "slf4j-api"                 % "1.7.25"
-val scalaParsers   = "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
-val logbackClassic = "ch.qos.logback"         % "logback-classic"           % "1.2.3" % "test"
-val scalatest      = "org.scalatest"          %% "scalatest"                % "3.0.5" % "test"
+val scalaParsers  = "org.scala-lang.modules"   %% "scala-parser-combinators" % "1.1.0"
+val scalatest     = "org.scalatest"            %% "scalatest"                % "3.0.5" % "test"
+val log4jApi      = "org.apache.logging.log4j" % "log4j-api"                 % "2.11.0"
+val log4jCore     = "org.apache.logging.log4j" % "log4j-core"                % "2.11.0" % "test"
+val log4jScalaApi = "org.apache.logging.log4j" %% "log4j-api-scala"          % "11.0"
 
 val baseDependencies = Seq(
-  slf4jApi,
-  logbackClassic,
+  log4jApi,
+  log4jCore,
+  log4jScalaApi,
   scalaParsers,
   scalatest
 )
 val scala210Dependencies = Seq(
-  slf4jApi,
-  logbackClassic,
+  log4jApi,
+  log4jCore,
+  log4jScalaApi,
   scalatest
 )
 
@@ -94,8 +97,8 @@ scalacOptions in (Compile, doc) := Seq(
   "-implicits",
   "-diagrams"
 )
-libraryDependencies <++= scalaVersion { sv =>
-  if (sv.startsWith("2.10"))
+libraryDependencies ++= {
+  if (scalaVersion.value.startsWith("2.10"))
     scala210Dependencies
   else
     baseDependencies
