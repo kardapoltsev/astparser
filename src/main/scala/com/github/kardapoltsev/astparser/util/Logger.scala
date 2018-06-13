@@ -16,7 +16,7 @@
 
 package com.github.kardapoltsev.astparser.util
 
-import org.slf4j.LoggerFactory
+import org.apache.logging.log4j.scala.Logging
 
 object Logger {
   import scala.collection.concurrent.{TrieMap => MMap}
@@ -24,9 +24,8 @@ object Logger {
   val counts = MMap[String, Int]()
 }
 
-trait Logger {
-
-  protected val log = LoggerFactory.getLogger(getClass)
+trait Logger extends Logging {
+  protected def log = logger
 
   protected def loggingTimeMuted[A](tag: String)(f: => A): A = {
     f
@@ -45,11 +44,11 @@ trait Logger {
     if (time < 10) {
       //skip it
     } else if (time < 100) {
-      log.debug(reportMessage)
+      logger.debug(reportMessage)
     } else if (time < 1000) {
-      log.info(reportMessage)
+      logger.info(reportMessage)
     } else {
-      log.warn(reportMessage)
+      logger.warn(reportMessage)
     }
 
     result
