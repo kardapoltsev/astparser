@@ -3,16 +3,16 @@ resolvers ++= Seq(
   "Sonatype-releases" at "https://oss.sonatype.org/content/repositories/releases/"
 )
 
-addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.5.0")
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.5.1")
 
-addSbtPlugin("org.scoverage" % "sbt-coveralls" % "1.1.0")
+addSbtPlugin("org.scoverage" % "sbt-coveralls" % "1.2.5")
 
-addSbtPlugin("de.heikoseeberger" % "sbt-header" % "3.0.1")
+addSbtPlugin("de.heikoseeberger" % "sbt-header" % "5.0.0")
 
 addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "2.0")
 
-addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.1.0-M1")
+addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.1.1")
 
-addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.6")
+addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.8")
 
 addSbtPlugin("com.lucidchart" % "sbt-scalafmt" % "1.15")
