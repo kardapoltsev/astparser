@@ -74,7 +74,7 @@ class SchemaGeneratorSpec extends TestBase {
           |
           |  type B {
           |
-          |    b
+          |    b ::
           |  }
           |}
           |
@@ -91,8 +91,8 @@ class SchemaGeneratorSpec extends TestBase {
           |
           |/** Doc for trait A
           |  */
-          |trait A
-          |trait B <: A
+          |trait A ::
+          |trait B <: A ::
           |trait C ::
           |  arg1 : A""".stripMargin
 
@@ -129,6 +129,11 @@ class SchemaGeneratorSpec extends TestBase {
           |    mapParam: Map[Int, Vector[Int]]
           |}
           |
+          |type MyEnum {
+          |  enumA <: T ::
+          |  enumB <: T ::
+          |}
+          |
           |/** Docs for type B
           |    Very long
           |  */
@@ -151,7 +156,7 @@ class SchemaGeneratorSpec extends TestBase {
           |external type String
           |external type Vector
           |external type Map
-          |trait T
+          |trait T ::
           |
           |type MyType {
           |
@@ -159,6 +164,13 @@ class SchemaGeneratorSpec extends TestBase {
           |    param1                : Int                   -- docs
           |    paramWithVeryLongName : String                -- comment
           |    mapParam              : Map[Int, Vector[Int]]
+          |}
+          |
+          |type MyEnum {
+          |
+          |  enumA <: T ::
+          |
+          |  enumB <: T ::
           |}
           |
           |/** Docs for type B

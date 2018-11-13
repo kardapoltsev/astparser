@@ -150,7 +150,7 @@ class SchemaGenerator(
       }.mkString("", ls, "")
         .offset(2)
     } else {
-      ""
+      " ::"
     }
   }
 
