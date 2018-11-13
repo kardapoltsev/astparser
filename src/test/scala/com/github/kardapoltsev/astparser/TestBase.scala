@@ -21,8 +21,8 @@ import com.github.kardapoltsev.astparser.parser.{AstParser, Model => ParsedModel
 import org.scalatest.{Matchers, WordSpec}
 
 trait TestBase extends WordSpec with Matchers {
-
-  protected val parser = new AstParser()
+  protected val fileExt = "sl"
+  protected val parser  = new AstParser()
 
   protected def buildParserModel(source: String, sources: String*): ParsedModel = {
     val schemas = (source +: sources).zipWithIndex map {
@@ -33,8 +33,8 @@ trait TestBase extends WordSpec with Matchers {
     ParsedModel(schemas)
   }
 
-  protected def buildModel(source: String, sources: String*): Model = {
-    val schemas = (source +: sources).zipWithIndex map {
+  protected def buildModel(sources: String*): Model = {
+    val schemas = sources.zipWithIndex map {
       case (src, idx) =>
         src -> ("test_source_" + idx)
     }

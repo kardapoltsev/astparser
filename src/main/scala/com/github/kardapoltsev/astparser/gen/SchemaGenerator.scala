@@ -110,12 +110,13 @@ class SchemaGenerator(
   }
 
   private def generateConstructor(c: TypeConstructor): String = {
-    val docs        = formatDocs(c.docs)
-    val ext         = formatParents(c.parents)
-    val args        = generateArguments(c.arguments)
-    val id          = formatId(c.maybeId)
-    val v           = formatVersion(c.versions)
-    val escapedName = escaped(c.name)
+    val docs              = formatDocs(c.docs)
+    val ext               = formatParents(c.parents)
+    val forceArgsOperator = c.arguments.isEmpty && c.parents.nonEmpty
+    val args              = generateArguments(c.arguments, forceArgsOperator)
+    val id                = formatId(c.maybeId)
+    val v                 = formatVersion(c.versions)
+    val escapedName       = escaped(c.name)
     s"""$docs
        |$escapedName$id$v$ext$args""".stripMargin
   }
@@ -135,7 +136,8 @@ class SchemaGenerator(
        |  => ${formatTypeStatement(c.returnType)}""".stripMargin
   }
 
-  private def generateArguments(args: Seq[Argument]): String = {
+  private def generateArguments(args: Seq[Argument],
+                                forceArgumentsOperator: Boolean = false): String = {
     if (args.nonEmpty) {
       val paramNameLength = args.map(n => escaped(n.name).length).max
       val typeLength      = args.map(a => formatTypeStatement(a.`type`).length).max
@@ -150,7 +152,7 @@ class SchemaGenerator(
       }.mkString("", ls, "")
         .offset(2)
     } else {
-      " ::"
+      if (forceArgumentsOperator) " ::" else ""
     }
   }
 

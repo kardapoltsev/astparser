@@ -19,10 +19,23 @@ package com.github.kardapoltsev.astparser.gen
 import com.github.kardapoltsev.astparser.TestBase
 
 class SchemaGeneratorSpec extends TestBase {
+  private def generate(sources: String*): Seq[GeneratedFile] = {
+    val m         = buildModel(sources: _*)
+    val generator = new SchemaGenerator(m, fileExt)
+    val generated = generator.generate()
 
-  private def generate(source: String, sources: String*): Seq[GeneratedFile] = {
-    val m = buildModel(source, sources: _*)
-    new SchemaGenerator(m, "sl").generate()
+    //ensure that generated source is parsable
+    generated.foreach { f =>
+      noException shouldBe thrownBy {
+        parser.parse(f.content, f.fullName)
+      }
+    }
+
+    //ensure that generator is "stable"
+    val formattedSchemas = generated.map(_.content)
+    new SchemaGenerator(buildModel(formattedSchemas: _*), fileExt).generate() shouldBe generated
+
+    generated
   }
 
   "SchemaGenerator" should {
@@ -74,7 +87,7 @@ class SchemaGeneratorSpec extends TestBase {
           |
           |  type B {
           |
-          |    b ::
+          |    b
           |  }
           |}
           |
@@ -91,8 +104,8 @@ class SchemaGeneratorSpec extends TestBase {
           |
           |/** Doc for trait A
           |  */
-          |trait A ::
-          |trait B <: A ::
+          |trait A
+          |trait B <: A
           |trait C ::
           |  arg1 : A""".stripMargin
 
@@ -156,7 +169,7 @@ class SchemaGeneratorSpec extends TestBase {
           |external type String
           |external type Vector
           |external type Map
-          |trait T ::
+          |trait T
           |
           |type MyType {
           |
