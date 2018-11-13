@@ -183,6 +183,20 @@ class ParserSpec extends WordSpec with Matchers {
       parsed shouldBe expected
     }
 
+    "allow constructors with no parameters to extend trait" in new ParserTestEnv {
+      val in =
+        """
+          |type MyClass {
+          |  myClass <: MyTrait ::
+          |
+          |  anotherConstructor ::
+          |    arg1: int
+          |}
+        """.stripMargin
+      val parsed = parse(typeDefinition, in)
+      parsed.constructors.head.parents shouldBe Seq(Reference("MyTrait"))
+    }
+
     "parse trait definition" in new ParserTestEnv {
       val docString = "Documentation for MyTrait"
       val in =

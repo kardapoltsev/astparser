@@ -185,7 +185,7 @@ class AstParser(
   }
 
   protected def modernArgumentsExpr = {
-    argumentsOperator ~> rep1(argument)
+    argumentsOperator ~> rep(argument)
   }
 
   protected def argumentsExpr = {
