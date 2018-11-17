@@ -20,6 +20,7 @@ updateOptions := updateOptions.value.withCachedResolution(CacheUpdate)
 
 addCompilerPlugin(scalafixSemanticdb)
 addCommandAlias("checkall", "; compile:scalafix --check ; test:scalafix --check")
+addCommandAlias("fixall", "all compile:scalafix test:scalafix")
 
 scalacOptions ++= Seq(
   "-encoding",
@@ -27,7 +28,7 @@ scalacOptions ++= Seq(
   "-deprecation",
   "-unchecked",
   "-feature",
-  "-Xfatal-warnings",
+//  "-Xfatal-warnings",
   "-Xlint",
   "-Yrangepos"
 )
