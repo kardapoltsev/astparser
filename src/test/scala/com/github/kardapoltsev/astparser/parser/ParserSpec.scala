@@ -298,7 +298,6 @@ class ParserSpec extends WordSpec with Matchers {
       parsed.pos.asInstanceOf[SourcePosition].lineContents should include("schema api")
 
       def checkPosition(e: Element): Unit = {
-        //println(s"checking ${e.humanReadable}")
         e.pos shouldBe a[SourcePosition]
         e.children foreach checkPosition
       }

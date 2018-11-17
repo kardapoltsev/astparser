@@ -17,7 +17,7 @@
 package com.github.kardapoltsev.astparser.util
 
 object StringUtil {
-  implicit class StringOpt(val self: String) extends AnyVal {
+  implicit class StringOpt(private val self: String) extends AnyVal {
     def simpleName: String = {
       self.drop(self.lastIndexOf(".") + 1)
     }

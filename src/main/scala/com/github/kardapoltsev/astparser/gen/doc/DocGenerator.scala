@@ -22,8 +22,8 @@ import com.github.kardapoltsev.astparser.model._
 trait DocGenerator extends Generator {
 
   def printDocsCoverage(schema: Schema): Unit = {
-    println(s"${schema.fullName} coverage:")
-    calculateDocsCoverage(schema) map (c => "\t" + c) foreach println
+    log.info(s"${schema.fullName} coverage:")
+    calculateDocsCoverage(schema).map(c => "\t" + c).foreach(log.info(_))
   }
 
   def calculateDocsCoverage(schema: Schema): Seq[String] = {

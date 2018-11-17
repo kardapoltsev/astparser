@@ -99,7 +99,6 @@ class LexerSpec extends WordSpec with Matchers {
 
     "should lead to the error if comment unclosed" in {
       val res = scan("/* asdf ")
-      // println(res)
       hasError(res) shouldBe true
     }
 
@@ -163,7 +162,6 @@ class LexerSpec extends WordSpec with Matchers {
         """.stripMargin
 
       val res = scan(in)
-      // println(res)
       res shouldBe sample
     }
 

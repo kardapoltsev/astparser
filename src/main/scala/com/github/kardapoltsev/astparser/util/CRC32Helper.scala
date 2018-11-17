@@ -23,8 +23,6 @@ object CRC32Helper {
   def crc32(string: String): Int = {
     val crc = new CRC32()
     crc.update(string.getBytes(StandardCharsets.UTF_8))
-    val r = crc.getValue.toInt
-    //println(f"hash $r%02x :" + string)
-    r
+    crc.getValue.toInt
   }
 }

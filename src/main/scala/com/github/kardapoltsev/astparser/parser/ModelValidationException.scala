@@ -16,6 +16,4 @@
 
 package com.github.kardapoltsev.astparser.parser
 
-class ModelValidationException(msg: String, cause: Throwable) extends Exception(msg, cause) {
-  def this(msg: String) = this(msg, null)
-}
+class ModelValidationException(msg: String) extends Exception(msg)

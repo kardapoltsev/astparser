@@ -87,9 +87,7 @@ private[astparser] trait TypeId extends Element {
   def maybeId: Option[Int]
   def idString: String
   def id: Int = maybeId.getOrElse {
-    val r = CRC32Helper.crc32(idString)
-    //println(f"computed hash `$r%02x` for `$fixedId` (before fix `$idString`)")
-    r
+    CRC32Helper.crc32(idString)
   }
   def idHex: String = f"$id%02x"
 

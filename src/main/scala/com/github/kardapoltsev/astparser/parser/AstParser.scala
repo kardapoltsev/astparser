@@ -26,8 +26,7 @@ object TokenParsers {
   case class IntNumber(value: Int)    extends Positional
 }
 
-class ParseException(message: String, val pos: Position, cause: Throwable = null)
-    extends Exception(message, cause)
+class ParseException(message: String, val pos: Position) extends Exception(message)
 
 class AstParser(
   override protected val enableProfiling: Boolean = false

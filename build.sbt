@@ -5,7 +5,7 @@ val CacheUpdate  = true
 organization := Organization
 name := "ast-parser"
 scalaVersion := "2.11.12"
-crossScalaVersions := Seq("2.10.7", scalaVersion.value, "2.12.7")
+crossScalaVersions := Seq(scalaVersion.value, "2.12.7") // 2.10 was removed due to scalafix plugin
 organizationName := "Alexey Kardapoltsev"
 organizationHomepage := Some(url("https://github.com/kardapoltsev"))
 parallelExecution in Test := true
@@ -17,6 +17,10 @@ initialize ~= { _ =>
 }
 updateOptions := updateOptions.value.withCachedResolution(CacheUpdate)
 //incOptions := incOptions.value.withNameHashing(true)
+
+addCompilerPlugin(scalafixSemanticdb)
+addCommandAlias("checkall", "; compile:scalafix --check ; test:scalafix --check")
+
 scalacOptions ++= Seq(
   "-encoding",
   "UTF-8",
@@ -24,7 +28,8 @@ scalacOptions ++= Seq(
   "-unchecked",
   "-feature",
   "-Xfatal-warnings",
-  "-Xlint"
+  "-Xlint",
+  "-Yrangepos"
 )
 scalacOptions ++= {
   if (scalaVersion.value.startsWith("2.10")) {
@@ -67,7 +72,7 @@ licenses := Seq(("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-
 import de.heikoseeberger.sbtheader.AutomateHeaderPlugin
 startYear := Some(2016)
 
-val scalaParsers  = "org.scala-lang.modules"   %% "scala-parser-combinators" % "1.1.0"
+val scalaParsers  = "org.scala-lang.modules"   %% "scala-parser-combinators" % "1.1.1"
 val scalatest     = "org.scalatest"            %% "scalatest"                % "3.0.5" % "test"
 val log4jApi      = "org.apache.logging.log4j" % "log4j-api"                 % "2.11.1"
 val log4jCore     = "org.apache.logging.log4j" % "log4j-core"                % "2.11.1" % "test"

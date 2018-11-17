@@ -52,7 +52,6 @@ class ModelSpec extends TestBase {
         """.stripMargin
 
       val m = buildModel(s1)
-      //println(m)
       m.schemas should have size 1
       m.schemas.head.schemaName shouldBe "api"
       m.schemas.head.name shouldBe "api"
