@@ -17,7 +17,8 @@
 package com.github.kardapoltsev.astparser.model
 
 import com.github.kardapoltsev.astparser.TestBase
-import com.github.kardapoltsev.astparser.parser.http.{Get}
+import com.github.kardapoltsev.astparser.parser.ModelValidationException
+import com.github.kardapoltsev.astparser.parser.http.Get
 
 class ModelSpec extends TestBase {
 
@@ -346,6 +347,17 @@ class ModelSpec extends TestBase {
       constructorEmpty.versions should have size 1
     }
 
+    "not allow to extend self" in {
+      a[ModelValidationException] shouldBe thrownBy {
+        buildModel(
+          """
+            |schema api
+            |
+            |trait A <: A
+            |""".stripMargin
+        )
+      }
+    }
   }
 
 }

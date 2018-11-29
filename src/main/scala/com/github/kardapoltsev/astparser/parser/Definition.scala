@@ -440,6 +440,19 @@ private[astparser] final case class Model(
       )
     }
 
+    val selfInheritance = schemas flatMap { s =>
+      s.deepDefinitions.collect {
+        case t: TypeLike if t.parents.exists { p =>
+              (t.packageName ~ p.fullName) == t.fullName || p.fullName == t.fullName
+            } =>
+          t
+      }
+    }
+    if (selfInheritance.nonEmpty) {
+      failValidation(
+        s"Model contains self-inherited elements: ${selfInheritance.map(_.humanReadable).mkString(System.lineSeparator())}")
+    }
+
     val duplicateDefinitions = deepDefinitions.map { definition =>
       val duplicates = definition.children.collect {
         case ne: NamedElement => ne
