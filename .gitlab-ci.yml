@@ -12,4 +12,4 @@ before_script:
 
 test:
   script:
-    - sbt clean checkall test coverageReport
+    - sbt clean checkall coverage test coverageReport
