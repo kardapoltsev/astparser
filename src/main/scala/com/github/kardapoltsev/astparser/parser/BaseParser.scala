@@ -21,10 +21,7 @@ import com.github.kardapoltsev.astparser.util.Logger
 
 import scala.util.parsing.combinator.Parsers
 
-@SuppressWarnings(
-  Array(
-    "scalafix:DisableSyntax.println"
-  ))
+@SuppressWarnings(Array("scalafix:DisableSyntax.println"))
 class BaseParser extends Parsers with Logger {
 
   protected def getResult[T](res: ParseResult[T]): T = res match {

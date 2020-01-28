@@ -55,6 +55,11 @@ case class Model(
     this.copy(schemas = schemas.map(_.slice(VersionsInterval(Some(from), Some(to)))))
   }
 
+  def filterConstrained(enabledFeatures: Seq[String]): Model = {
+    val filteredSchemas = schemas.flatMap(_.filterConstrained(enabledFeatures))
+    this.copy(schemas = filteredSchemas)
+  }
+
 }
 
 object Model {

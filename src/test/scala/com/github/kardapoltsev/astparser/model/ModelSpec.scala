@@ -358,6 +358,48 @@ class ModelSpec extends TestBase {
         )
       }
     }
+
+    "filter Constrained for enabledFeatures" in {
+      val model = buildModel(
+        """
+          |schema api
+          |
+          |?EnableA
+          |?!DisableA
+          |type A {
+          |  ?!DisableConstructorA
+          |  a
+          |}
+          |
+          |?EnablePkg
+          |?! DisablePkg
+          |package pkg {
+          |  type B {
+          |    ?!DisableB
+          |    b
+          |    ?!DisableB
+          |    otherB
+          |  }
+          |}
+        """.stripMargin
+      )
+
+      model.filterConstrained(Seq("EnableA")).getDefinition("api.A") should not be empty
+      model.filterConstrained(Seq("DisableA")).getDefinition("api.A") shouldBe empty
+      model.filterConstrained(Seq("DisableConstructorA")).getDefinition("api.A") shouldBe empty
+      model.filterConstrained(Seq("EnablePkg")).getDefinition("api.pkg.B") should not be empty
+      model.getDefinition("api.pkg") should not be empty
+      model.getDefinition("api.pkg.B") should not be empty
+      model.filterConstrained(Seq("EnablePkg")).getDefinition("api.pkg") should not be empty
+      an[AssertionError] shouldBe thrownBy {
+        model.filterConstrained(Seq("EnablePkg", "DisablePkg"))
+      }
+      model.filterConstrained(Seq("DisablePkg")).getDefinition("api.pkg") shouldBe empty
+      model.filterConstrained(Seq("DisablePkg")).getDefinition("api.pkg.B") shouldBe empty
+
+      model.filterConstrained(Seq("DisableB")).getDefinition("api.pkg.B") shouldBe empty
+      model.filterConstrained(Seq("DisableB")).getDefinition("api.pkg") shouldBe empty
+    }
   }
 
 }

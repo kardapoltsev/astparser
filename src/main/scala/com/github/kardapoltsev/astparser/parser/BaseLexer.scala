@@ -25,6 +25,7 @@ import scala.util.parsing.input.{CharSequenceReader, Reader}
 
 abstract class BaseLexer extends Scanners with Parsers {
 
+  @SuppressWarnings(Array("scalafix:DisableSyntax.while"))
   def scan(input: Reader[Char]): List[Token] = {
     var r   = new Scanner(input)
     val buf = ListBuffer[Token]()

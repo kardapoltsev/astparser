@@ -50,6 +50,14 @@ case class Constraint(
 
 sealed trait Constrained {
   def constraint: Constraint
+  def isEnabled(enabledFeatures: Seq[String]): Boolean = {
+    val enabled  = constraint.enable.constraints.intersect(enabledFeatures)
+    val disabled = constraint.disable.constraints.intersect(enabledFeatures)
+    assert(
+      enabled.isEmpty || disabled.isEmpty,
+      "enabledFeatures contains both allowed and disallowed")
+    (constraint.enable.constraints.isEmpty || enabled.nonEmpty) && disabled.isEmpty
+  }
 }
 
 sealed trait TypeId {
@@ -130,7 +138,7 @@ case class Type(
   override def definitions: Seq[Definition] = constructors
 
   override def slice(interval: VersionsInterval): Type = {
-    val filtered = constructors.flatMap { c =>
+    val filteredConstructors = constructors.flatMap { c =>
       val filteredVersions = c.versions.filter { v =>
         v.versions.isIntersect(interval)
       }
@@ -140,14 +148,38 @@ case class Type(
         None
       }
     }
-    this.copy(constructors = filtered)
+    this.copy(constructors = filteredConstructors)
   }
+
+  override def filterConstrained(enabledFeatures: Seq[String]): Option[Type] = {
+    if (isEnabled(enabledFeatures)) {
+      val filteredConstructors = constructors.flatMap { c =>
+        val filteredVersions = c.versions.filter { v =>
+          v.isEnabled(enabledFeatures)
+        }
+        if (filteredVersions.nonEmpty) {
+          Some(c.copy(versions = filteredVersions))
+        } else {
+          None
+        }
+      }
+
+      if (filteredConstructors.nonEmpty) {
+        Some(this.copy(constructors = filteredConstructors))
+      } else {
+        None
+      }
+    } else {
+      None
+    }
+  }
+
 }
 
 case class ExternalType(
   parent: String,
   name: String,
-  typeArguments: Seq[TypeParameter],
+  typeArguments: Seq[TypeParameter] = Nil,
   constraint: Constraint
 ) extends Parent
     with Constrained {
@@ -278,6 +310,26 @@ sealed trait PackageLike extends Definition with Constrained {
     }
   }
 
+  def filterConstrained(enabledFeatures: Seq[String]): Option[PackageLike]
+
+  protected def filterConstrainedInt(enabledFeatures: Seq[String]): Seq[Definition] = {
+    if (isEnabled(enabledFeatures)) {
+      definitions.flatMap {
+        case p: PackageLike => p.filterConstrained(enabledFeatures)
+        case d: Constrained => if (d.isEnabled(enabledFeatures)) { Some(d) } else None
+        case c: TypeConstructor =>
+          val filteredVersions = c.versions.filter(_.isEnabled(enabledFeatures))
+          if (filteredVersions.nonEmpty) {
+            Some(c.copy(versions = filteredVersions))
+          } else {
+            None
+          }
+      }
+    } else {
+      Nil
+    }
+  }
+
 }
 
 case class Package(
@@ -291,6 +343,15 @@ case class Package(
       definitions = sliceInt(interval)
     )
   }
+
+  override def filterConstrained(enabledFeatures: Seq[String]): Option[Package] = {
+    if (isEnabled(enabledFeatures)) {
+      Some(this.copy(definitions = filterConstrainedInt(enabledFeatures)))
+    } else {
+      None
+    }
+  }
+
 }
 
 case class Schema(
@@ -303,9 +364,15 @@ case class Schema(
   override def schemaName: String = name
 
   override def slice(interval: VersionsInterval): Schema = {
-    this.copy(
-      definitions = sliceInt(interval)
-    )
+    this.copy(definitions = sliceInt(interval))
+  }
+
+  def filterConstrained(enabledFeatures: Seq[String]): Option[Schema] = {
+    if (isEnabled(enabledFeatures)) {
+      Some(this.copy(definitions = filterConstrainedInt(enabledFeatures)))
+    } else {
+      None
+    }
   }
 
 }
