@@ -16,7 +16,8 @@
 
 package com.github.kardapoltsev.astparser.parser.doc
 
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
 trait DocParserEnv extends DocParser {
 
@@ -26,7 +27,7 @@ trait DocParserEnv extends DocParser {
 
 }
 
-class DocParserSpec extends WordSpec with Matchers {
+class DocParserSpec extends AnyWordSpec with Matchers {
 
   "DocParser" should {
     "parse doc string" in new DocParserEnv {

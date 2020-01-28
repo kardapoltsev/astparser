@@ -17,7 +17,8 @@
 package com.github.kardapoltsev.astparser.parser.http
 
 import com.github.kardapoltsev.astparser.parser.ParseException
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
 trait HttpParserEnv extends HttpParser {
 
@@ -27,7 +28,7 @@ trait HttpParserEnv extends HttpParser {
 
 }
 
-class HttpParserSpec extends WordSpec with Matchers {
+class HttpParserSpec extends AnyWordSpec with Matchers {
   "HttpParser" should {
 
     "parse method" in new HttpParserEnv {

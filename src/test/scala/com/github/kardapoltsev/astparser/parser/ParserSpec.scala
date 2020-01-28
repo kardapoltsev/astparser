@@ -16,9 +16,10 @@
 
 package com.github.kardapoltsev.astparser.parser
 
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class ParserSpec extends WordSpec with Matchers {
+class ParserSpec extends AnyWordSpec with Matchers {
   "Parser" should {
     "parse schema info" in new ParserTestEnv {
       val in =

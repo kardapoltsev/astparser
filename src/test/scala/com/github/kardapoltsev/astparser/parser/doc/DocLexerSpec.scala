@@ -16,9 +16,10 @@
 
 package com.github.kardapoltsev.astparser.parser.doc
 
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class DocLexerSpec extends WordSpec with Matchers {
+class DocLexerSpec extends AnyWordSpec with Matchers {
   import DocLexer._
 
   private val lexer = new DocLexer

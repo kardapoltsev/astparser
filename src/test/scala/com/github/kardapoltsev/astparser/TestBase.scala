@@ -18,9 +18,10 @@ package com.github.kardapoltsev.astparser
 
 import com.github.kardapoltsev.astparser.model.Model
 import com.github.kardapoltsev.astparser.parser.{AstParser, Model => ParsedModel}
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-trait TestBase extends WordSpec with Matchers {
+trait TestBase extends AnyWordSpec with Matchers {
   protected val fileExt = "sl"
   protected val parser  = new AstParser()
 

@@ -16,11 +16,11 @@
 
 package com.github.kardapoltsev.astparser.parser
 
-import org.scalatest.{Matchers, WordSpec}
-
 import scala.util.parsing.input.CharSequenceReader
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class LexerSpec extends WordSpec with Matchers {
+class LexerSpec extends AnyWordSpec with Matchers {
   import Tokens._
   val lexer = new Lexer
 

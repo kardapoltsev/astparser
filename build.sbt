@@ -5,11 +5,12 @@ val CacheUpdate  = true
 organization := Organization
 name := "ast-parser"
 scalaVersion := "2.11.12"
-crossScalaVersions := Seq(scalaVersion.value, "2.12.7") // 2.10 was removed due to scalafix plugin
+crossScalaVersions := Seq(scalaVersion.value, "2.12.10") // 2.10 was removed due to scalafix plugin
 organizationName := "Alexey Kardapoltsev"
 organizationHomepage := Some(url("https://github.com/kardapoltsev"))
 parallelExecution in Test := true
 scalafmtOnCompile in ThisBuild := true
+Global / onChangedBuildSource := ReloadOnSourceChanges
 
 initialize ~= { _ =>
   if (sys.props("java.specification.version") < "1.7")
@@ -18,6 +19,7 @@ initialize ~= { _ =>
 updateOptions := updateOptions.value.withCachedResolution(CacheUpdate)
 //incOptions := incOptions.value.withNameHashing(true)
 
+scalafixDependencies in ThisBuild += "org.scalatest" %% "autofix" % "3.1.0.0"
 addCompilerPlugin(scalafixSemanticdb)
 addCommandAlias("checkall", "; compile:scalafix --check ; test:scalafix --check")
 addCommandAlias("fixall", "all compile:scalafix test:scalafix")
@@ -66,9 +68,9 @@ import de.heikoseeberger.sbtheader.AutomateHeaderPlugin
 startYear := Some(2016)
 
 val scalaParsers  = "org.scala-lang.modules"   %% "scala-parser-combinators" % "1.1.2"
-val scalatest     = "org.scalatest"            %% "scalatest"                % "3.0.8" % "test"
-val log4jApi      = "org.apache.logging.log4j" % "log4j-api"                 % "2.12.1"
-val log4jCore     = "org.apache.logging.log4j" % "log4j-core"                % "2.12.1" % "test"
+val scalatest     = "org.scalatest"            %% "scalatest"                % "3.1.0" % "test"
+val log4jApi      = "org.apache.logging.log4j" % "log4j-api"                 % "2.13.0"
+val log4jCore     = "org.apache.logging.log4j" % "log4j-core"                % "2.13.0" % "test"
 val log4jScalaApi = "org.apache.logging.log4j" %% "log4j-api-scala"          % "11.0"
 
 val baseDependencies = Seq(

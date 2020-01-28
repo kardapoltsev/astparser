@@ -16,9 +16,10 @@
 
 package com.github.kardapoltsev.astparser.util
 
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class StringUtilSpec extends WordSpec with Matchers {
+class StringUtilSpec extends AnyWordSpec with Matchers {
   import StringUtil._
 
   "StringUtil" should {

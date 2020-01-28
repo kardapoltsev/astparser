@@ -16,9 +16,10 @@
 
 package com.github.kardapoltsev.astparser.parser.http
 
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class HttpLexerSpec extends WordSpec with Matchers {
+class HttpLexerSpec extends AnyWordSpec with Matchers {
   import HttpLexer._
 
   private val lexer = new HttpLexer

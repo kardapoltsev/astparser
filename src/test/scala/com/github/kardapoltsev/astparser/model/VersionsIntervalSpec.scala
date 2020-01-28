@@ -16,9 +16,10 @@
 
 package com.github.kardapoltsev.astparser.model
 
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class VersionsIntervalSpec extends WordSpec with Matchers {
+class VersionsIntervalSpec extends AnyWordSpec with Matchers {
 
   "VersionsIntervalSpec" should {
 
