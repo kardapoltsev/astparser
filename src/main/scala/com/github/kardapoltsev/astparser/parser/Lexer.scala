@@ -43,8 +43,10 @@ object Tokens {
   case class LeftParen()    extends Token
   case class RightParen()   extends Token
 
-  case class LessSign()    extends Token
-  case class GreaterSign() extends Token
+  case class LessSign()        extends Token
+  case class GreaterSign()     extends Token
+  case class QuestionMark()    extends Token
+  case class ExclamationMark() extends Token
 
   case class Lexeme(chars: String) extends Token
 
@@ -91,8 +93,10 @@ class Lexer extends BaseLexer {
   protected def leftParen  = '(' ^^^ LeftParen()
   protected def rightParen = ')' ^^^ RightParen()
 
-  protected def lessSign    = '<' ^^^ LessSign()
-  protected def greaterSign = '>' ^^^ GreaterSign()
+  protected def lessSign        = '<' ^^^ LessSign()
+  protected def greaterSign     = '>' ^^^ GreaterSign()
+  protected def questionMark    = '?' ^^^ QuestionMark()
+  protected def exclamationMark = '!' ^^^ ExclamationMark()
 
   import com.github.kardapoltsev.astparser.Hardcoded.{Keywords => K}
   private def typeKeyword: Parser[Token]    = keyword(K.Type, TypeKeyword())
@@ -133,9 +137,10 @@ class Lexer extends BaseLexer {
 
   private def eof = EofCh ^^^ EOF
 
-  private def symbol: Parser[Token] =
+  private def symbol: Parser[Token] = {
     eq | colon | hash | dot | comma | leftBrace | rightBrace | leftBracket | rightBracket |
-      leftParen | rightParen | dash | lessSign | greaterSign
+      leftParen | rightParen | dash | lessSign | greaterSign | questionMark | exclamationMark
+  }
 
   private def lexemeChar = elem("valid lexeme", x => x != EofCh && x.isLetterOrDigit)
 

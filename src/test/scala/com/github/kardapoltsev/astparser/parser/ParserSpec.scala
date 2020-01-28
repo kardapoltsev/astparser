@@ -306,6 +306,19 @@ class ParserSpec extends WordSpec with Matchers {
         checkPosition(d)
       }
     }
+
+    "parse constraints" in new ParserTestEnv {
+      val in =
+        """
+          |?A, B
+          |?B
+          |?C
+          |?!D
+        """.stripMargin
+      val parsed = parse(constraint, in)
+      parsed.enable.constraints should contain theSameElementsAs Seq("A", "B", "C")
+    }
+
   }
 
 }

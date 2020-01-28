@@ -78,10 +78,18 @@ object Model {
       parsed.schemas map { s =>
         Schema(
           name = s.name,
-          definitions = convertDefinitions(s.definitions)
+          definitions = convertDefinitions(s.definitions),
+          constraint = convertConstraint(s.constraint)
         )
       },
       parsed
+    )
+  }
+
+  private def convertConstraint(constraint: parser.Constraint): Constraint = {
+    Constraint(
+      EnableConstraint(constraint.enable.constraints),
+      DisableConstraint(constraint.disable.constraints)
     )
   }
 
@@ -110,7 +118,8 @@ object Model {
     Package(
       p.packageName,
       p.name,
-      convertDefinitions(p.definitions)
+      convertDefinitions(p.definitions),
+      convertConstraint(p.constraint)
     )
   }
 
@@ -122,7 +131,8 @@ object Model {
       t.arguments map convertArgument,
       t.name,
       t.parents map resolve map (_.head) map convertParent,
-      convertDocs(t.docs)
+      convertDocs(t.docs),
+      convertConstraint(t.constraint)
     )
   }
 
@@ -149,7 +159,8 @@ object Model {
       c.parents map resolve map (_.head) map convertParent,
       httpDefinition,
       convertVersionsInterval(c.versions),
-      convertDocs(c.docs)
+      convertDocs(c.docs),
+      convertConstraint(c.constraint)
     )
   }
 
@@ -203,7 +214,8 @@ object Model {
     ExternalType(
       et.packageName,
       et.fullName,
-      et.typeArguments map convertTypeParameter
+      et.typeArguments map convertTypeParameter,
+      convertConstraint(et.constraint)
     )
   }
 
@@ -225,7 +237,8 @@ object Model {
       constructors = t.constructors.groupBy(_.name).toSeq map {
         case (_, constructors) => convertTypeConstructor(constructors)
       },
-      docs = convertDocs(t.docs)
+      docs = convertDocs(t.docs),
+      convertConstraint(t.constraint)
     )
   }
 
@@ -242,7 +255,11 @@ object Model {
   private def convertTypeAlias(
     a: parser.TypeAlias
   )(implicit m: parser.Model): TypeAlias = {
-    TypeAlias(a.packageName, a.name, convertTypeStatement(a.`type`))
+    TypeAlias(
+      a.packageName,
+      a.name,
+      convertTypeStatement(a.`type`),
+      convertConstraint(a.constraint))
   }
 
   private def resolve(ref: parser.Reference)(implicit m: parser.Model): Seq[parser.TypeLike] = {
@@ -279,7 +296,8 @@ object Model {
         typeArguments = constructor.typeArguments map convertTypeParameter,
         arguments = constructor.arguments map convertArgument,
         versions = convertVersionsInterval(constructor.versions),
-        docs = convertDocs(constructor.docs)
+        docs = convertDocs(constructor.docs),
+        constraint = convertConstraint(constructor.constraint)
       )
     }
     TypeConstructor(

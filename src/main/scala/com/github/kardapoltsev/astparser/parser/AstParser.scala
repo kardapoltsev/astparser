@@ -96,18 +96,18 @@ class AstParser(
 
   protected def traitDefinition: Parser[Trait] = {
     positioned {
-      repLeftDoc ~ (TraitKeyword() ~> identifier) ~ typeExtensionExpr ~ argumentsExpr ^^ {
-        case ld ~ name ~ exts ~ arguments =>
-          Trait(name.name, arguments, exts, ld)
+      repLeftDoc ~ constraint ~ (TraitKeyword() ~> identifier) ~ typeExtensionExpr ~ argumentsExpr ^^ {
+        case ld ~ c ~ name ~ exts ~ arguments =>
+          Trait(name.name, arguments, exts, ld, c)
       }
     }
   }
 
   protected def externalTypeDefinition: Parser[Definition] = profile("externalTypeDefinition") {
     positioned {
-      (ExternalKeyword() ~> TypeKeyword()) ~ identifier ~ genericTypeParameters ^^ {
-        case kw ~ name ~ ta =>
-          ExternalType(name.name, ta)
+      constraint ~ (ExternalKeyword() ~> TypeKeyword()) ~ identifier ~ genericTypeParameters ^^ {
+        case c ~ kw ~ name ~ ta =>
+          ExternalType(name.name, ta, c)
       }
     }
   }
@@ -129,32 +129,33 @@ class AstParser(
 
   protected def typeAlias: Parser[TypeAlias] = {
     profile("typeAliasExp") {
-      (TypeKeyword() ~> identifier <~ Eq()) ~ typeStatement ^^ {
-        case name ~ aType =>
-          TypeAlias(name.name, aType)
+      constraint ~ (TypeKeyword() ~> identifier <~ Eq()) ~ typeStatement ^^ {
+        case c ~ name ~ aType =>
+          TypeAlias(name.name, aType, c)
       }
     }
   }
 
   protected[astparser] def importDefinition: Parser[Import] = {
     positioned {
-      ImportKeyword() ~ reference ^^ {
-        case _ ~ reference =>
-          Import(reference.name, reference)
+      constraint ~ (ImportKeyword() ~> reference) ^^ {
+        case c ~ reference =>
+          Import(reference.name, reference, c)
       }
     }
   }
 
   protected def typeDefinition: Parser[Type] = {
     profile("typeDefinitionExpr") {
-      ((repLeftDoc <~ TypeKeyword()) ~ identifier ~ genericTypeParameters ~ typeExtensionExpr ~ typeDefinitionBody) ^^ {
-        case docs ~ name ~ gargs ~ parents ~ body =>
+      repLeftDoc ~ constraint ~ (TypeKeyword() ~> identifier) ~ genericTypeParameters ~ typeExtensionExpr ~ typeDefinitionBody ^^ {
+        case docs ~ c ~ name ~ gargs ~ parents ~ body =>
           Type(
             name.name,
             gargs,
             parents,
             body,
-            docs
+            docs,
+            c
           )
       }
     }
@@ -193,11 +194,11 @@ class AstParser(
 
   protected def typeConstructor = profile("typeConstructor") {
     positioned {
-      repLeftDoc ~ opt(Dot()) ~ identifier ~ opt(hashId) ~ opt(versionsInterval) ~ typeExtensionExpr ~
+      repLeftDoc ~ constraint ~ opt(Dot()) ~ identifier ~ opt(hashId) ~ opt(versionsInterval) ~ typeExtensionExpr ~
         genericTypeParameters ~ argumentsExpr ~ repRightDoc ^^ {
-        case ld ~ _ ~ name ~ id ~ int ~ ext ~ ta ~ args ~ rd =>
+        case ld ~ c ~ _ ~ name ~ id ~ int ~ ext ~ ta ~ args ~ rd =>
           val i = int.getOrElse(VersionsInterval(None, None))
-          TypeConstructor(name.name, id.map(_.value), ta, args, ext, i, docs = ld ++ rd)
+          TypeConstructor(name.name, id.map(_.value), ta, args, ext, i, docs = ld ++ rd, c)
       }
     }
   }
@@ -213,12 +214,24 @@ class AstParser(
     }
   }
 
-  //TODO: fix copy
   protected def callDefinition: Parser[Call] = profile("callDefinition") {
     positioned {
-      repLeftDoc ~ opt(httpDefinition) ~ CallKeyword() ~ (callDefinitionExp | failure(
-        "call definition expected")) ~ repRightDoc ^^ {
-        case ld ~ httpDef ~ kw ~ cd ~ rd => cd.copy(docs = ld ++ rd, httpRequest = httpDef)
+      repLeftDoc ~ constraint ~ opt(httpDefinition) ~ (CallKeyword() ~> identifier) ~ opt(hashId) ~ opt(
+        versionsInterval) ~ typeExtensionExpr ~ argumentsExpr ~
+        (responseOperator ~> typeStatement) ^^ {
+        case ld ~ c ~ httpDef ~ name ~ id ~ int ~ parents ~ args ~ rtype =>
+          val i = int.getOrElse(VersionsInterval(None, None))
+          Call(
+            name.name,
+            id.map(_.value),
+            args,
+            rtype,
+            parents = parents,
+            httpRequest = httpDef,
+            i,
+            docs = ld,
+            constraint = c
+          )
       }
     }
   }
@@ -229,38 +242,20 @@ class AstParser(
     })
   }
 
-  protected def callDefinitionExp: Parser[Call] = {
-    identifier ~ opt(hashId) ~ opt(versionsInterval) ~ typeExtensionExpr ~ argumentsExpr ~
-      (responseOperator ~> typeStatement) ^^ {
-      case name ~ id ~ int ~ parents ~ args ~ rtype =>
-        val i = int.getOrElse(VersionsInterval(None, None))
-        Call(
-          name.name,
-          id.map(_.value),
-          args,
-          rtype,
-          parents = parents,
-          httpRequest = None,
-          i,
-          docs = Seq.empty
-        )
-    }
-  }
-
   protected def apackage: Parser[Package] = profile("package") {
     positioned {
-      (repLeftDoc <~ PackageKeyword()) ~ reference ~ (LeftBrace() ~> definitions <~ RightBrace()) ^^ {
-        case ld ~ name ~ ds =>
-          packagesFromString(name.fullName, ds, doc = ld, position = name.pos)
+      repLeftDoc ~ constraint ~ (PackageKeyword() ~> reference) ~ (LeftBrace() ~> definitions <~ RightBrace()) ^^ {
+        case ld ~ c ~ name ~ ds =>
+          packagesFromString(name.fullName, ds, doc = ld, position = name.pos, c)
       }
     }
   }
 
   def schema: Parser[Schema] = profile("schema") {
     positioned {
-      phrase(schemaInfoExp ~ definitions) ^^ {
-        case sn ~ ds =>
-          Schema(sn.name, ds)
+      phrase(constraint ~ schemaInfoExp ~ definitions) ^^ {
+        case c ~ sn ~ ds =>
+          Schema(sn.name, ds, c)
       }
     }
   }
@@ -325,17 +320,48 @@ class AstParser(
     )
   }
 
+  protected def constraint: Parser[Constraint] = profile("constraints") {
+    positioned {
+      rep(maybeEnableConstraint | maybeDisableConstraint) ^^ { constraints =>
+        val enable = constraints.collect {
+          case c: EnableConstraint => c.constraints
+        }.flatten.distinct
+        val disable = constraints.collect {
+          case c: DisableConstraint => c.constraints
+        }.flatten.distinct
+        Constraint(EnableConstraint(enable), DisableConstraint(disable))
+      }
+    }
+  }
+
+  private def maybeEnableConstraint: Parser[EnableConstraint] = profile("enableConstraint") {
+    positioned {
+      QuestionMark() ~> rep1sep(identifier, Comma()) ^^ { constraints =>
+        EnableConstraint(constraints.map(_.name))
+      }
+    }
+  }
+
+  private def maybeDisableConstraint: Parser[DisableConstraint] = profile("disableConstraint") {
+    positioned {
+      QuestionMark() ~> ExclamationMark() ~> rep1sep(identifier, Comma()) ^^ { constraints =>
+        DisableConstraint(constraints.map(_.name))
+      }
+    }
+  }
+
   private def packagesFromString(
     fullName: String,
     definitions: Seq[Definition],
     doc: Seq[Documentation],
-    position: Position
+    position: Position,
+    constraint: Constraint
   ): Package = {
     val names = fullName.split("\\.").toSeq.reverse
-    val inner = Package(names.head, definitions).setPos(position)
+    val inner = Package(names.head, definitions, constraint).setPos(position)
     names.tail.foldLeft(inner) {
       case (acc, n) =>
-        Package(n, Seq(acc)).setPos(position)
+        Package(n, Seq(acc), constraint).setPos(position)
     }
   }
 

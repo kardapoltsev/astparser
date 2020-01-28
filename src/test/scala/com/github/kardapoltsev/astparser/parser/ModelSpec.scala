@@ -522,6 +522,38 @@ class ModelSpec extends TestBase {
         )
       }
     }
+
+    "handle constraints" in {
+      val model = buildParserModel(
+        """
+            |schema api
+            |external type Int
+            |
+            |?!DisabledPkg, DisabledFeature
+            |package pkg {
+            |  ?EnableA
+            |  ?EnableB
+            |  ?!DisableB
+            |  type A {
+            |    a ::
+            |      param1: Int
+            |  }
+            |}
+            |?EnableFeatureOne
+            |import pkg.A
+            |
+            |?EnableFeatureTwo
+            |type AliasA = A
+        """.stripMargin
+      )
+      val aType = model
+        .getDefinition("api.pkg.A")
+        .head
+        .asInstanceOf[Type]
+
+      aType.constraint.enable.constraints should contain theSameElementsAs Seq("EnableA", "EnableB")
+      aType.constraint.disable.constraints should contain theSameElementsAs Seq("DisableB")
+    }
   }
 
 }

@@ -35,6 +35,23 @@ sealed trait Definition extends NamedElement {
   def packageName = parent
 }
 
+case class EnableConstraint(
+  constraints: Seq[String]
+)
+
+case class DisableConstraint(
+  constraints: Seq[String]
+)
+
+case class Constraint(
+  enable: EnableConstraint,
+  disable: DisableConstraint
+)
+
+sealed trait Constrained {
+  def constraint: Constraint
+}
+
 sealed trait TypeId {
   def id: Int
   def idHex: String = f"$id%08x"
@@ -104,8 +121,10 @@ case class Type(
   typeArguments: Seq[TypeParameter],
   parents: Seq[Parent],
   constructors: Seq[TypeConstructor],
-  docs: Documentation
+  docs: Documentation,
+  constraint: Constraint
 ) extends TypeLike
+    with Constrained
     with PackageLike
     with Documented {
   override def definitions: Seq[Definition] = constructors
@@ -128,8 +147,10 @@ case class Type(
 case class ExternalType(
   parent: String,
   name: String,
-  typeArguments: Seq[TypeParameter]
-) extends Parent {
+  typeArguments: Seq[TypeParameter],
+  constraint: Constraint
+) extends Parent
+    with Constrained {
   override def fullName = name
   def parents           = Seq.empty
 }
@@ -142,8 +163,10 @@ case class TypeParameter(
 case class TypeAlias(
   parent: String,
   name: String,
-  `type`: TypeStatement
-) extends TypeLike {
+  `type`: TypeStatement,
+  constraint: Constraint
+) extends TypeLike
+    with Constrained {
   def parents = Seq.empty
 }
 
@@ -171,10 +194,12 @@ case class TypeConstructorVersion(
   typeArguments: Seq[TypeParameter],
   arguments: Seq[Argument],
   versions: VersionsInterval,
-  docs: Documentation
+  docs: Documentation,
+  constraint: Constraint
 ) extends TypeLike
     with TypeId
     with Documented
+    with Constrained
     with Versioned {
   val typeReference = TypeReference(parent)
 }
@@ -199,22 +224,26 @@ case class Call(
   parents: Seq[Parent],
   httpRequest: Option[HttpRequest],
   versions: VersionsInterval,
-  docs: Documentation
+  docs: Documentation,
+  constraint: Constraint
 ) extends TypeLike
     with TypeId
     with Documented
     with Versioned
+    with Constrained
 
 case class Trait(
   parent: String,
   arguments: Seq[Argument],
   name: String,
   parents: Seq[Parent],
-  docs: Documentation
+  docs: Documentation,
+  constraint: Constraint
 ) extends Parent
     with Documented
+    with Constrained
 
-sealed trait PackageLike extends Definition {
+sealed trait PackageLike extends Definition with Constrained {
   def name: String
   def definitions: Seq[Definition]
 
@@ -254,7 +283,8 @@ sealed trait PackageLike extends Definition {
 case class Package(
   parent: String,
   name: String,
-  definitions: Seq[Definition]
+  definitions: Seq[Definition],
+  constraint: Constraint
 ) extends PackageLike {
   override def slice(interval: VersionsInterval): Package = {
     this.copy(
@@ -265,7 +295,8 @@ case class Package(
 
 case class Schema(
   name: String,
-  definitions: Seq[Definition]
+  definitions: Seq[Definition],
+  constraint: Constraint
 ) extends PackageLike {
   def parent = ""
 
