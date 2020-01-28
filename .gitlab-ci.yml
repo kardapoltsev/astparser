@@ -1,4 +1,4 @@
-image: 11-jdk-stretch
+image: openjdk:11
 
 before_script:
   - apt-get update -y
