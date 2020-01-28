@@ -14,3 +14,6 @@ before_script:
 test:
   script:
     - sbt clean checkall coverage +test coverageReport
+
+after_script:
+  - sbt coverageReport coveralls
