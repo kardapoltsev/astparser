@@ -11,3 +11,4 @@ cache:
   - $HOME/.coursier/cache
 
 script: "sbt clean checkall +test"
+after_success: "sbt coverageReport coveralls"
