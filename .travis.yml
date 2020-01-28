@@ -3,7 +3,7 @@ scala:
    - 2.11.12
    - 2.12.7
 jdk:
-  - oraclejdk9
+  - oraclejdk11
 
 cache:
   directories:
