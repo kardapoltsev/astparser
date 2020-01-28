@@ -68,27 +68,33 @@ class LexerSpec extends WordSpec with Matchers {
       hasError(scan(in)) shouldBe true
     }
 
-    "should ignore line comments" in {
+    "should parse line comments" in {
+      val commentBody = "comment body"
       val in =
-        """
+        s"""
           |asdf
-          |// asdfadsf
+          |//$commentBody
           |adsf
         """.stripMargin
       scan(in) shouldBe List(Lexeme("asdf"), Lexeme("adsf"))
     }
 
-    "should ignore multiline comment" in {
+    "should parse nested multiline comment" in {
+      val commentBody =
+        """|2line
+           |3line
+           |   /*
+           |   4line other level of comments with * and another *
+           |   */
+           |5line
+           |""".stripMargin
       val in =
-        """
-          |asdf
-          |/* asdfadsf
-          |asdf
-          |adsf
-          |  */
-          |adsf
+        s"""
+          |1line
+          |/*$commentBody*/
+          |6line
         """.stripMargin
-      scan(in) shouldBe List(Lexeme("asdf"), Lexeme("adsf"))
+      scan(in) should contain theSameElementsInOrderAs List(Lexeme("1line"), Lexeme("6line"))
     }
 
     "should parse REST definition" in {
@@ -121,7 +127,6 @@ class LexerSpec extends WordSpec with Matchers {
           |/**$commentSample*/
           |asdf
         """.stripMargin
-
       scan(in) shouldBe List(Lexeme("asdf"), LeftDoc(commentSample), Lexeme("asdf"))
     }
 
@@ -154,7 +159,7 @@ class LexerSpec extends WordSpec with Matchers {
 
       val in =
         s"""
-          |  ASD { // $lineDocSample
+          |  ASD { //$lineDocSample
           |    /*$multiDocSample*/
           |    /**$multiDocSample*/
           |    abc.abc # 789 : T[B] --$lineDocSample

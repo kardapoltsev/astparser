@@ -72,14 +72,7 @@ class Lexer extends BaseLexer {
   import scala.util.parsing.input.CharArrayReader.EofCh
 
   override def whitespace: Parser[Any] = rep[Any](
-    elem("", _.isWhitespace)
-      | '/' ~ '/' ~ tillEndOfLine
-      | '/' ~ '*' ~ not('*') ~ multilineCommentBody
-  )
-
-  protected def comment: Parser[Any] = (
-    rep(noneOf(EofCh, '*')) ~ '*' ~ '/' ^^ { case _         => ' ' }
-      | rep(noneOf(EofCh, '*')) ~ '*' ~ comment ^^ { case _ => ' ' }
+    elem("whitespace elem", _.isWhitespace) | comment
   )
 
   protected def eq    = '=' ^^^ Eq()
@@ -120,7 +113,7 @@ class Lexer extends BaseLexer {
     acceptSeq(keyword) ~ ' ' ^^^ keywordToken
   }
 
-  override def errorToken(msg: String) = Tokens.Error(msg)
+  override def errorToken(msg: String): Token = Tokens.Error(msg)
 
   override def token: Parser[Token] = positioned(
     packageKeyword
@@ -144,30 +137,45 @@ class Lexer extends BaseLexer {
     eq | colon | hash | dot | comma | leftBrace | rightBrace | leftBracket | rightBracket |
       leftParen | rightParen | dash | lessSign | greaterSign
 
-  private def lexemeChar = elem("valid lexeme", x => x != EofCh && (x.isLetter || x.isDigit))
+  private def lexemeChar = elem("valid lexeme", x => x != EofCh && x.isLetterOrDigit)
 
   private def lexeme: Parser[Lexeme] =
     opt('`') ~> rep1(lexemeChar) <~ opt('`') ^^ (x => Lexeme(x.mkString))
 
   private def lineDoc: Parser[RightDoc] = ('-' ~ '-') ~> tillEndOfLine ^^ RightDoc
 
-  private def multilineDoc: Parser[LeftDoc] =
-    ('/' ~ '*' ~ '*') ~> multilineCommentBody ^^ LeftDoc
+  private def multilineDoc: Parser[LeftDoc] = {
+    docStart ~> multilineDocBody <~ docEnd ^^ LeftDoc
+  }
+
+  private def commentStart = '/' ~ '*' ~ not('*')
+  private def commentEnd   = '*' ~ '/'
+  private def docStart     = '/' ~ '*' ~ '*'
+  private def docEnd       = commentEnd
+
+  private def multilineDocBody: Parser[String] = {
+    rep1(not(docEnd | docStart) ~> noneOf(EofCh)) ^^ (_.mkString)
+  }
 
   def doc: Parser[Doc] = lineDoc | multilineDoc
 
   private def tillEndOfLine = rep(noneOf(EofCh, '\n')) ^^ (_.mkString)
 
-  private def multilineCommentBody: Parser[String] = {
-    def seq = rep(noneOf('*', EofCh)) ^^ (_.mkString)
+  private def comment: Parser[String] = lineComment | multilineComment
 
-    (seq <~ ('*' ~ '/')
-      | seq ~ ('*' ~> multilineCommentBody) ^^ {
-        case a ~ b => a + "*" + b
-      }
-      | seq <~ eof ~ err("unclosed comment"))
+  private def lineComment: Parser[String] = '/' ~> '/' ~> tillEndOfLine
+
+  private def multilineComment: Parser[String] = {
+    commentStart ~> rep1(multilineComment | multilineCommentBody) <~ commentEnd ^^ { elems =>
+      elems.mkString
+    }
   }
 
-  private def noneOf(xs: Elem*): Parser[Elem] = elem("", e => !xs.contains(e))
+  private def multilineCommentBody: Parser[String] = {
+    rep1(not(commentEnd | commentStart) ~> noneOf(EofCh)) ^^ (_.mkString)
+  }
+
+  private def noneOf(xs: Elem*): Parser[Elem] =
+    elem("Such elem doesn't expected here", e => !xs.contains(e))
 
 }

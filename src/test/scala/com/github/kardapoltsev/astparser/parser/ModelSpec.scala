@@ -498,6 +498,30 @@ class ModelSpec extends TestBase {
 
       model.getDefinition("api.A.a").headOption shouldBe defined
     }
+
+    "handle comments" in {
+      noException shouldBe thrownBy {
+        buildParserModel(
+          """
+            |schema api
+            |external type Int
+            |
+            |/* multiline
+            | comment
+            |*/
+            |type A {
+            |//line comment
+            |  a ::
+            |  /* nested
+            |     /* multiline
+            |     comment */
+            |   */
+            |    param1: Int
+            |}
+        """.stripMargin
+        )
+      }
+    }
   }
 
 }
