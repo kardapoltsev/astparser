@@ -450,7 +450,7 @@ private[astparser] final case class Model(
     schemas.find(_.name == name)
   }
 
-  private[astparser] def validate(): Unit = loggingTime("validateModel") {
+  private[astparser] def validate(): Unit = loggingTime("validateParserModel") {
     val c = schemas.flatMap(allChildren)
     log.info(s"validating model containing ${c.size} elements")
     val allReferences = c.collect {
@@ -560,7 +560,7 @@ private[astparser] final case class Model(
 
   private def failValidation(msg: String): Unit = {
     log.error(msg)
-    throw new ModelValidationException(msg)
+    throw new ParserValidationException(msg)
   }
 
   private def allChildren(e: Element): Seq[Element] = {

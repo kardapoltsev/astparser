@@ -19,7 +19,6 @@ initialize ~= { _ =>
 updateOptions := updateOptions.value.withCachedResolution(CacheUpdate)
 //incOptions := incOptions.value.withNameHashing(true)
 
-scalafixDependencies in ThisBuild += "org.scalatest" %% "autofix" % "3.1.0.0"
 addCompilerPlugin(scalafixSemanticdb)
 addCommandAlias("checkall", "; compile:scalafix --check ; test:scalafix --check")
 addCommandAlias("fixall", "all compile:scalafix test:scalafix")
@@ -30,7 +29,7 @@ scalacOptions ++= Seq(
   "-deprecation",
   "-unchecked",
   "-feature",
-//  "-Xfatal-warnings",
+  "-Xfatal-warnings",
   "-Ywarn-unused-import",
   "-Xlint",
   "-Yrangepos"

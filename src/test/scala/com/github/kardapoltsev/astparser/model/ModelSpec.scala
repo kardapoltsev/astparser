@@ -17,7 +17,7 @@
 package com.github.kardapoltsev.astparser.model
 
 import com.github.kardapoltsev.astparser.TestBase
-import com.github.kardapoltsev.astparser.parser.ModelValidationException
+import com.github.kardapoltsev.astparser.parser.ParserValidationException
 import com.github.kardapoltsev.astparser.parser.http.Get
 
 class ModelSpec extends TestBase {
@@ -156,7 +156,7 @@ class ModelSpec extends TestBase {
           |  userId: Int
           |  => User
           |
-          |call GetUser(3-) ::
+          |call GetUser(3-10) ::
           |  userId: Int
           |  newParam: Int
           |  => User
@@ -165,7 +165,7 @@ class ModelSpec extends TestBase {
           |  userId: Int
           |  => User
           |
-          |call GetUserNewest(5-) ::
+          |call GetUserNewest(5-10) ::
           |  userId: Int
           |  => User
           |
@@ -182,7 +182,7 @@ class ModelSpec extends TestBase {
           |  id: Int
           |  => User
           |
-          |call getUser(2-) ::
+          |call getUser(2-10) ::
           |  id: Int
           |  param: Int
           |  => User
@@ -348,7 +348,7 @@ class ModelSpec extends TestBase {
     }
 
     "not allow to extend self" in {
-      a[ModelValidationException] shouldBe thrownBy {
+      a[ParserValidationException] shouldBe thrownBy {
         buildModel(
           """
             |schema api
@@ -399,6 +399,31 @@ class ModelSpec extends TestBase {
 
       model.filterConstrained(Seq("DisableB")).getDefinition("api.pkg.B") shouldBe empty
       model.filterConstrained(Seq("DisableB")).getDefinition("api.pkg") shouldBe empty
+    }
+
+    "validate model after slicing" in {
+      val model = buildModel(
+        """
+          |schema api
+          |external type Int
+          |
+          |type A {
+          |  a(1-1) ::
+          |    param: Int
+          |}
+          |
+          |type B {
+          |  b ::
+          |    param: A.a
+          |}
+        """.stripMargin
+      )
+
+      model.getDefinition("api.B.b") should have size 1
+      a[ModelValidationException] shouldBe thrownBy {
+        model.slice(2, 2)
+      }
+
     }
   }
 

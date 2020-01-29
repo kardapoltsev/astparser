@@ -16,4 +16,4 @@
 
 package com.github.kardapoltsev.astparser.parser
 
-class ModelValidationException(msg: String) extends Exception(msg)
+class ParserValidationException(msg: String) extends Exception(msg)

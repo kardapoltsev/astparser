@@ -196,7 +196,7 @@ class ModelSpec extends TestBase {
           |  => Void
           |}
         """.stripMargin
-      an[ModelValidationException] shouldBe thrownBy {
+      an[ParserValidationException] shouldBe thrownBy {
         buildParserModel(s1)
       }
     }
@@ -353,7 +353,7 @@ class ModelSpec extends TestBase {
     }
 
     "validate duplicate ids" in {
-      a[ModelValidationException] shouldBe thrownBy {
+      a[ParserValidationException] shouldBe thrownBy {
         buildParserModel(
           """
             |schema api
@@ -371,7 +371,7 @@ class ModelSpec extends TestBase {
     }
 
     "validate duplicate definitions" in {
-      a[ModelValidationException] shouldBe thrownBy {
+      a[ParserValidationException] shouldBe thrownBy {
         buildParserModel(
           """
             |schema api
@@ -414,7 +414,7 @@ class ModelSpec extends TestBase {
     }
 
     "validate layer ranges" ignore {
-      a[ModelValidationException] shouldBe thrownBy {
+      a[ParserValidationException] shouldBe thrownBy {
         buildParserModel(
           """
             |schema api
@@ -439,7 +439,7 @@ class ModelSpec extends TestBase {
     }
 
     "validate trait fields" in {
-      a[ModelValidationException] shouldBe thrownBy {
+      a[ParserValidationException] shouldBe thrownBy {
         buildParserModel(
           """
             |schema api

@@ -18,14 +18,15 @@ package com.github.kardapoltsev.astparser.model
 
 import com.github.kardapoltsev.astparser.parser
 import com.github.kardapoltsev.astparser.parser.AstParser
-import com.github.kardapoltsev.astparser.parser.doc.{DocParser}
+import com.github.kardapoltsev.astparser.parser.doc.DocParser
 import com.github.kardapoltsev.astparser.parser.doc
 import com.github.kardapoltsev.astparser.parser.http.{HttpParser, HttpRequest, PathParam}
+import com.github.kardapoltsev.astparser.util.Logger
 
 case class Model(
   schemas: Seq[Schema],
   private[astparser] val parsedModel: parser.Model
-) {
+) extends Logger {
 
   private val definitions = deepDefinitions
     .groupBy(_.fullName)
@@ -46,8 +47,9 @@ case class Model(
   def getType(typeReference: TypeReference): TypeLike = {
     getDefinition(typeReference.fullName) match {
       case Seq(t: TypeLike) => t
-      case x =>
-        throw new Exception(s"found unexpected entity for $typeReference: $x")
+      case found if found.isEmpty =>
+        throw new ReferenceNotFoundException(s"could not resolve $typeReference")
+      case x => throw new ModelException(s"found unexpected entity for $typeReference: $x")
     }
   }
 
@@ -60,6 +62,49 @@ case class Model(
     this.copy(schemas = filteredSchemas)
   }
 
+  private[astparser] def validate(): Unit = loggingTime("validateModel") {
+    val definitions = deepDefinitions
+    log.info(s"validating model containing ${definitions.length} elements")
+
+    def checkTypeReference(ref: TypeReference, parent: Definition): Unit = {
+      try {
+        this.getType(ref)
+      } catch {
+        case e: ModelException =>
+          log.error(e)
+          failValidation(s"could not resolve $ref from $parent")
+      }
+    }
+
+    def checkArguments(args: Seq[Argument], parent: Definition): Unit = {
+      args.foreach { a =>
+        checkTypeReference(a.`type`.typeReference, parent)
+      }
+    }
+
+    definitions.foreach {
+      case d: Call =>
+        checkTypeReference(d.returnType.typeReference, d)
+        checkArguments(d.arguments, d)
+      case d: Trait =>
+        checkArguments(d.arguments, d)
+      case d: TypeAlias =>
+        checkTypeReference(d.`type`.typeReference, d)
+      case d: TypeConstructor =>
+        d.versions.foreach { cv =>
+          checkArguments(cv.arguments, cv)
+        }
+      case _: TypeConstructorVersion                          => // nothing to do. It must be validated before
+      case _: Package | _: ExternalType | _: Schema | _: Type => // nothing to check
+    }
+  }
+
+  private def failValidation(msg: String): Unit = {
+    log.error(msg)
+    throw new ModelValidationException(msg)
+  }
+
+  validate()
 }
 
 object Model {
