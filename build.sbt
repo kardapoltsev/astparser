@@ -4,8 +4,8 @@ val CacheUpdate  = true
 
 organization := Organization
 name := "ast-parser"
-scalaVersion := "2.11.12"
-crossScalaVersions := Seq(scalaVersion.value, "2.12.10") // 2.10 was removed due to scalafix plugin
+scalaVersion := "2.12.10"
+crossScalaVersions := Seq("2.11.12", scalaVersion.value) // 2.10 was removed due to scalafix plugin
 organizationName := "Alexey Kardapoltsev"
 organizationHomepage := Some(url("https://github.com/kardapoltsev"))
 parallelExecution in Test := true

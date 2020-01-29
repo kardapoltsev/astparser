@@ -36,7 +36,7 @@ class BaseParser extends Parsers with Logger {
   private class Printer(val prefix: String = "### ", val indent: Int = 0) {
     def println(str: String): Unit = {
       val p = prefix + " " * indent
-      Predef.println(str.lines.map(p + _).mkString(s"\n"))
+      Predef.println(str.linesIterator.map(l => p + l).mkString(s"\n"))
     }
 
     def newIndent() = new Printer("", indent + 1)
