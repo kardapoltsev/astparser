@@ -1,9 +1,8 @@
 language: scala
 scala:
-   - 2.11.12
-   - 2.12.7
+   - 2.12.10
 jdk:
-  - oraclejdk9
+  - oraclejdk11
 
 cache:
   directories:
@@ -11,5 +10,5 @@ cache:
   - $HOME/.sbt
   - $HOME/.coursier/cache
 
-script: "sbt clean checkall coverage test"
+script: "sbt clean checkall +test"
 after_success: "sbt coverageReport coveralls"
