@@ -319,6 +319,33 @@ class SchemaGeneratorSpec extends TestBase {
           |  param1 : Int
           |  => Int""".stripMargin
     }
+
+    "generate constraints" in {
+      val g = generate(
+        """
+          |? FeatureA
+          |schema api
+          |external type Int
+          |
+          |?! FeatureB
+          |? FeatureC
+          |call `call` ::
+          |  param1 : Int
+          |  => Int
+        """.stripMargin
+      )
+      g.head.content shouldBe
+        """? FeatureA
+          |schema api
+          |
+          |external type Int
+          |
+          |? FeatureC
+          |?! FeatureB
+          |call `call` ::
+          |  param1 : Int
+          |  => Int""".stripMargin
+    }
   }
 
 }
