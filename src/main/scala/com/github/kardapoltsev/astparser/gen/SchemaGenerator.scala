@@ -45,7 +45,9 @@ class SchemaGenerator(
   }
 
   private def generateHeader(schema: Schema): String = {
-    s"${K.Schema} ${schema.name}" + ls * 2
+    s"""${formatConstraint(schema)}${K.Schema} ${schema.name}
+       |
+       |""".stripMargin
   }
 
   private def generateDefinition(d: Definition): Option[String] = {
@@ -63,30 +65,32 @@ class SchemaGenerator(
     }
   }
 
-  private def generatePackage(p: PackageLike): String = {
+  private def generatePackage(p: Package): String = {
     val c = p.definitions.flatMap { d =>
       generateDefinition(d)
-    }.mkString(System.lineSeparator())
+    }.mkString(ls)
     s"""
-      |package ${p.name} {
+      |${formatConstraint(p)}package ${p.name} {
       |${c.offset(2)}
       |}
       |""".stripMargin
   }
 
   private def generateImport(i: Import): String = {
-    s"${K.Import} ${i.reference.fullName}"
+    s"""${formatConstraint(i)}${K.Import} ${i.reference.fullName}
+       |""".stripMargin
   }
 
   private def generateExternalType(et: ExternalType): String = {
     val docs = formatDocs(et.docs)
     s"""$docs
-       |${K.External} ${K.Type} ${et.fullName}${formatTypeParameters(et.typeArguments)}
+       |${formatConstraint(et)}${K.External} ${K.Type} ${et.fullName}${formatTypeParameters(
+         et.typeArguments)}
        |""".stripMargin.trim
   }
 
   private def generateTypeAlias(ta: TypeAlias): String = {
-    s"${K.Type} ${ta.name} = ${formatTypeStatement(ta.`type`)}"
+    s"""${formatConstraint(ta)}${K.Type} ${ta.name} = ${formatTypeStatement(ta.`type`)}"""
   }
 
   private def generateTrait(t: Trait): String = {
@@ -104,7 +108,7 @@ class SchemaGenerator(
     val ext         = formatParents(t.parents)
     val escapedName = escaped(t.name)
     s"""$docs
-       |${K.Type} $escapedName$ext {
+       |${formatConstraint(t)}${K.Type} $escapedName$ext {
        |${c.offset(2)}
        |}""".stripMargin
   }
@@ -118,21 +122,22 @@ class SchemaGenerator(
     val v                 = formatVersion(c.versions)
     val escapedName       = escaped(c.name)
     s"""$docs
-       |$escapedName$id$v$ext$args""".stripMargin
+       |${formatConstraint(c)}$escapedName$id$v$ext$args""".stripMargin
   }
 
   private def generateCall(c: Call): String = {
     val docs = formatDocs(c.docs)
     val httpString = c.httpRequest match {
-      case Some(http) => ls + "@" + http
+      case Some(http) => "@" + http + ls
       case None       => ""
     }
     val ext         = formatParents(c.parents)
     val id          = formatId(c.maybeId)
     val v           = formatVersion(c.versions)
     val escapedName = escaped(c.name)
-    s"""$docs$httpString
-       |${K.Call} $escapedName$id$v$ext${generateArguments(c.arguments)}
+    s"""$docs
+       |${formatConstraint(c)}$httpString${K.Call} $escapedName$id$v$ext${generateArguments(
+         c.arguments)}
        |  => ${formatTypeStatement(c.returnType)}""".stripMargin
   }
 
@@ -232,6 +237,23 @@ class SchemaGenerator(
     } else {
       s" (${version.start.map(_.toString).getOrElse("")}-${version.end.map(_.toString).getOrElse("")})"
     }
+  }
+
+  private def formatConstraint(constrained: Constrained): String = {
+    val enable  = constrained.constraint.enable.constraints.mkString("", ", ", "")
+    val disable = constrained.constraint.disable.constraints.mkString("", ", ", "")
+    val b       = new StringBuilder
+    if (enable.nonEmpty) {
+      b.append("? ")
+      b.append(enable)
+    }
+    if (disable.nonEmpty) {
+      if (b.nonEmpty) b.append(ls)
+      b.append("?! ")
+      b.append(disable)
+    }
+    if (b.nonEmpty) b.append(ls)
+    b.result()
   }
 
 }
