@@ -69,7 +69,13 @@ class SchemaGeneratorSpec extends TestBase {
       val g = generate("""
           |schema api
           |
+          |import p1.A
+          |import p2.B
+          |
           |package p1 {
+          |  type A {
+          |    a
+          |  }
           |  type B {
           |    b
           |  }
@@ -82,8 +88,15 @@ class SchemaGeneratorSpec extends TestBase {
       g.head.content shouldBe
         """schema api
           |
+          |import p1.A
+          |import p2.B
           |
           |package p1 {
+          |
+          |  type A {
+          |
+          |    a
+          |  }
           |
           |  type B {
           |

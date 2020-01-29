@@ -77,8 +77,7 @@ class SchemaGenerator(
   }
 
   private def generateImport(i: Import): String = {
-    s"""${formatConstraint(i)}${K.Import} ${i.reference.fullName}
-       |""".stripMargin
+    s"""${formatConstraint(i)}${K.Import} ${i.reference.fullName}"""
   }
 
   private def generateExternalType(et: ExternalType): String = {
