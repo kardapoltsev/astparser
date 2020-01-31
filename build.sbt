@@ -30,7 +30,7 @@ scalacOptions ++= Seq(
   "-deprecation",
   "-unchecked",
   "-feature",
-  "-Xfatal-warnings",
+  //"-Xfatal-warnings", turned of because of StringLike.lineIterator/lines deprecations
   "-Ywarn-unused-import",
   "-Xlint",
   "-Yrangepos"
