@@ -5,12 +5,13 @@ val CacheUpdate  = true
 organization := Organization
 name := "ast-parser"
 scalaVersion := "2.12.10"
-crossScalaVersions := Seq("2.11.12", scalaVersion.value) // 2.10 was removed due to scalafix plugin
+crossScalaVersions := Seq("2.11.12", scalaVersion.value)
 organizationName := "Alexey Kardapoltsev"
 organizationHomepage := Some(url("https://github.com/kardapoltsev"))
 parallelExecution in Test := true
 scalafmtOnCompile in ThisBuild := true
 Global / onChangedBuildSource := ReloadOnSourceChanges
+scapegoatVersion in ThisBuild := "1.3.8"
 
 initialize ~= { _ =>
   if (sys.props("java.specification.version") < "1.7")

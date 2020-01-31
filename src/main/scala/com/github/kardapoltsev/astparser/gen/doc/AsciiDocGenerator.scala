@@ -32,8 +32,9 @@ class AsciiDocGenerator(
 
   private def generateSchema(schema: Schema): Seq[GeneratedFile] = {
     log.debug(s"generating docs for `${schema.fullName}`")
-    val fullDoc = generateDefinition(schema).get
-    Seq(GeneratedFile(".", schema.fullName + s"-v$targetVersion.ad", fullDoc.render))
+    generateDefinition(schema).toSeq.map { fullDoc =>
+      GeneratedFile(".", schema.fullName + s"-v$targetVersion.ad", fullDoc.render)
+    }
   }
 
   private def generateDefinition(d: Definition): Option[DocNode] = {
@@ -51,7 +52,7 @@ class AsciiDocGenerator(
       case t: Type =>
         val td = typeDoc(t)
         val cd = t.constructors map { c =>
-          constructorDoc(t, c)
+          constructorDoc(c)
         }
         Some(Group(td +: cd))
       case _ =>
@@ -89,7 +90,7 @@ class AsciiDocGenerator(
     )
   }
 
-  private def constructorDoc(t: Type, c: TypeConstructor): DocNode = {
+  private def constructorDoc(c: TypeConstructor): DocNode = {
     val docs = c.versions map { constructor =>
       Group(
         Seq(
