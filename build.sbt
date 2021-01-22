@@ -60,7 +60,8 @@ developers := List(
     id = "kardapoltsev",
     name = "Alexey Kardapoltsev",
     email = "alexey.kardapoltsev@gmail.com",
-    url = url("https://github.com/kardapoltsev"))
+    url = url("https://github.com/kardapoltsev")
+  )
 )
 licenses := Seq(("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-2.0.txt")))
 
