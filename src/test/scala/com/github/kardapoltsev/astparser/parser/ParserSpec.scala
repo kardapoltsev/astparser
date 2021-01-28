@@ -76,9 +76,7 @@ class ParserSpec extends AnyWordSpec with Matchers {
           |type myAlias = Vector[api.User]
         """.stripMargin
       val parsed = parse(typeAlias, in)
-      val t = TypeStatement(
-        ref = Reference("Vector"),
-        typeArguments = Seq(TypeStatement(Reference("api.User"))))
+      val t      = TypeStatement(ref = Reference("Vector"), typeArguments = Seq(TypeStatement(Reference("api.User"))))
       parsed shouldBe TypeAlias("myAlias", t)
     }
 
@@ -106,9 +104,7 @@ class ParserSpec extends AnyWordSpec with Matchers {
           |external type Map[K,V]
         """.stripMargin
       val parsed = parse(externalTypeDefinition, in)
-      parsed shouldBe ExternalType(
-        "Map",
-        Seq(TypeParameter("K", Seq.empty), TypeParameter("V", Seq.empty)))
+      parsed shouldBe ExternalType("Map", Seq(TypeParameter("K", Seq.empty), TypeParameter("V", Seq.empty)))
     }
 
     "parse simple package definition" in new ParserTestEnv {
@@ -167,9 +163,8 @@ class ParserSpec extends AnyWordSpec with Matchers {
                 name = "param3",
                 `type` = TypeStatement(
                   Reference("Map"),
-                  Seq(
-                    TypeStatement(Reference("String"), Seq.empty),
-                    TypeStatement(Reference("Int"), Seq.empty))),
+                  Seq(TypeStatement(Reference("String"), Seq.empty), TypeStatement(Reference("Int"), Seq.empty))
+                ),
                 docs = Seq.empty
               )
             ),
@@ -274,24 +269,24 @@ class ParserSpec extends AnyWordSpec with Matchers {
 
     "save positions for all elements" in new ParserTestEnv {
       val src    = """
-        |schema api
-        |external type Int
-        |type UserId = Int
-        |
-        |package outer.inner {
-        |  import p.B
-        |  type A {
-        |    a ::
-        |      param1: B
-        |
-        |  }
-        |}
-        |
-        |package p {
-        |  type B {
-        |    b
-        |  }
-        |}
+                  |schema api
+                  |external type Int
+                  |type UserId = Int
+                  |
+                  |package outer.inner {
+                  |  import p.B
+                  |  type A {
+                  |    a ::
+                  |      param1: B
+                  |
+                  |  }
+                  |}
+                  |
+                  |package p {
+                  |  type B {
+                  |    b
+                  |  }
+                  |}
       """.stripMargin
       val parsed = parse(src, "source_name")
 

@@ -59,18 +59,24 @@ class DocParser(override protected val enableProfiling: Boolean = false) extends
   }
 
   private def docWord: Parser[String] =
-    accept("doc word", {
-      case Identifier(chars)        => chars
-      case SpecialCharacters(chars) => chars
-      case Dot()                    => "."
-      case Newline()                => "\n"
-      case Space()                  => " "
-    })
+    accept(
+      "doc word",
+      {
+        case Identifier(chars)        => chars
+        case SpecialCharacters(chars) => chars
+        case Dot()                    => "."
+        case Newline()                => "\n"
+        case Space()                  => " "
+      }
+    )
 
   private def identifier: Parser[String] =
-    accept("identifier", {
-      case Identifier(chars) => chars
-    })
+    accept(
+      "identifier",
+      {
+        case Identifier(chars) => chars
+      }
+    )
 
   def parse(input: CharSequence, sourceName: String): Docs = {
     loggingTime(s"parse $sourceName") {

@@ -55,9 +55,9 @@ class SchemaGeneratorSpec extends TestBase {
 
     "generate external types" in {
       val g = generate("""
-          |schema api
-          |
-          |external type Int
+                         |schema api
+                         |
+                         |external type Int
         """.stripMargin)
       g.head.content shouldBe
         """schema api
@@ -67,22 +67,22 @@ class SchemaGeneratorSpec extends TestBase {
 
     "generate imports" in {
       val g = generate("""
-          |schema api
-          |
-          |import p1.A
-          |import p2.B
-          |
-          |package p1 {
-          |  type A {
-          |    a
-          |  }
-          |  type B {
-          |    b
-          |  }
-          |}
-          |package p2 {
-          |  import p1.B
-          |}
+                         |schema api
+                         |
+                         |import p1.A
+                         |import p2.B
+                         |
+                         |package p1 {
+                         |  type A {
+                         |    a
+                         |  }
+                         |  type B {
+                         |    b
+                         |  }
+                         |}
+                         |package p2 {
+                         |  import p1.B
+                         |}
         """.stripMargin)
 
       g.head.content shouldBe
@@ -127,10 +127,10 @@ class SchemaGeneratorSpec extends TestBase {
 
     "generate type aliases" in {
       val g = generate("""
-          |schema api
-          |
-          |external type Int
-          |type UserId = Int
+                         |schema api
+                         |
+                         |external type Int
+                         |type UserId = Int
         """.stripMargin)
       g.head.content shouldBe
         """schema api
@@ -141,38 +141,38 @@ class SchemaGeneratorSpec extends TestBase {
 
     "generate types" in {
       val g = generate("""
-          |schema api
-          |external type Int
-          |external type String
-          |external type Vector
-          |external type Map
-          |trait T
-          |
-          |type MyType {
-          |  myType ::
-          |    param1: Int -- docs
-          |    paramWithVeryLongName: String -- comment
-          |    mapParam: Map[Int, Vector[Int]]
-          |}
-          |
-          |type MyEnum {
-          |  enumA <: T ::
-          |  enumB <: T ::
-          |}
-          |
-          |/** Docs for type B
-          |    Very long
-          |  */
-          |type B <: T {
-          |  b ::
-          |    parameter: api.MyType
-          |    `version`   : Int
-          |
-          |  /** Docs for constructor c
-          |    */
-          |  c ::
-          |    parameter: api.MyType
-          |}
+                         |schema api
+                         |external type Int
+                         |external type String
+                         |external type Vector
+                         |external type Map
+                         |trait T
+                         |
+                         |type MyType {
+                         |  myType ::
+                         |    param1: Int -- docs
+                         |    paramWithVeryLongName: String -- comment
+                         |    mapParam: Map[Int, Vector[Int]]
+                         |}
+                         |
+                         |type MyEnum {
+                         |  enumA <: T ::
+                         |  enumB <: T ::
+                         |}
+                         |
+                         |/** Docs for type B
+                         |    Very long
+                         |  */
+                         |type B <: T {
+                         |  b ::
+                         |    parameter: api.MyType
+                         |    `version`   : Int
+                         |
+                         |  /** Docs for constructor c
+                         |    */
+                         |  c ::
+                         |    parameter: api.MyType
+                         |}
         """.stripMargin)
 
       g.head.content shouldBe
@@ -217,14 +217,14 @@ class SchemaGeneratorSpec extends TestBase {
 
     "generate calls" in {
       val g = generate("""
-          |schema api
-          |external type Int
-          |external type String
-          |external type Void
-          |call myCall ::
-          |  param1: Int -- docs
-          |  paramWithVeryLongName: String -- comment
-          |  => Void
+                         |schema api
+                         |external type Int
+                         |external type String
+                         |external type Void
+                         |call myCall ::
+                         |  param1: Int -- docs
+                         |  paramWithVeryLongName: String -- comment
+                         |  => Void
         """.stripMargin)
 
       g.head.content shouldBe
@@ -242,12 +242,12 @@ class SchemaGeneratorSpec extends TestBase {
 
     "generate versioned calls" in {
       val g = generate("""
-          |schema api
-          |external type Int
-          |external type Void
-          |call myCall(-2) ::
-          |  param1: Int -- docs
-          |  => Void
+                         |schema api
+                         |external type Int
+                         |external type Void
+                         |call myCall(-2) ::
+                         |  param1: Int -- docs
+                         |  => Void
         """.stripMargin)
 
       g.head.content shouldBe
@@ -263,14 +263,14 @@ class SchemaGeneratorSpec extends TestBase {
 
     "generate calls with http definitions" in {
       val g = generate("""
-          |schema api
-          |external type Int
-          |external type Void
-          |@GET /api/call?{`type`}&{param2}
-          |call myCall ::
-          |  `type`: Int
-          |  param2: Int
-          |  => Void
+                         |schema api
+                         |external type Int
+                         |external type Void
+                         |@GET /api/call?{`type`}&{param2}
+                         |call myCall ::
+                         |  `type`: Int
+                         |  param2: Int
+                         |  => Void
         """.stripMargin)
 
       g.head.content shouldBe
@@ -288,13 +288,13 @@ class SchemaGeneratorSpec extends TestBase {
 
     "generate packages" in {
       val g = generate("""
-        |schema api
-        |
-        |package p1.p2 {
-        |  package p3 {
-        |
-        |  }
-        |}
+                         |schema api
+                         |
+                         |package p1.p2 {
+                         |  package p3 {
+                         |
+                         |  }
+                         |}
       """.stripMargin)
       g.head.content shouldBe
         """schema api

@@ -4,14 +4,14 @@ val CacheUpdate  = true
 
 organization := Organization
 name := "ast-parser"
-scalaVersion := "2.12.10"
-crossScalaVersions := Seq("2.11.12", scalaVersion.value)
+scalaVersion := "2.13.4"
+crossScalaVersions := Seq("2.11.12", "2.12.11", scalaVersion.value)
 organizationName := "Alexey Kardapoltsev"
 organizationHomepage := Some(url("https://github.com/kardapoltsev"))
 parallelExecution in Test := true
 scalafmtOnCompile in ThisBuild := true
 Global / onChangedBuildSource := ReloadOnSourceChanges
-scapegoatVersion in ThisBuild := "1.3.8"
+scapegoatVersion in ThisBuild := "1.4.7"
 
 initialize ~= { _ =>
   if (sys.props("java.specification.version") < "1.7")
@@ -31,10 +31,19 @@ scalacOptions ++= Seq(
   "-unchecked",
   "-feature",
   //"-Xfatal-warnings", turned of because of StringLike.lineIterator/lines deprecations
-  "-Ywarn-unused-import",
   "-Xlint",
   "-Yrangepos"
 )
+
+scalacOptions ++= {
+  if (scalaVersion.value.startsWith("2.10") || scalaVersion.value.startsWith("2.13")) {
+    Seq.empty[String]
+  } else {
+    Seq(
+      "-Ywarn-unused-import"
+    )
+  }
+}
 
 //sbt-release configuration
 releasePublishArtifactsAction := PgpKeys.publishSigned.value
@@ -69,10 +78,10 @@ import de.heikoseeberger.sbtheader.AutomateHeaderPlugin
 startYear := Some(2016)
 
 val scalaParsers  = "org.scala-lang.modules"   %% "scala-parser-combinators" % "1.1.2"
-val scalatest     = "org.scalatest"            %% "scalatest"                % "3.1.0" % "test"
-val log4jApi      = "org.apache.logging.log4j" % "log4j-api"                 % "2.13.0"
-val log4jCore     = "org.apache.logging.log4j" % "log4j-core"                % "2.13.0" % "test"
-val log4jScalaApi = "org.apache.logging.log4j" %% "log4j-api-scala"          % "11.0"
+val scalatest     = "org.scalatest"            %% "scalatest"                % "3.2.3"  % "test"
+val log4jApi      = "org.apache.logging.log4j"  % "log4j-api"                % "2.14.0"
+val log4jCore     = "org.apache.logging.log4j"  % "log4j-core"               % "2.14.0" % "test"
+val log4jScalaApi = "org.apache.logging.log4j" %% "log4j-api-scala"          % "12.0"
 
 val baseDependencies = Seq(
   log4jApi,

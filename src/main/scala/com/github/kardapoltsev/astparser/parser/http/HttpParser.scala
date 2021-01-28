@@ -82,13 +82,16 @@ class HttpParser(override protected val enableProfiling: Boolean = false) extend
   }
 
   protected def method: Parser[HttpMethod] =
-    accept("HttpMethod", {
-      case Method("GET")    => Get()
-      case Method("PUT")    => Put()
-      case Method("POST")   => Post()
-      case Method("PATCH")  => Patch()
-      case Method("DELETE") => Delete()
-    })
+    accept(
+      "HttpMethod",
+      {
+        case Method("GET")    => Get()
+        case Method("PUT")    => Put()
+        case Method("POST")   => Post()
+        case Method("PATCH")  => Patch()
+        case Method("DELETE") => Delete()
+      }
+    )
 
   private def url: Parser[Url] = profile("url") {
     positioned {
@@ -118,16 +121,18 @@ class HttpParser(override protected val enableProfiling: Boolean = false) extend
   }
 
   private def identifier: Parser[String] =
-    accept("pathSegment", {
-      case Lexeme(chars) => chars.toString
-    })
+    accept(
+      "pathSegment",
+      {
+        case Lexeme(chars) => chars.toString
+      }
+    )
 
   private def query: Parser[Seq[QueryParam]] = profile("query") {
-    opt(QuestionMark() ~> repsep(LeftBrace() ~> identifier <~ RightBrace(), Ampersand())) ^^ {
-      querySegments =>
-        querySegments.getOrElse(Seq.empty) map { s =>
-          QueryParam(s)
-        }
+    opt(QuestionMark() ~> repsep(LeftBrace() ~> identifier <~ RightBrace(), Ampersand())) ^^ { querySegments =>
+      querySegments.getOrElse(Seq.empty) map { s =>
+        QueryParam(s)
+      }
     }
   }
 

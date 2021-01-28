@@ -23,7 +23,7 @@ case class SourcePosition(position: Position, sourceName: String) extends Positi
 
   override def line = position.line
 
-  override def lineContents = position match {
+  override def lineContents: String = position match {
     case p: OffsetPosition => p.lineContents
     case p: SourcePosition => p.lineContents
     case NoPosition        => ""

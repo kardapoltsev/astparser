@@ -70,10 +70,10 @@ class SchemaGenerator(
       generateDefinition(d)
     }.mkString(ls)
     s"""
-      |${formatConstraint(p)}package ${p.name} {
-      |${c.offset(2)}
-      |}
-      |""".stripMargin
+       |${formatConstraint(p)}package ${p.name} {
+       |${c.offset(2)}
+       |}
+       |""".stripMargin
   }
 
   private def generateImport(i: Import): String = {
@@ -83,8 +83,7 @@ class SchemaGenerator(
   private def generateExternalType(et: ExternalType): String = {
     val docs = formatDocs(et.docs)
     s"""$docs
-       |${formatConstraint(et)}${K.External} ${K.Type} ${et.fullName}${formatTypeParameters(
-         et.typeArguments)}
+       |${formatConstraint(et)}${K.External} ${K.Type} ${et.fullName}${formatTypeParameters(et.typeArguments)}
        |""".stripMargin.trim
   }
 
@@ -135,13 +134,11 @@ class SchemaGenerator(
     val v           = formatVersion(c.versions)
     val escapedName = escaped(c.name)
     s"""$docs
-       |${formatConstraint(c)}$httpString${K.Call} $escapedName$id$v$ext${generateArguments(
-         c.arguments)}
+       |${formatConstraint(c)}$httpString${K.Call} $escapedName$id$v$ext${generateArguments(c.arguments)}
        |  => ${formatTypeStatement(c.returnType)}""".stripMargin
   }
 
-  private def generateArguments(args: Seq[Argument],
-                                forceArgumentsOperator: Boolean = false): String = {
+  private def generateArguments(args: Seq[Argument], forceArgumentsOperator: Boolean = false): String = {
     if (args.nonEmpty) {
       val paramNameLength = args.map(n => escaped(n.name).length).max
       val typeLength      = args.map(a => formatTypeStatement(a.`type`).length).max

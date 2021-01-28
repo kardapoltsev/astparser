@@ -22,47 +22,47 @@ class AsciiDocGeneratorSpec extends TestBase {
   "AsciiDocGenerator" should {
     "generate docs" in {
       val model = buildModel(s"""
-           |schema api
-           |external type Int
-           |external type Long
-           |external type Void
-           |
-           |package outer.inner {
-           |  /**Documentation for type A*/
-           |  type A {
-           |    /** Multi line doc
-           |        for constructor a
-           |     */
-           |    a ::
-           |      param1: Int -- docs for type parameter
-           |
-           |    aEmpty
-           |
-           |    anotherA ::
-           |      param1: Int
-           |      param2: Long
-           |  }
-           |
-           |  type B {
-           |    b ::
-           |      parameter: Int -- docs for parameter with link to `A`
-           |  }
-           |
-           |  @GET /api/x/{pathParam}?{param}
-           |  call X ::
-           |    param: Long
-           |    pathParam: Int
-           |    => Void
-           |}
-           |
-           |package p1 {
-           |  /** Method returns type `outer.inner.A` with trailing spaces       */
-           |  @POST /api/y
-           |  call Y ::
-           |    param: Int -- docs for call parameter
-           |  => outer.inner.A
-           |}
-           |
+                                |schema api
+                                |external type Int
+                                |external type Long
+                                |external type Void
+                                |
+                                |package outer.inner {
+                                |  /**Documentation for type A*/
+                                |  type A {
+                                |    /** Multi line doc
+                                |        for constructor a
+                                |     */
+                                |    a ::
+                                |      param1: Int -- docs for type parameter
+                                |
+                                |    aEmpty
+                                |
+                                |    anotherA ::
+                                |      param1: Int
+                                |      param2: Long
+                                |  }
+                                |
+                                |  type B {
+                                |    b ::
+                                |      parameter: Int -- docs for parameter with link to `A`
+                                |  }
+                                |
+                                |  @GET /api/x/{pathParam}?{param}
+                                |  call X ::
+                                |    param: Long
+                                |    pathParam: Int
+                                |    => Void
+                                |}
+                                |
+                                |package p1 {
+                                |  /** Method returns type `outer.inner.A` with trailing spaces       */
+                                |  @POST /api/y
+                                |  call Y ::
+                                |    param: Int -- docs for call parameter
+                                |  => outer.inner.A
+                                |}
+                                |
          """.stripMargin)
 
       val generator = new AsciiDocGenerator(model, 1)
@@ -76,10 +76,10 @@ class AsciiDocGeneratorSpec extends TestBase {
 
       apiDoc should include(
         """|
-          |[[api.outer.inner.A]]
-          |=== A
-          |Documentation for type A
-          |""".stripMargin
+           |[[api.outer.inner.A]]
+           |=== A
+           |Documentation for type A
+           |""".stripMargin
       )
       apiDoc should include(
         "GET /api/x/{pathParam}?{param}"

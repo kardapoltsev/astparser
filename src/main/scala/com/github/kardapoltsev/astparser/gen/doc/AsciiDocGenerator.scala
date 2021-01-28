@@ -77,7 +77,8 @@ class AsciiDocGenerator(
           Text("Result type: "),
           linkified(m.returnType),
           LineBreak
-        ) ++ docs),
+        ) ++ docs
+      ),
       httpString(m),
       Paragraph(paramsTable(m.arguments))
     )
@@ -131,13 +132,17 @@ class AsciiDocGenerator(
   }
 
   private def paramsTable(params: Seq[Argument]): Table = {
-    Table("", None, params.map { p =>
-      Seq(
-        Text(p.name),
-        linkified(p.`type`),
-        renderDocs(p.docs)
-      )
-    })
+    Table(
+      "",
+      None,
+      params.map { p =>
+        Seq(
+          Text(p.name),
+          linkified(p.`type`),
+          renderDocs(p.docs)
+        )
+      }
+    )
   }
 
   private def httpString(m: Call): DocNode = {
@@ -152,7 +157,7 @@ class AsciiDocGenerator(
 }
 
 object AsciiDocGenerator {
-  private[doc] sealed trait DocNode {
+  sealed private[doc] trait DocNode {
     def render: String
   }
 
@@ -232,10 +237,7 @@ object AsciiDocGenerator {
 
   }
 
-  private[doc] case class Table(name: String,
-                                headers: Option[Seq[DocNode]],
-                                rows: Seq[Seq[DocNode]])
-      extends DocNode {
+  private[doc] case class Table(name: String, headers: Option[Seq[DocNode]], rows: Seq[Seq[DocNode]]) extends DocNode {
     val width = headers.map(_.size).getOrElse(0) max
       (if (rows.isEmpty) 0 else rows.maxBy(_.size).size)
     override def render: String = {

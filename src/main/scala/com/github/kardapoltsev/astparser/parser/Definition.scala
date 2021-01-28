@@ -287,9 +287,7 @@ final private[astparser] case class TypeStatement(
         case found if found.nonEmpty =>
           val pn = found.head.packageName
           val n  = found.head.name
-          assume(
-            found.forall(_.packageName == pn),
-            s"${r.humanReadable} resolved to unexpected $found")
+          assume(found.forall(_.packageName == pn), s"${r.humanReadable} resolved to unexpected $found")
           assume(found.forall(_.name == n), s"${r.humanReadable} resolved to unexpected $found")
           found.head
         case _ =>
@@ -365,8 +363,7 @@ sealed private[astparser] trait PackageLike extends Definition with Logger {
                 }
             }
           case Some(x) =>
-            throw new Exception(
-              s"expected package for name `$packageName`, found ${x.humanReadable}")
+            throw new Exception(s"expected package for name `$packageName`, found ${x.humanReadable}")
           case None =>
             getDefinition(ref) match {
               case found if found.nonEmpty => found
@@ -500,13 +497,11 @@ final private[astparser] case class Model(
     val duplicateDefinitions = deepDefinitions.map { definition =>
       val duplicates = definition.children.collect {
         case ne: NamedElement => ne
-      }.groupBy(_.name)
-        .filter { case (name, elems) => elems.size > 1 }
-        .map { case (name, elems) => elems }
-        .filter { elems =>
+      }.groupBy(_.name).filter { case (name, elems) => elems.size > 1 }.map { case (name, elems) => elems }.filter {
+        elems =>
           !elems.forall(_.isInstanceOf[TypeConstructor]) &&
           !elems.forall(_.isInstanceOf[Call])
-        }
+      }
       definition -> duplicates
     }.filter { case (_, duplicates) => duplicates.nonEmpty }
 

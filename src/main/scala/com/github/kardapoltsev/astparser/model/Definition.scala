@@ -53,9 +53,7 @@ sealed trait Constrained {
   def isEnabled(enabledFeatures: Seq[String]): Boolean = {
     val enabled  = constraint.enable.constraints.intersect(enabledFeatures)
     val disabled = constraint.disable.constraints.intersect(enabledFeatures)
-    assert(
-      enabled.isEmpty || disabled.isEmpty,
-      "enabledFeatures contains both allowed and disallowed")
+    assert(enabled.isEmpty || disabled.isEmpty, "enabledFeatures contains both allowed and disallowed")
     (constraint.enable.constraints.isEmpty || enabled.nonEmpty) && disabled.isEmpty
   }
 }
@@ -316,7 +314,9 @@ sealed trait PackageLike extends Definition with Constrained {
     if (isEnabled(enabledFeatures)) {
       definitions.flatMap {
         case p: PackageLike => p.filterConstrained(enabledFeatures)
-        case d: Constrained => if (d.isEnabled(enabledFeatures)) { Some(d) } else None
+        case d: Constrained =>
+          if (d.isEnabled(enabledFeatures)) { Some(d) }
+          else None
         case c: TypeConstructor =>
           val filteredVersions = c.versions.filter(_.isEnabled(enabledFeatures))
           if (filteredVersions.nonEmpty) {

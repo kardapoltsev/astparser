@@ -72,9 +72,9 @@ class LexerSpec extends AnyWordSpec with Matchers {
       val commentBody = "comment body"
       val in =
         s"""
-          |asdf
-          |//$commentBody
-          |adsf
+           |asdf
+           |//$commentBody
+           |adsf
         """.stripMargin
       scan(in) shouldBe List(Lexeme("asdf"), Lexeme("adsf"))
     }
@@ -90,9 +90,9 @@ class LexerSpec extends AnyWordSpec with Matchers {
            |""".stripMargin
       val in =
         s"""
-          |1line
-          |/*$commentBody*/
-          |6line
+           |1line
+           |/*$commentBody*/
+           |6line
         """.stripMargin
       scan(in) should contain theSameElementsInOrderAs List(Lexeme("1line"), Lexeme("6line"))
     }
@@ -123,9 +123,9 @@ class LexerSpec extends AnyWordSpec with Matchers {
 
       val in =
         s"""
-          |asdf
-          |/**$commentSample*/
-          |asdf
+           |asdf
+           |/**$commentSample*/
+           |asdf
         """.stripMargin
       scan(in) shouldBe List(Lexeme("asdf"), LeftDoc(commentSample), Lexeme("asdf"))
     }
@@ -159,11 +159,11 @@ class LexerSpec extends AnyWordSpec with Matchers {
 
       val in =
         s"""
-          |  ASD { //$lineDocSample
-          |    /*$multiDocSample*/
-          |    /**$multiDocSample*/
-          |    abc.abc # 789 : T[B] --$lineDocSample
-          |  }
+           |  ASD { //$lineDocSample
+           |    /*$multiDocSample*/
+           |    /**$multiDocSample*/
+           |    abc.abc # 789 : T[B] --$lineDocSample
+           |  }
         """.stripMargin
 
       val res = scan(in)

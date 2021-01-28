@@ -260,7 +260,8 @@ class ModelSpec extends TestBase {
       typeA.asInstanceOf[Type].docs shouldBe Documentation(
         Seq(
           PlainDoc("Docs for type A")
-        ))
+        )
+      )
       val arg = typeA.asInstanceOf[Type].constructors.head.versions.head.arguments.head
       arg.docs.content should have size 2
       arg.docs.content.head shouldBe PlainDoc("docs for param1 with a link to ")
@@ -274,19 +275,19 @@ class ModelSpec extends TestBase {
 
     "resolve references from imports" in {
       val m = buildModel("""
-          |schema api
-          |
-          |package p1 {
-          |  type A {
-          |    a
-          |  }
-          |}
-          |package p2 {
-          |  import p1.A
-          |  type B {
-          |    b -- reference from import: `A.a`
-          |  }
-          |}
+                           |schema api
+                           |
+                           |package p1 {
+                           |  type A {
+                           |    a
+                           |  }
+                           |}
+                           |package p2 {
+                           |  import p1.A
+                           |  type B {
+                           |    b -- reference from import: `A.a`
+                           |  }
+                           |}
         """.stripMargin)
 
       val maybeTypeB = m.getDefinition("api.p2.B").headOption

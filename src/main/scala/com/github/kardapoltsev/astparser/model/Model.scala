@@ -297,19 +297,14 @@ object Model {
       case t: parser.Trait        => convertTrait(t)
       case e: parser.ExternalType => convertExternalType(e)
       case other =>
-        throw new Exception(
-          s"expected trait or external type as parent, got ${other.humanReadable}")
+        throw new Exception(s"expected trait or external type as parent, got ${other.humanReadable}")
     }
   }
 
   private def convertTypeAlias(
     a: parser.TypeAlias
   )(implicit m: parser.Model): TypeAlias = {
-    TypeAlias(
-      a.packageName,
-      a.name,
-      convertTypeStatement(a.`type`),
-      convertConstraint(a.constraint))
+    TypeAlias(a.packageName, a.name, convertTypeStatement(a.`type`), convertConstraint(a.constraint))
   }
 
   private def resolve(ref: parser.Reference)(implicit m: parser.Model): Seq[parser.TypeLike] = {

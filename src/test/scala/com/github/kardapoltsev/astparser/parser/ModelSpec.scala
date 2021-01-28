@@ -23,18 +23,18 @@ class ModelSpec extends TestBase {
 
     "resolve local references" in {
       val m          = buildParserModel("""
-          |schema api
-          |
-          |package outer.inner {
-          |  type A {
-          |    a ::
-          |      param1: B
-          |  }
-          |
-          |  type B {
-          |    b
-          |  }
-          |}
+                                 |schema api
+                                 |
+                                 |package outer.inner {
+                                 |  type A {
+                                 |    a ::
+                                 |      param1: B
+                                 |  }
+                                 |
+                                 |  type B {
+                                 |    b
+                                 |  }
+                                 |}
         """.stripMargin)
       val maybeTypeA = m.findSchema("api").flatMap(_.getDefinition("outer.inner.A").headOption)
       maybeTypeA shouldBe defined
@@ -85,20 +85,20 @@ class ModelSpec extends TestBase {
 
     "resolve absolute references within one schema" in {
       val m          = buildParserModel("""
-          |schema api
-          |
-          |package p1 {
-          |  type A {
-          |    a ::
-          |      param1: p2.B
-          |
-          |  }
-          |}
-          |package p2 {
-          |  type B {
-          |    b
-          |  }
-          |}
+                                 |schema api
+                                 |
+                                 |package p1 {
+                                 |  type A {
+                                 |    a ::
+                                 |      param1: p2.B
+                                 |
+                                 |  }
+                                 |}
+                                 |package p2 {
+                                 |  type B {
+                                 |    b
+                                 |  }
+                                 |}
         """.stripMargin)
       val maybeTypeA = m.findSchema("api").flatMap(_.getDefinition("p1.A").headOption)
       maybeTypeA shouldBe defined
@@ -203,21 +203,21 @@ class ModelSpec extends TestBase {
 
     "handle imports" in {
       val m     = buildParserModel("""
-          |schema api
-          |
-          |package p1 {
-          |  import p2.B
-          |  type A {
-          |    a ::
-          |      param1: B
-          |
-          |  }
-          |}
-          |package p2 {
-          |  type B {
-          |    b
-          |  }
-          |}
+                                 |schema api
+                                 |
+                                 |package p1 {
+                                 |  import p2.B
+                                 |  type A {
+                                 |    a ::
+                                 |      param1: B
+                                 |
+                                 |  }
+                                 |}
+                                 |package p2 {
+                                 |  type B {
+                                 |    b
+                                 |  }
+                                 |}
         """.stripMargin)
       val api   = m.findSchema("api").head
       val typeA = api.getDefinition("p1.A").head
@@ -526,24 +526,24 @@ class ModelSpec extends TestBase {
     "handle constraints" in {
       val model = buildParserModel(
         """
-            |schema api
-            |external type Int
-            |
-            |?!DisabledPkg, DisabledFeature
-            |package pkg {
-            |  ?EnableA
-            |  ?EnableB
-            |  ?!DisableB
-            |  type A {
-            |    a ::
-            |      param1: Int
-            |  }
-            |}
-            |?EnableFeatureOne
-            |import pkg.A
-            |
-            |?EnableFeatureTwo
-            |type AliasA = A
+          |schema api
+          |external type Int
+          |
+          |?!DisabledPkg, DisabledFeature
+          |package pkg {
+          |  ?EnableA
+          |  ?EnableB
+          |  ?!DisableB
+          |  type A {
+          |    a ::
+          |      param1: Int
+          |  }
+          |}
+          |?EnableFeatureOne
+          |import pkg.A
+          |
+          |?EnableFeatureTwo
+          |type AliasA = A
         """.stripMargin
       )
       val aType = model

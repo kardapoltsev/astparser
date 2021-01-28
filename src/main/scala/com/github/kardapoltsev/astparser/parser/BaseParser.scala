@@ -76,7 +76,8 @@ class BaseParser extends Parsers with Logger {
         printerUnindent()
         println(s"} $name => $t - parse in ${end - start}ms")
         res
-      } else p
+      }
+    else p
   }
 
 }

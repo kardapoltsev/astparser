@@ -217,7 +217,8 @@ class AstParser(
   protected def callDefinition: Parser[Call] = profile("callDefinition") {
     positioned {
       repLeftDoc ~ constraint ~ opt(httpDefinition) ~ (CallKeyword() ~> identifier) ~ opt(hashId) ~ opt(
-        versionsInterval) ~ typeExtensionExpr ~ argumentsExpr ~
+        versionsInterval
+      ) ~ typeExtensionExpr ~ argumentsExpr ~
         (responseOperator ~> typeStatement) ^^ {
         case ld ~ c ~ httpDef ~ name ~ id ~ int ~ parents ~ args ~ rtype =>
           val i = int.getOrElse(VersionsInterval(None, None))
@@ -237,9 +238,12 @@ class AstParser(
   }
 
   private def httpDefinition: Parser[String] = {
-    accept("httpDefinition", {
-      case Http(content) => content
-    })
+    accept(
+      "httpDefinition",
+      {
+        case Http(content) => content
+      }
+    )
   }
 
   protected def apackage: Parser[Package] = profile("package") {
@@ -274,15 +278,21 @@ class AstParser(
   }
 
   protected def leftDoc = positioned {
-    accept("prefix doc", {
-      case LeftDoc(d) => Documentation(d)
-    })
+    accept(
+      "prefix doc",
+      {
+        case LeftDoc(d) => Documentation(d)
+      }
+    )
   }
 
   protected def rightDoc = positioned {
-    accept("suffix doc", {
-      case RightDoc(d) => Documentation(d)
-    })
+    accept(
+      "suffix doc",
+      {
+        case RightDoc(d) => Documentation(d)
+      }
+    )
   }
 
   protected def identifierM: Parser[Elem] =
@@ -304,15 +314,19 @@ class AstParser(
   }
 
   protected def intNumber: Parser[IntNumber] = profile("intNumber") {
-    accept("int number", {
-      case l @ Lexeme(x) if IntNumberRegexp.unapplySeq(x).isDefined =>
-        IntNumber(x.toInt).setPos(l.pos)
-    })
+    accept(
+      "int number",
+      {
+        case l @ Lexeme(x) if IntNumberRegexp.unapplySeq(x).isDefined =>
+          IntNumber(x.toInt).setPos(l.pos)
+      }
+    )
   }
 
   protected def hexNumber: Parser[IntNumber] = profile("hexNumber") {
     accept(
-      "hex number", {
+      "hex number",
+      {
         case l @ Lexeme(x) if HexNumberRegexp.unapplySeq(x).isDefined =>
           //noinspection ScalaStyle
           IntNumber(java.lang.Long.parseLong(x, 16).toInt).setPos(l.pos)
@@ -373,7 +387,8 @@ class AstParser(
     parser(
       new lexer.Scanner(
         new ReaderWithSourcePosition(new CharSequenceReader(input), sourceName)
-      ))
+      )
+    )
   }
 
   def tryParse(input: CharSequence, sourceName: String): ParseResult[Schema] = {
