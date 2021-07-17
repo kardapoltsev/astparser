@@ -70,7 +70,7 @@ class SchemaGenerator(
       generateDefinition(d)
     }.mkString(ls)
     s"""
-       |${formatConstraint(p)}package ${p.name} {
+       |${formatConstraint(p)}package ${escaped(p.name)} {
        |${c.offset(2)}
        |}
        |""".stripMargin
