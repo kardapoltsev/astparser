@@ -1,6 +1,4 @@
 val Organization = "com.github.kardapoltsev"
-val SkipUpdate   = true
-val CacheUpdate  = true
 
 organization := Organization
 name := "ast-parser"
@@ -8,17 +6,15 @@ scalaVersion := "2.13.4"
 crossScalaVersions := Seq("2.11.12", "2.12.11", scalaVersion.value)
 organizationName := "Alexey Kardapoltsev"
 organizationHomepage := Some(url("https://github.com/kardapoltsev"))
-parallelExecution in Test := true
-scalafmtOnCompile in ThisBuild := true
+Test / parallelExecution := true
+ThisBuild / scalafmtOnCompile := true
 Global / onChangedBuildSource := ReloadOnSourceChanges
-scapegoatVersion in ThisBuild := "1.4.7"
+ThisBuild / scapegoatVersion := "1.4.8"
 
 initialize ~= { _ =>
   if (sys.props("java.specification.version") < "1.7")
     sys.error("Java 7 is required for this project.")
 }
-updateOptions := updateOptions.value.withCachedResolution(CacheUpdate)
-//incOptions := incOptions.value.withNameHashing(true)
 
 addCompilerPlugin(scalafixSemanticdb)
 addCommandAlias("checkall", "; compile:scalafix --check ; test:scalafix --check")
@@ -78,9 +74,9 @@ import de.heikoseeberger.sbtheader.AutomateHeaderPlugin
 startYear := Some(2016)
 
 val scalaParsers  = "org.scala-lang.modules"   %% "scala-parser-combinators" % "1.1.2"
-val scalatest     = "org.scalatest"            %% "scalatest"                % "3.2.3"  % "test"
-val log4jApi      = "org.apache.logging.log4j"  % "log4j-api"                % "2.14.0"
-val log4jCore     = "org.apache.logging.log4j"  % "log4j-core"               % "2.14.0" % "test"
+val scalatest     = "org.scalatest"            %% "scalatest"                % "3.2.9"  % "test"
+val log4jApi      = "org.apache.logging.log4j"  % "log4j-api"                % "2.14.1"
+val log4jCore     = "org.apache.logging.log4j"  % "log4j-core"               % "2.14.1" % "test"
 val log4jScalaApi = "org.apache.logging.log4j" %% "log4j-api-scala"          % "12.0"
 
 val baseDependencies = Seq(
@@ -91,7 +87,7 @@ val baseDependencies = Seq(
   scalatest
 )
 
-scalacOptions in (Compile, doc) := Seq(
+Compile / doc / scalacOptions := Seq(
   "-encoding",
   "UTF-8",
   "-Xlint",
