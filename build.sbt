@@ -1,15 +1,15 @@
 val Organization = "com.github.kardapoltsev"
 
-organization := Organization
-name := "ast-parser"
-scalaVersion := "2.13.4"
-crossScalaVersions := Seq("2.11.12", "2.12.11", scalaVersion.value)
-organizationName := "Alexey Kardapoltsev"
-organizationHomepage := Some(url("https://github.com/kardapoltsev"))
-Test / parallelExecution := true
+organization                  := Organization
+name                          := "ast-parser"
+scalaVersion                  := "2.13.4"
+crossScalaVersions            := Seq("2.11.12", "2.12.11", scalaVersion.value)
+organizationName              := "Alexey Kardapoltsev"
+organizationHomepage          := Some(url("https://github.com/kardapoltsev"))
+Test / parallelExecution      := true
 ThisBuild / scalafmtOnCompile := true
 Global / onChangedBuildSource := ReloadOnSourceChanges
-ThisBuild / scapegoatVersion := "1.4.8"
+ThisBuild / scapegoatVersion  := "1.4.8"
 
 initialize ~= { _ =>
   if (sys.props("java.specification.version") < "1.7")
@@ -17,8 +17,7 @@ initialize ~= { _ =>
 }
 
 addCompilerPlugin(scalafixSemanticdb)
-addCommandAlias("checkall", "; compile:scalafix --check ; test:scalafix --check")
-addCommandAlias("fixall", "all compile:scalafix test:scalafix")
+ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.5.0"
 
 scalacOptions ++= Seq(
   "-encoding",
@@ -28,7 +27,7 @@ scalacOptions ++= Seq(
   "-feature",
   //"-Xfatal-warnings", turned of because of StringLike.lineIterator/lines deprecations
   "-Xlint",
-  "-Yrangepos"
+  "-Yrangepos",
 )
 
 scalacOptions ++= {
@@ -43,31 +42,36 @@ scalacOptions ++= {
 
 //sbt-release configuration
 releasePublishArtifactsAction := PgpKeys.publishSigned.value
-releaseCrossBuild := true
+releaseCrossBuild             := true
 
 //publish configuration
 publishMavenStyle := true
+
 publishTo := Some(
   if (isSnapshot.value)
     Opts.resolver.sonatypeSnapshots
   else
     Opts.resolver.sonatypeStaging
 )
+
 homepage := Some(url("https://github.com/kardapoltsev/astparser"))
+
 scmInfo := Some(
   ScmInfo(
     url("https://github.com/kardapoltsev/astparser"),
-    "scm:git@github.com:kardapoltsev/astparser.git"
+    "scm:git@github.com:kardapoltsev/astparser.git",
   )
 )
+
 developers := List(
   Developer(
     id = "kardapoltsev",
     name = "Alexey Kardapoltsev",
     email = "alexey.kardapoltsev@gmail.com",
-    url = url("https://github.com/kardapoltsev")
+    url = url("https://github.com/kardapoltsev"),
   )
 )
+
 licenses := Seq(("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-2.0.txt")))
 
 import de.heikoseeberger.sbtheader.AutomateHeaderPlugin
@@ -84,7 +88,7 @@ val baseDependencies = Seq(
   log4jCore,
   log4jScalaApi,
   scalaParsers,
-  scalatest
+  scalatest,
 )
 
 Compile / doc / scalacOptions := Seq(
@@ -95,7 +99,7 @@ Compile / doc / scalacOptions := Seq(
   "-unchecked",
   "-groups",
   "-implicits",
-  "-diagrams"
+  "-diagrams",
 )
 
 libraryDependencies ++= baseDependencies

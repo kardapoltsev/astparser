@@ -16,9 +16,11 @@
 
 package com.github.kardapoltsev.astparser.parser.doc
 
-import com.github.kardapoltsev.astparser.parser.{BaseParser, ReaderWithSourcePosition}
+import com.github.kardapoltsev.astparser.parser.BaseParser
+import com.github.kardapoltsev.astparser.parser.ReaderWithSourcePosition
 
-import scala.util.parsing.input.{CharSequenceReader, Positional}
+import scala.util.parsing.input.CharSequenceReader
+import scala.util.parsing.input.Positional
 
 sealed trait DocElement                                  extends Positional
 case class DocString(value: String)                      extends DocElement
@@ -67,15 +69,15 @@ class DocParser(override protected val enableProfiling: Boolean = false) extends
         case Dot()                    => "."
         case Newline()                => "\n"
         case Space()                  => " "
-      }
+      },
     )
 
   private def identifier: Parser[String] =
     accept(
       "identifier",
-      {
-        case Identifier(chars) => chars
-      }
+      { case Identifier(chars) =>
+        chars
+      },
     )
 
   def parse(input: CharSequence, sourceName: String): Docs = {
@@ -91,7 +93,7 @@ class DocParser(override protected val enableProfiling: Boolean = false) extends
   protected def tryParse[T](
     parser: Parser[T],
     input: CharSequence,
-    sourceName: String
+    sourceName: String,
   ): ParseResult[T] = {
     val reader  = new ReaderWithSourcePosition(new CharSequenceReader(input), sourceName)
     val scanner = new lexer.Scanner(reader)

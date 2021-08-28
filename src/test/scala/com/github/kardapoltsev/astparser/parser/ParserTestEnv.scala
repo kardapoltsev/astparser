@@ -17,7 +17,9 @@
 package com.github.kardapoltsev.astparser.parser
 
 trait ParserTestEnv extends AstParser {
+
   protected def parse[T](p: Parser[T], input: String): T = {
     parse(phrase(p), input, "<undefined>")
   }
+
 }

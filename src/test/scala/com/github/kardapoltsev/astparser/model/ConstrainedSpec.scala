@@ -20,14 +20,15 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
 class ConstrainedSpec extends AnyWordSpec with Matchers {
+
   private def newConstrained(enabled: Seq[String] = Nil, disabled: Seq[String] = Nil): Constrained = {
     ExternalType(
       parent = "",
       name = "",
       constraint = Constraint(
         EnableConstraint(enabled),
-        DisableConstraint(disabled)
-      )
+        DisableConstraint(disabled),
+      ),
     )
   }
 

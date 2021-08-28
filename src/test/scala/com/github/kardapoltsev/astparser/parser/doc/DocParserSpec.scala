@@ -43,7 +43,7 @@ class DocParserSpec extends AnyWordSpec with Matchers {
         Seq(
           DocString("word 2 "),
           DocReference("ref", "ref"),
-          DocString(" next. Second sentence. characters: (){}[]-=/")
+          DocString(" next. Second sentence. characters: (){}[]-=/"),
         )
       )
     }

@@ -16,12 +16,12 @@
 
 package com.github.kardapoltsev.astparser.gen.doc
 
-import com.github.kardapoltsev.astparser.gen.{GeneratedFile}
+import com.github.kardapoltsev.astparser.gen.GeneratedFile
 import com.github.kardapoltsev.astparser.model._
 
 class AsciiDocGenerator(
   m: Model,
-  targetVersion: Int
+  targetVersion: Int,
 ) extends DocGenerator {
   import AsciiDocGenerator._
   val model = m.slice(targetVersion, targetVersion)
@@ -76,18 +76,18 @@ class AsciiDocGenerator(
         Seq(
           Text("Result type: "),
           linkified(m.returnType),
-          LineBreak
+          LineBreak,
         ) ++ docs
       ),
       httpString(m),
-      Paragraph(paramsTable(m.arguments))
+      Paragraph(paramsTable(m.arguments)),
     )
   }
 
   private def typeDoc(t: Type): DocNode = {
     Paragraph(
       Header(t.fullName, t.name, 2),
-      renderDocs(t.docs)
+      renderDocs(t.docs),
     )
   }
 
@@ -97,7 +97,7 @@ class AsciiDocGenerator(
         Seq(
           Header(c.fullName, c.name, 3),
           Paragraph(renderDocs(constructor.docs)),
-          Paragraph(paramsTable(constructor.arguments))
+          Paragraph(paramsTable(constructor.arguments)),
         )
       )
     }
@@ -139,9 +139,9 @@ class AsciiDocGenerator(
         Seq(
           Text(p.name),
           linkified(p.`type`),
-          renderDocs(p.docs)
+          renderDocs(p.docs),
         )
-      }
+      },
     )
   }
 
@@ -157,6 +157,7 @@ class AsciiDocGenerator(
 }
 
 object AsciiDocGenerator {
+
   sealed private[doc] trait DocNode {
     def render: String
   }
@@ -164,19 +165,25 @@ object AsciiDocGenerator {
   private[doc] case class Paragraph(content: Seq[DocNode]) extends DocNode {
     override def render: String = content.map(_.render).mkString("", "", "\n")
   }
+
   private[doc] object Paragraph {
+
     def apply(c1: DocNode, content: DocNode*): Paragraph = {
       Paragraph(c1 +: content)
     }
+
   }
 
   private[doc] case class Group(content: Seq[DocNode]) extends DocNode {
     override def render: String = content.map(_.render).mkString("")
   }
+
   private[doc] object Group {
+
     def apply(c1: DocNode, content: DocNode*): Group = {
       Group(c1 +: content)
     }
+
   }
 
   private[doc] case class Text(content: String) extends DocNode {
@@ -184,12 +191,14 @@ object AsciiDocGenerator {
   }
 
   private[doc] case class SourceCode(content: String) extends DocNode {
+
     override def render: String = {
       "\n\n[source,options=\"nowrap\"]\n" +
         "----\n" +
         content + "\n" +
         "----\n"
     }
+
   }
 
   private[doc] case class AnchorLink(content: String, anchor: String) extends DocNode {
@@ -201,6 +210,7 @@ object AsciiDocGenerator {
   }
 
   private[doc] case class DocumentInfo(title: String, version: Int) extends DocNode {
+
     override def render: String =
       s"""= $title
          |:version: $version
@@ -211,15 +221,19 @@ object AsciiDocGenerator {
          |
          |== $title
          |""".stripMargin
+
   }
 
   private[doc] case class Header(anchor: String, content: String, level: Int) extends DocNode {
+
     override def render: String = {
       s"\n[[$anchor]]\n" + ("=" * (level + 1)) + " " + content + "\n"
     }
+
   }
 
   private[doc] case class UnorderedList(items: Seq[DocNode]) extends DocNode {
+
     override def render: String =
       if (items.isEmpty)
         ""
@@ -238,20 +252,23 @@ object AsciiDocGenerator {
   }
 
   private[doc] case class Table(name: String, headers: Option[Seq[DocNode]], rows: Seq[Seq[DocNode]]) extends DocNode {
+
     val width = headers.map(_.size).getOrElse(0) max
       (if (rows.isEmpty) 0 else rows.maxBy(_.size).size)
+
     override def render: String = {
       val width = headers.map(_.size).getOrElse(0) max
         (if (rows.isEmpty) 0 else rows.maxBy(_.size).size)
       val lines = Seq(
         s"""[width="100%",cols="$width",frame="topbot",grid="rows"]""",
         s"""[options="autowidth${headers.fold("")(_ => ",header")}"]""",
-        "|======"
+        "|======",
       ) ++ (headers.map(h => h ++ Seq.fill(width - h.length)(" ")) ++ rows.map(_.map(_.render)))
         .map(_.mkString("|", "|", "")) :+
         "|======"
       lines.mkString("\n", "\n", "")
     }
+
   }
 
   private[doc] case object LineBreak extends DocNode {

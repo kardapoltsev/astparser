@@ -19,12 +19,14 @@ package com.github.kardapoltsev.astparser
 package object gen {
 
   implicit final class StringExt(val string: String) {
+
     def offset(count: Int): String = {
       require(count >= 0)
       string.linesIterator
         .map(l => if (l.isEmpty) l else " " * count + l)
         .mkString(System.lineSeparator())
     }
+
   }
 
 }

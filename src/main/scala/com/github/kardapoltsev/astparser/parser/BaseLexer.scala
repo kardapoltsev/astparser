@@ -17,11 +17,11 @@
 package com.github.kardapoltsev.astparser.parser
 
 import java.awt.event.KeyEvent
-
 import scala.collection.mutable.ListBuffer
 import scala.util.parsing.combinator.Parsers
 import scala.util.parsing.combinator.lexical.Scanners
-import scala.util.parsing.input.{CharSequenceReader, Reader}
+import scala.util.parsing.input.CharSequenceReader
+import scala.util.parsing.input.Reader
 
 abstract class BaseLexer extends Scanners with Parsers {
 

@@ -20,6 +20,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
 class ParserSpec extends AnyWordSpec with Matchers {
+
   "Parser" should {
     "parse schema info" in new ParserTestEnv {
       val in =
@@ -152,28 +153,28 @@ class ParserSpec extends AnyWordSpec with Matchers {
               Argument(
                 name = "param1",
                 `type` = TypeStatement(Reference("Int"), Seq.empty),
-                docs = Seq.empty
+                docs = Seq.empty,
               ),
               Argument(
                 name = "param2",
                 `type` = TypeStatement(Reference("String"), Seq.empty),
-                docs = Seq.empty
+                docs = Seq.empty,
               ),
               Argument(
                 name = "param3",
                 `type` = TypeStatement(
                   Reference("Map"),
-                  Seq(TypeStatement(Reference("String"), Seq.empty), TypeStatement(Reference("Int"), Seq.empty))
+                  Seq(TypeStatement(Reference("String"), Seq.empty), TypeStatement(Reference("Int"), Seq.empty)),
                 ),
-                docs = Seq.empty
-              )
+                docs = Seq.empty,
+              ),
             ),
             parents = Seq(Reference("ParentA"), Reference("ParentB")),
             VersionsInterval(None, None),
-            docs = Seq.empty
+            docs = Seq.empty,
           )
         ),
-        docs = Seq(Documentation(" Docs for type A "))
+        docs = Seq(Documentation(" Docs for type A ")),
       )
 
       parsed shouldBe expected
@@ -208,7 +209,7 @@ class ParserSpec extends AnyWordSpec with Matchers {
           Argument("arg1", TypeStatement(Reference("Int"), Seq.empty), Seq.empty)
         ),
         parents = Seq(Reference("ParentType")),
-        docs = Seq(Documentation(docString))
+        docs = Seq(Documentation(docString)),
       )
       parsed shouldBe expected
     }
@@ -229,13 +230,13 @@ class ParserSpec extends AnyWordSpec with Matchers {
         maybeId = None,
         arguments = Seq(
           Argument("param1", TypeStatement(Reference("Int"), Seq.empty), Seq.empty),
-          Argument("param2", TypeStatement(Reference("User"), Seq.empty), Seq.empty)
+          Argument("param2", TypeStatement(Reference("User"), Seq.empty), Seq.empty),
         ),
         returnType = TypeStatement(Reference("Void"), Seq.empty),
         parents = Seq(Reference("ParentA"), Reference("ParentB")),
         httpRequest = None,
         VersionsInterval(None, None),
-        docs = Seq(Documentation(docString))
+        docs = Seq(Documentation(docString)),
       )
       parsed shouldBe expected
     }
@@ -262,13 +263,13 @@ class ParserSpec extends AnyWordSpec with Matchers {
         parents = Seq(Reference("ParentA"), Reference("ParentB")),
         httpRequest = Some(http),
         VersionsInterval(None, None),
-        docs = Seq(Documentation(docString))
+        docs = Seq(Documentation(docString)),
       )
       parsed shouldBe expected
     }
 
     "save positions for all elements" in new ParserTestEnv {
-      val src    = """
+      val src = """
                   |schema api
                   |external type Int
                   |type UserId = Int

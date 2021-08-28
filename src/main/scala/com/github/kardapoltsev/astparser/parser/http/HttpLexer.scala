@@ -32,14 +32,16 @@ class HttpLexer extends BaseLexer {
   override def token: Parser[Token] = {
     cached | method | leftBrace | rightBrace | questionMark | ampersand | slash | lexeme
   }
+
   protected def lexeme: Parser[Lexeme] =
     opt('`') ~> rep1(lexemeChar) <~ opt('`') ^^ (x => Lexeme(x.mkString))
 
   //TODO: improve valid http elems
   private val specialCharacters = Set(
     '-',
-    '_'
+    '_',
   )
+
   private def lexemeChar =
     elem("valid lexeme", x => x.isLetterOrDigit || specialCharacters(x))
 
@@ -50,15 +52,19 @@ class HttpLexer extends BaseLexer {
   protected def get: Parser[Token] = acceptSeq("GET") ^^ { m =>
     Method(m.mkString)
   }
+
   protected def post: Parser[Token] = acceptSeq("POST") ^^ { m =>
     Method(m.mkString)
   }
+
   protected def put: Parser[Token] = acceptSeq("PUT") ^^ { m =>
     Method(m.mkString)
   }
+
   protected def patch: Parser[Token] = acceptSeq("PATCH") ^^ { m =>
     Method(m.mkString)
   }
+
   protected def delete: Parser[Token] = acceptSeq("DELETE") ^^ { m =>
     Method(m.mkString)
   }

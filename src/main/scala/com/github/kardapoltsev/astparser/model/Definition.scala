@@ -45,17 +45,19 @@ case class DisableConstraint(
 
 case class Constraint(
   enable: EnableConstraint,
-  disable: DisableConstraint
+  disable: DisableConstraint,
 )
 
 sealed trait Constrained {
   def constraint: Constraint
+
   def isEnabled(enabledFeatures: Seq[String]): Boolean = {
     val enabled  = constraint.enable.constraints.intersect(enabledFeatures)
     val disabled = constraint.disable.constraints.intersect(enabledFeatures)
     assert(enabled.isEmpty || disabled.isEmpty, "enabledFeatures contains both allowed and disallowed")
     (constraint.enable.constraints.isEmpty || enabled.nonEmpty) && disabled.isEmpty
   }
+
 }
 
 sealed trait TypeId {
@@ -72,6 +74,7 @@ sealed trait Versioned {
 }
 
 case class VersionsInterval(start: Option[Int], end: Option[Int]) {
+
   def contains(version: Int): Boolean = {
     start.forall(_ <= version) && end.forall(_ >= version)
   }
@@ -106,19 +109,21 @@ case class Documentation(
 case class Argument(
   name: String,
   `type`: TypeStatement,
-  docs: Documentation
+  docs: Documentation,
 ) extends Documented
 
 sealed trait Parent extends TypeLike
 
 sealed trait TypeLike extends Definition {
   def parents: Seq[Parent]
+
   def isSubtypeOf(other: Parent): Boolean = {
     parents.contains(other) ||
     parents.foldLeft(false) { (isSubtype, p) =>
       isSubtype || p.isSubtypeOf(other)
     }
   }
+
 }
 
 case class Type(
@@ -128,7 +133,7 @@ case class Type(
   parents: Seq[Parent],
   constructors: Seq[TypeConstructor],
   docs: Documentation,
-  constraint: Constraint
+  constraint: Constraint,
 ) extends TypeLike
     with Constrained
     with PackageLike
@@ -178,7 +183,7 @@ case class ExternalType(
   parent: String,
   name: String,
   typeArguments: Seq[TypeParameter] = Nil,
-  constraint: Constraint
+  constraint: Constraint,
 ) extends Parent
     with Constrained {
   override def fullName = name
@@ -187,14 +192,14 @@ case class ExternalType(
 
 case class TypeParameter(
   name: String,
-  typeParameters: Seq[TypeParameter]
+  typeParameters: Seq[TypeParameter],
 )
 
 case class TypeAlias(
   parent: String,
   name: String,
   `type`: TypeStatement,
-  constraint: Constraint
+  constraint: Constraint,
 ) extends TypeLike
     with Constrained {
   def parents = Seq.empty
@@ -203,9 +208,10 @@ case class TypeAlias(
 case class TypeConstructor(
   parent: String,
   name: String,
-  versions: Seq[TypeConstructorVersion]
+  versions: Seq[TypeConstructorVersion],
 ) extends TypeLike {
   val typeReference = TypeReference(parent)
+
   def parents: Seq[Parent] = {
     versions
       .map(_.parents)
@@ -214,6 +220,7 @@ case class TypeConstructor(
       }
       .getOrElse(Seq.empty)
   }
+
 }
 
 case class TypeConstructorVersion(
@@ -225,7 +232,7 @@ case class TypeConstructorVersion(
   arguments: Seq[Argument],
   versions: VersionsInterval,
   docs: Documentation,
-  constraint: Constraint
+  constraint: Constraint,
 ) extends TypeLike
     with TypeId
     with Documented
@@ -238,7 +245,7 @@ case class TypeStatement(
   parent: String,
   typeReference: TypeReference,
   typeArguments: Seq[TypeStatement],
-  isTypeArgument: Boolean
+  isTypeArgument: Boolean,
 ) extends AstElement
 
 case class TypeReference(
@@ -255,7 +262,7 @@ case class Call(
   httpRequest: Option[HttpRequest],
   versions: VersionsInterval,
   docs: Documentation,
-  constraint: Constraint
+  constraint: Constraint,
 ) extends TypeLike
     with TypeId
     with Documented
@@ -268,7 +275,7 @@ case class Trait(
   name: String,
   parents: Seq[Parent],
   docs: Documentation,
-  constraint: Constraint
+  constraint: Constraint,
 ) extends Parent
     with Documented
     with Constrained
@@ -336,8 +343,9 @@ case class Package(
   parent: String,
   name: String,
   definitions: Seq[Definition],
-  constraint: Constraint
+  constraint: Constraint,
 ) extends PackageLike {
+
   override def slice(interval: VersionsInterval): Package = {
     this.copy(
       definitions = sliceInt(interval)
@@ -357,7 +365,7 @@ case class Package(
 case class Schema(
   name: String,
   definitions: Seq[Definition],
-  constraint: Constraint
+  constraint: Constraint,
 ) extends PackageLike {
   def parent = ""
 

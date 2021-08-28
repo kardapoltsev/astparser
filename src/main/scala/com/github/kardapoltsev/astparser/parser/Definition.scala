@@ -16,8 +16,10 @@
 
 package com.github.kardapoltsev.astparser.parser
 
-import com.github.kardapoltsev.astparser.util.{CRC32Helper, Logger}
+import com.github.kardapoltsev.astparser.util.CRC32Helper
+import com.github.kardapoltsev.astparser.util.Logger
 import com.github.kardapoltsev.astparser.util.StringUtil._
+
 import scala.util.parsing.input.Positional
 
 sealed private[astparser] trait Element extends Positional with Logger {
@@ -84,20 +86,22 @@ private[astparser] case class DisableConstraint(
 
 private[astparser] case class Constraint(
   enable: EnableConstraint,
-  disable: DisableConstraint
+  disable: DisableConstraint,
 ) extends Element
 
 sealed private[astparser] trait Constrained {
   def constraint: Constraint
+
   assert(
     constraint.enable.constraints.intersect(constraint.disable.constraints).isEmpty,
-    "enable and disable contains the same constraint"
+    "enable and disable contains the same constraint",
   )
+
 }
 
 private[astparser] case class VersionsInterval(
   start: Option[Int],
-  end: Option[Int]
+  end: Option[Int],
 ) extends Element
 
 sealed private[astparser] trait Versioned {
@@ -107,9 +111,11 @@ sealed private[astparser] trait Versioned {
 private[astparser] trait TypeId extends Element {
   def maybeId: Option[Int]
   def idString: String
+
   def id: Int = maybeId.getOrElse {
     CRC32Helper.crc32(idString)
   }
+
   def idHex: String = f"$id%02x"
 
   override def humanReadable: String = {
@@ -140,7 +146,7 @@ final private[astparser] case class Type(
   parents: Seq[Reference],
   constructors: Seq[TypeConstructor],
   docs: Seq[Documentation],
-  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil))
+  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil)),
 ) extends TypeLike
     with PackageLike
     with Constrained {
@@ -152,7 +158,7 @@ final private[astparser] case class Type(
 final private[astparser] case class ExternalType(
   override val fullName: String,
   typeArguments: Seq[TypeParameter],
-  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil))
+  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil)),
 ) extends TypeLike
     with Constrained {
   def docs    = Seq.empty
@@ -162,7 +168,7 @@ final private[astparser] case class ExternalType(
 
 final private[astparser] case class TypeParameter(
   name: String,
-  typeParameters: Seq[TypeParameter]
+  typeParameters: Seq[TypeParameter],
 ) extends Element
 
 final private[astparser] case class TypeConstructor(
@@ -173,13 +179,14 @@ final private[astparser] case class TypeConstructor(
   parents: Seq[Reference],
   versions: VersionsInterval,
   docs: Seq[Documentation],
-  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil))
+  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil)),
 ) extends TypeLike
     with TypeId
     with Argumented
     with Versioned
     with Constrained {
   children = typeArguments ++ arguments ++ parents ++ docs
+
   def idString: String = {
     maybeParent match {
       case Some(t: Type) =>
@@ -195,6 +202,7 @@ final private[astparser] case class TypeConstructor(
     }
 
   }
+
 }
 
 final private[astparser] case class Reference(
@@ -209,7 +217,7 @@ final private[astparser] case class Reference(
 final private[astparser] case class Import(
   name: String,
   reference: Reference,
-  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil))
+  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil)),
 ) extends Definition
     with Constrained {
   children = Seq(reference)
@@ -219,7 +227,7 @@ final private[astparser] case class Import(
 final private[astparser] case class TypeAlias(
   name: String,
   `type`: TypeStatement,
-  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil))
+  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil)),
 ) extends TypeLike
     with Constrained {
   children = Seq(`type`)
@@ -236,13 +244,14 @@ final private[astparser] case class Call(
   httpRequest: Option[String],
   versions: VersionsInterval,
   docs: Seq[Documentation],
-  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil))
+  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil)),
 ) extends TypeLike
     with TypeId
     with Versioned
     with Argumented
     with Constrained {
   children = (arguments :+ returnType) ++ parents ++ docs
+
   def idString: String = {
     val packageNamePrefix =
       if (packageName.isEmpty) ""
@@ -254,12 +263,13 @@ final private[astparser] case class Call(
 
     "call " + packageNamePrefix + name + argString + " = " + returnType.idString
   }
+
 }
 
 final private[astparser] case class Argument(
   name: String,
   `type`: TypeStatement,
-  docs: Seq[Documentation]
+  docs: Seq[Documentation],
 ) extends NamedElement
     with Documented {
   children = `type` +: docs
@@ -270,9 +280,10 @@ final private[astparser] case class Argument(
 
 final private[astparser] case class TypeStatement(
   ref: Reference,
-  typeArguments: Seq[TypeStatement] = Seq.empty
+  typeArguments: Seq[TypeStatement] = Seq.empty,
 ) extends Element {
   children = ref +: typeArguments
+
   def idString: String = {
     val argStr =
       if (typeArguments.isEmpty) ""
@@ -299,6 +310,7 @@ final private[astparser] case class TypeStatement(
     val fullName = resolved.packageName ~ resolved.name
     s"${fullName}$argStr"
   }
+
 }
 
 sealed private[astparser] trait PackageLike extends Definition with Logger {
@@ -381,7 +393,7 @@ sealed private[astparser] trait PackageLike extends Definition with Logger {
 final private[astparser] case class Package(
   name: String,
   definitions: Seq[Definition],
-  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil))
+  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil)),
 ) extends PackageLike
     with Constrained {
   children = definitions
@@ -393,7 +405,7 @@ final private[astparser] case class Trait(
   arguments: Seq[Argument],
   parents: Seq[Reference],
   docs: Seq[Documentation],
-  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil))
+  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil)),
 ) extends TypeLike
     with Argumented
     with Constrained {
@@ -411,7 +423,7 @@ trait Documented {
 final private[astparser] case class Schema(
   name: String,
   definitions: Seq[Definition],
-  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil))
+  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil)),
 ) extends PackageLike
     with Constrained {
   children = definitions
@@ -423,15 +435,15 @@ final private[astparser] case class Model(
   private val _schemas: Seq[Schema]
 ) extends PackageLike
     with Logger {
+
   val schemas = _schemas
     .groupBy(_.name)
-    .map {
-      case (name, schemas) =>
-        val enable  = schemas.flatMap(_.constraint.enable.constraints).distinct
-        val disable = schemas.flatMap(_.constraint.disable.constraints).distinct
-        val constraint =
-          Constraint(enable = EnableConstraint(enable), disable = DisableConstraint(disable))
-        Schema(name, schemas.flatMap(_.definitions), constraint)
+    .map { case (name, schemas) =>
+      val enable  = schemas.flatMap(_.constraint.enable.constraints).distinct
+      val disable = schemas.flatMap(_.constraint.disable.constraints).distinct
+      val constraint =
+        Constraint(enable = EnableConstraint(enable), disable = DisableConstraint(disable))
+      Schema(name, schemas.flatMap(_.definitions), constraint)
     }
     .toSeq
 
@@ -451,10 +463,10 @@ final private[astparser] case class Model(
   private[astparser] def validate(): Unit = loggingTime("validateParserModel") {
     val c = schemas.flatMap(allChildren)
     log.info(s"validating model containing ${c.size} elements")
-    val allReferences = c.collect {
-      case r: Reference => r
-    } ++ deepDefinitions.collect {
-      case t: TypeLike => t.parents
+    val allReferences = c.collect { case r: Reference =>
+      r
+    } ++ deepDefinitions.collect { case t: TypeLike =>
+      t.parents
     }.flatten
     val unresolvedReferences = allReferences.filter(lookup(_).isEmpty)
 
@@ -466,10 +478,10 @@ final private[astparser] case class Model(
     }
 
     val duplicateIds = schemas flatMap { s =>
-      s.deepDefinitions.collect {
-        case ti: TypeId => ti.id -> ti
-      }.groupBy { case (id, t) => id }.filter { case (id, types) => types.size > 1 }.flatMap {
-        case (id, types) => types.map(_._2)
+      s.deepDefinitions.collect { case ti: TypeId =>
+        ti.id -> ti
+      }.groupBy { case (id, t) => id }.filter { case (id, types) => types.size > 1 }.flatMap { case (id, types) =>
+        types.map(_._2)
       }
     }
 
@@ -495,8 +507,8 @@ final private[astparser] case class Model(
     }
 
     val duplicateDefinitions = deepDefinitions.map { definition =>
-      val duplicates = definition.children.collect {
-        case ne: NamedElement => ne
+      val duplicates = definition.children.collect { case ne: NamedElement =>
+        ne
       }.groupBy(_.name).filter { case (name, elems) => elems.size > 1 }.map { case (name, elems) => elems }.filter {
         elems =>
           !elems.forall(_.isInstanceOf[TypeConstructor]) &&
@@ -508,17 +520,16 @@ final private[astparser] case class Model(
     if (duplicateDefinitions.nonEmpty) {
       failValidation(
         "Model contains duplicate definitions:" + System.lineSeparator() +
-          duplicateDefinitions.map {
-            case (d, duplicates) =>
-              duplicates.flatten
-                .map(_.humanReadable)
-                .mkString(System.lineSeparator())
+          duplicateDefinitions.map { case (d, duplicates) =>
+            duplicates.flatten
+              .map(_.humanReadable)
+              .mkString(System.lineSeparator())
           }.mkString(System.lineSeparator())
       )
     }
 
-    val traits = deepDefinitions.collect {
-      case t: Trait => t
+    val traits = deepDefinitions.collect { case t: Trait =>
+      t
     }
     def hasParent(t: Trait, parents: Seq[Reference]): Boolean = {
       parents.exists { ref =>
@@ -532,23 +543,21 @@ final private[astparser] case class Model(
         case aType: Type if hasParent(t, aType.parents) => aType.constructors
       }.flatten
       t -> inheritors
-    } filter {
-      case (t, inheritors) =>
-        !t.arguments.forall { a =>
-          inheritors
-            .forall(_.arguments.map(_.name).contains(a.name)) //check type here?
-        }
+    } filter { case (t, inheritors) =>
+      !t.arguments.forall { a =>
+        inheritors
+          .forall(_.arguments.map(_.name).contains(a.name)) //check type here?
+      }
     }
 
     if (typeWithMissedField.nonEmpty) {
       failValidation(
         "Models contains trait inheritors with missed fields:" + System
           .lineSeparator() +
-          typeWithMissedField.map {
-            case (t, inheritors) =>
-              t.humanReadable + ": " + inheritors
-                .map(_.humanReadable)
-                .mkString(", ")
+          typeWithMissedField.map { case (t, inheritors) =>
+            t.humanReadable + ": " + inheritors
+              .map(_.humanReadable)
+              .mkString(", ")
           }.mkString(System.lineSeparator())
       )
     }
@@ -569,10 +578,12 @@ final private[astparser] case class Model(
 object Model {
 
   private val parser = new AstParser()
+
   def load(in: Seq[java.io.File]): Model = {
     val schemes = in map { f =>
       parser.parse(f)
     }
     Model(schemes)
   }
+
 }

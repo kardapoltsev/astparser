@@ -19,6 +19,7 @@ package com.github.kardapoltsev.astparser.gen.doc
 import com.github.kardapoltsev.astparser.TestBase
 
 class AsciiDocGeneratorSpec extends TestBase {
+
   "AsciiDocGenerator" should {
     "generate docs" in {
       val model = buildModel(s"""
@@ -99,4 +100,5 @@ class AsciiDocGeneratorSpec extends TestBase {
       )
     }
   }
+
 }

@@ -19,6 +19,7 @@ package com.github.kardapoltsev.astparser.gen
 import com.github.kardapoltsev.astparser.TestBase
 
 class SchemaGeneratorSpec extends TestBase {
+
   private def generate(sources: String*): Seq[GeneratedFile] = {
     val m         = buildModel(sources: _*)
     val generator = new SchemaGenerator(m, fileExt)

@@ -16,7 +16,9 @@
 
 package com.github.kardapoltsev.astparser.parser
 
-import scala.util.parsing.input.{NoPosition, OffsetPosition, Position}
+import scala.util.parsing.input.NoPosition
+import scala.util.parsing.input.OffsetPosition
+import scala.util.parsing.input.Position
 
 case class SourcePosition(position: Position, sourceName: String) extends Position {
   override def column = position.column

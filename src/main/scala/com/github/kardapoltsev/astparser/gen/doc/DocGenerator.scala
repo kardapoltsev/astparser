@@ -39,7 +39,7 @@ trait DocGenerator extends Generator {
       coverage("constructors", constructors),
       coverage("constructors arguments", constructorArguments),
       coverage("calls", calls),
-      coverage("calls params", callsParams)
+      coverage("calls params", callsParams),
     )
   }
 

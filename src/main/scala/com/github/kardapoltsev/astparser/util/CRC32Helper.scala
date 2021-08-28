@@ -20,9 +20,11 @@ import java.nio.charset.StandardCharsets
 import java.util.zip.CRC32
 
 object CRC32Helper {
+
   def crc32(string: String): Int = {
     val crc = new CRC32()
     crc.update(string.getBytes(StandardCharsets.UTF_8))
     crc.getValue.toInt
   }
+
 }

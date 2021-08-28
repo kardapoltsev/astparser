@@ -16,53 +16,77 @@
 
 package com.github.kardapoltsev.astparser.parser.http
 
-import com.github.kardapoltsev.astparser.parser.{BaseParser, ReaderWithSourcePosition}
+import com.github.kardapoltsev.astparser.parser.BaseParser
+import com.github.kardapoltsev.astparser.parser.ReaderWithSourcePosition
 
-import scala.util.parsing.input.{CharSequenceReader, Positional}
+import scala.util.parsing.input.CharSequenceReader
+import scala.util.parsing.input.Positional
 
 sealed trait PathElement extends Positional
+
 case class QueryParam(name: String) {
+
   override def toString: String = {
     "{" + name + "}"
   }
+
 }
+
 case class PathSegment(segment: String) extends PathElement {
+
   override def toString: String = {
     segment
   }
+
 }
+
 case class PathParam(name: String) extends PathElement {
+
   override def toString: String = {
     "{" + name + "}"
   }
+
 }
+
 case class Url(path: Seq[PathElement], query: Seq[QueryParam]) extends Positional {
+
   override def toString: String = {
     val queryString = if (query.nonEmpty) query.mkString("?", "&", "") else ""
     path.mkString("/", "/", "") + queryString
   }
+
 }
+
 sealed trait HttpMethod extends Positional
+
 case class Get() extends HttpMethod {
   override def toString: String = "GET"
 }
+
 case class Put() extends HttpMethod {
   override def toString: String = "PUT"
 }
+
 case class Post() extends HttpMethod {
   override def toString: String = "POST"
 }
+
 case class Delete() extends HttpMethod {
   override def toString: String = "DELETE"
 }
+
 case class Patch() extends HttpMethod {
   override def toString: String = "PATCH"
 }
+
 case class Cached() extends Positional
+
 case class HttpRequest(method: HttpMethod, url: Url, cached: Boolean) extends Positional {
+
   override def toString: String = {
     method.toString + " " + url.toString
   }
+
 }
 
 class HttpParser(override protected val enableProfiling: Boolean = false) extends BaseParser {
@@ -74,9 +98,8 @@ class HttpParser(override protected val enableProfiling: Boolean = false) extend
   def request: Parser[HttpRequest] = profile("request") {
     positioned {
       phrase {
-        cached ~ method ~ url ^^ {
-          case cached ~ m ~ url =>
-            HttpRequest(m, url, cached = cached.isDefined)
+        cached ~ method ~ url ^^ { case cached ~ m ~ url =>
+          HttpRequest(m, url, cached = cached.isDefined)
         }
       }
     }
@@ -86,9 +109,9 @@ class HttpParser(override protected val enableProfiling: Boolean = false) extend
     opt {
       accept(
         "CachedKeyword",
-        {
-          case _: CachedDirective => Cached()
-        }
+        { case _: CachedDirective =>
+          Cached()
+        },
       )
     }
   }
@@ -102,14 +125,13 @@ class HttpParser(override protected val enableProfiling: Boolean = false) extend
         case Method("POST")   => Post()
         case Method("PATCH")  => Patch()
         case Method("DELETE") => Delete()
-      }
+      },
     )
 
   private def url: Parser[Url] = profile("url") {
     positioned {
-      path ~ query ^^ {
-        case pathSegments ~ querySegments =>
-          Url(pathSegments, querySegments)
+      path ~ query ^^ { case pathSegments ~ querySegments =>
+        Url(pathSegments, querySegments)
       }
     }
   }
@@ -135,9 +157,9 @@ class HttpParser(override protected val enableProfiling: Boolean = false) extend
   private def identifier: Parser[String] =
     accept(
       "pathSegment",
-      {
-        case Lexeme(chars) => chars.toString
-      }
+      { case Lexeme(chars) =>
+        chars.toString
+      },
     )
 
   private def query: Parser[Seq[QueryParam]] = profile("query") {
@@ -168,10 +190,11 @@ class HttpParser(override protected val enableProfiling: Boolean = false) extend
   protected def tryParse[T](
     parser: Parser[T],
     input: CharSequence,
-    sourceName: String
+    sourceName: String,
   ): ParseResult[T] = {
     val reader  = new ReaderWithSourcePosition(new CharSequenceReader(input), sourceName)
     val scanner = new lexer.Scanner(reader)
     parser(scanner)
   }
+
 }

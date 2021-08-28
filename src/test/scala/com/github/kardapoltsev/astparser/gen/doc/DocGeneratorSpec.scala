@@ -19,6 +19,7 @@ package com.github.kardapoltsev.astparser.gen.doc
 import com.github.kardapoltsev.astparser.TestBase
 
 class DocGeneratorSpec extends TestBase {
+
   "DocGenerator" should {
     "calculate doc coverage" in {
       val model = buildModel(
@@ -67,4 +68,5 @@ class DocGeneratorSpec extends TestBase {
       )
     }
   }
+
 }

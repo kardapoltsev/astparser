@@ -16,14 +16,16 @@
 
 package com.github.kardapoltsev.astparser.gen
 
-import java.io.{File, FileWriter}
 import com.github.kardapoltsev.astparser.Hardcoded
-import com.github.kardapoltsev.astparser.parser._
 import com.github.kardapoltsev.astparser.model
+import com.github.kardapoltsev.astparser.parser._
+
+import java.io.File
+import java.io.FileWriter
 
 class SchemaGenerator(
   m: model.Model,
-  filenameExtension: String
+  filenameExtension: String,
 ) extends Generator {
   import Hardcoded.{Keywords => K}
   private def ls = System.lineSeparator()
@@ -40,7 +42,7 @@ class SchemaGenerator(
     GeneratedFile(
       path = "",
       name = filename,
-      content
+      content,
     )
   }
 
@@ -164,7 +166,7 @@ class SchemaGenerator(
     K.Call,
     K.Package,
     K.Schema,
-    K.Type
+    K.Type,
   )
 
   private def escaped(v: String): String = {
@@ -213,6 +215,7 @@ class SchemaGenerator(
       ""
     }
   }
+
   private def formatTypeArguments(args: Seq[TypeStatement]): String = {
     if (args.nonEmpty) {
       args.map { a =>
@@ -259,6 +262,7 @@ case class GeneratedFile(path: String, name: String, content: String) {
 }
 
 object GeneratedFile {
+
   def write(generated: GeneratedFile, rootDirectory: String): File = {
     val parent = new File(rootDirectory, generated.path)
     if (!parent.exists())
@@ -272,4 +276,5 @@ object GeneratedFile {
     writer.close()
     file
   }
+
 }

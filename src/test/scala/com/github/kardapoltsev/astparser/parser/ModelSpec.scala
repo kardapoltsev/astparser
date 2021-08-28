@@ -19,10 +19,11 @@ package com.github.kardapoltsev.astparser.parser
 import com.github.kardapoltsev.astparser.TestBase
 
 class ModelSpec extends TestBase {
+
   "Parser model" should {
 
     "resolve local references" in {
-      val m          = buildParserModel("""
+      val m = buildParserModel("""
                                  |schema api
                                  |
                                  |package outer.inner {
@@ -84,7 +85,7 @@ class ModelSpec extends TestBase {
     }
 
     "resolve absolute references within one schema" in {
-      val m          = buildParserModel("""
+      val m = buildParserModel("""
                                  |schema api
                                  |
                                  |package p1 {
@@ -202,7 +203,7 @@ class ModelSpec extends TestBase {
     }
 
     "handle imports" in {
-      val m     = buildParserModel("""
+      val m = buildParserModel("""
                                  |schema api
                                  |
                                  |package p1 {
@@ -261,7 +262,7 @@ class ModelSpec extends TestBase {
           |    }
           |  }
           |}
-        """.stripMargin
+        """.stripMargin,
       )
       val api   = m.findSchema("api").head
       val typeA = api.getDefinition("p1.A").head.asInstanceOf[Type]
@@ -347,7 +348,7 @@ class ModelSpec extends TestBase {
             |     x: E.e
             |  }
             |}
-          """.stripMargin
+          """.stripMargin,
         )
       }
     }
@@ -408,7 +409,7 @@ class ModelSpec extends TestBase {
             |schema b
             |import common.Int
             |
-          """.stripMargin
+          """.stripMargin,
         )
       }
     }

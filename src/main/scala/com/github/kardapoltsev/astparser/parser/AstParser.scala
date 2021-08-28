@@ -16,7 +16,8 @@
 
 package com.github.kardapoltsev.astparser.parser
 
-import com.github.kardapoltsev.astparser.parser.TokenParsers.{Identifier, IntNumber}
+import com.github.kardapoltsev.astparser.parser.TokenParsers.Identifier
+import com.github.kardapoltsev.astparser.parser.TokenParsers.IntNumber
 
 import scala.io.Source
 import scala.util.parsing.input._
@@ -73,21 +74,19 @@ class AstParser(
 
   protected[astparser] def typeStatement: Parser[TypeStatement] = profile("typeStatement") {
     positioned {
-      reference ~ opt(LeftBracket() ~> rep1sep(typeStatement, Comma()) <~ RightBracket()) ^^ {
-        case ref ~ ts =>
-          TypeStatement(
-            ref,
-            ts.getOrElse(Seq.empty)
-          )
+      reference ~ opt(LeftBracket() ~> rep1sep(typeStatement, Comma()) <~ RightBracket()) ^^ { case ref ~ ts =>
+        TypeStatement(
+          ref,
+          ts.getOrElse(Seq.empty),
+        )
       }
     }
   }
 
   protected def argument: Parser[Argument] = profile("argument") {
     positioned {
-      repLeftDoc ~ identifier ~ (Colon() ~> typeStatement) ~ repRightDoc ^^ {
-        case ld ~ name ~ ts ~ rd =>
-          Argument(name.name, ts, ld ++ rd)
+      repLeftDoc ~ identifier ~ (Colon() ~> typeStatement) ~ repRightDoc ^^ { case ld ~ name ~ ts ~ rd =>
+        Argument(name.name, ts, ld ++ rd)
       }
     }
   }
@@ -129,18 +128,16 @@ class AstParser(
 
   protected def typeAlias: Parser[TypeAlias] = {
     profile("typeAliasExp") {
-      constraint ~ (TypeKeyword() ~> identifier <~ Eq()) ~ typeStatement ^^ {
-        case c ~ name ~ aType =>
-          TypeAlias(name.name, aType, c)
+      constraint ~ (TypeKeyword() ~> identifier <~ Eq()) ~ typeStatement ^^ { case c ~ name ~ aType =>
+        TypeAlias(name.name, aType, c)
       }
     }
   }
 
   protected[astparser] def importDefinition: Parser[Import] = {
     positioned {
-      constraint ~ (ImportKeyword() ~> reference) ^^ {
-        case c ~ reference =>
-          Import(reference.name, reference, c)
+      constraint ~ (ImportKeyword() ~> reference) ^^ { case c ~ reference =>
+        Import(reference.name, reference, c)
       }
     }
   }
@@ -155,7 +152,7 @@ class AstParser(
             parents,
             body,
             docs,
-            c
+            c,
           )
       }
     }
@@ -172,7 +169,7 @@ class AstParser(
       args.getOrElse(Seq.empty).map { path =>
         TypeParameter(
           path.map(_.name).mkString("."),
-          Seq.empty
+          Seq.empty,
         ).setPos(path.head.pos)
       }
     }
@@ -196,10 +193,10 @@ class AstParser(
     positioned {
       repLeftDoc ~ constraint ~ opt(Dot()) ~ identifier ~ opt(hashId) ~ opt(versionsInterval) ~ typeExtensionExpr ~
         genericTypeParameters ~ argumentsExpr ~ repRightDoc ^^ {
-        case ld ~ c ~ _ ~ name ~ id ~ int ~ ext ~ ta ~ args ~ rd =>
-          val i = int.getOrElse(VersionsInterval(None, None))
-          TypeConstructor(name.name, id.map(_.value), ta, args, ext, i, docs = ld ++ rd, c)
-      }
+          case ld ~ c ~ _ ~ name ~ id ~ int ~ ext ~ ta ~ args ~ rd =>
+            val i = int.getOrElse(VersionsInterval(None, None))
+            TypeConstructor(name.name, id.map(_.value), ta, args, ext, i, docs = ld ++ rd, c)
+        }
     }
   }
 
@@ -207,9 +204,8 @@ class AstParser(
     positioned {
       (LeftParen() ~>
         opt(intNumber)) ~ (opt(Dash()) ~> opt(intNumber)
-        <~ RightParen()) ^^ {
-        case maybeStart ~ maybeEnd =>
-          VersionsInterval(maybeStart.map(_.value), maybeEnd.map(_.value))
+        <~ RightParen()) ^^ { case maybeStart ~ maybeEnd =>
+        VersionsInterval(maybeStart.map(_.value), maybeEnd.map(_.value))
       }
     }
   }
@@ -219,8 +215,7 @@ class AstParser(
       repLeftDoc ~ constraint ~ opt(httpDefinition) ~ (CallKeyword() ~> identifier) ~ opt(hashId) ~ opt(
         versionsInterval
       ) ~ typeExtensionExpr ~ argumentsExpr ~
-        (responseOperator ~> typeStatement) ^^ {
-        case ld ~ c ~ httpDef ~ name ~ id ~ int ~ parents ~ args ~ rtype =>
+        (responseOperator ~> typeStatement) ^^ { case ld ~ c ~ httpDef ~ name ~ id ~ int ~ parents ~ args ~ rtype =>
           val i = int.getOrElse(VersionsInterval(None, None))
           Call(
             name.name,
@@ -231,18 +226,18 @@ class AstParser(
             httpRequest = httpDef,
             i,
             docs = ld,
-            constraint = c
+            constraint = c,
           )
-      }
+        }
     }
   }
 
   private def httpDefinition: Parser[String] = {
     accept(
       "httpDefinition",
-      {
-        case Http(content) => content
-      }
+      { case Http(content) =>
+        content
+      },
     )
   }
 
@@ -257,9 +252,8 @@ class AstParser(
 
   def schema: Parser[Schema] = profile("schema") {
     positioned {
-      phrase(constraint ~ schemaInfoExp ~ definitions) ^^ {
-        case c ~ sn ~ ds =>
-          Schema(sn.name, ds, c)
+      phrase(constraint ~ schemaInfoExp ~ definitions) ^^ { case c ~ sn ~ ds =>
+        Schema(sn.name, ds, c)
       }
     }
   }
@@ -280,18 +274,18 @@ class AstParser(
   protected def leftDoc = positioned {
     accept(
       "prefix doc",
-      {
-        case LeftDoc(d) => Documentation(d)
-      }
+      { case LeftDoc(d) =>
+        Documentation(d)
+      },
     )
   }
 
   protected def rightDoc = positioned {
     accept(
       "suffix doc",
-      {
-        case RightDoc(d) => Documentation(d)
-      }
+      { case RightDoc(d) =>
+        Documentation(d)
+      },
     )
   }
 
@@ -319,7 +313,7 @@ class AstParser(
       {
         case l @ Lexeme(x) if IntNumberRegexp.unapplySeq(x).isDefined =>
           IntNumber(x.toInt).setPos(l.pos)
-      }
+      },
     )
   }
 
@@ -330,18 +324,18 @@ class AstParser(
         case l @ Lexeme(x) if HexNumberRegexp.unapplySeq(x).isDefined =>
           //noinspection ScalaStyle
           IntNumber(java.lang.Long.parseLong(x, 16).toInt).setPos(l.pos)
-      }
+      },
     )
   }
 
   protected def constraint: Parser[Constraint] = profile("constraints") {
     positioned {
       rep(maybeEnableConstraint | maybeDisableConstraint) ^^ { constraints =>
-        val enable = constraints.collect {
-          case c: EnableConstraint => c.constraints
+        val enable = constraints.collect { case c: EnableConstraint =>
+          c.constraints
         }.flatten.distinct
-        val disable = constraints.collect {
-          case c: DisableConstraint => c.constraints
+        val disable = constraints.collect { case c: DisableConstraint =>
+          c.constraints
         }.flatten.distinct
         Constraint(EnableConstraint(enable), DisableConstraint(disable))
       }
@@ -369,20 +363,19 @@ class AstParser(
     definitions: Seq[Definition],
     doc: Seq[Documentation],
     position: Position,
-    constraint: Constraint
+    constraint: Constraint,
   ): Package = {
     val names = fullName.split("\\.").toSeq.reverse
     val inner = Package(names.head, definitions, constraint).setPos(position)
-    names.tail.foldLeft(inner) {
-      case (acc, n) =>
-        Package(n, Seq(acc), constraint).setPos(position)
+    names.tail.foldLeft(inner) { case (acc, n) =>
+      Package(n, Seq(acc), constraint).setPos(position)
     }
   }
 
   protected def tryParse[T](
     parser: Parser[T],
     input: CharSequence,
-    sourceName: String
+    sourceName: String,
   ): ParseResult[T] = {
     parser(
       new lexer.Scanner(

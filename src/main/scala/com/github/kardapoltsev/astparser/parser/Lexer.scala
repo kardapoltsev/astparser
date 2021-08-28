@@ -66,10 +66,12 @@ object Tokens {
   case object EOF extends Token {
     def chars: String = "<EOF>"
   }
+
 }
 
 class Lexer extends BaseLexer {
   override type Token = com.github.kardapoltsev.astparser.parser.Token
+
   import Tokens._
   import scala.util.parsing.input.CharArrayReader.EofCh
 

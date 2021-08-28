@@ -43,13 +43,16 @@ class DocLexer extends BaseLexer {
   protected def identifier: Parser[Token] = {
     rep1(identifierChar) ^^ (x => Identifier(x.mkString))
   }
+
   private def identifierChar = elem("valid lexeme", x => x.isLetterOrDigit)
 
   protected def specialCharacters: Parser[Token] =
     rep1(specialChar) ^^ (x => SpecialCharacters(x.mkString))
+
   private val allowedCharacters = Set(
-    '-', '+', '*', '=', ',', '_', ':', '~', '\'', '"', '(', ')', '[', ']', '{', '}', '<', '>', '/', '|', '\\', '!', '?'
+    '-', '+', '*', '=', ',', '_', ':', '~', '\'', '"', '(', ')', '[', ']', '{', '}', '<', '>', '/', '|', '\\', '!', '?',
   )
+
   private def specialChar =
     elem("special character", x => x.isLetterOrDigit || allowedCharacters(x))
 

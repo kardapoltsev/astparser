@@ -17,7 +17,8 @@
 package com.github.kardapoltsev.astparser
 
 import com.github.kardapoltsev.astparser.model.Model
-import com.github.kardapoltsev.astparser.parser.{AstParser, Model => ParsedModel}
+import com.github.kardapoltsev.astparser.parser.AstParser
+import com.github.kardapoltsev.astparser.parser.{Model => ParsedModel}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
@@ -26,18 +27,16 @@ trait TestBase extends AnyWordSpec with Matchers {
   protected val parser  = new AstParser()
 
   protected def buildParserModel(source: String, sources: String*): ParsedModel = {
-    val schemas = (source +: sources).zipWithIndex map {
-      case (src, idx) =>
-        parser.parse(src, "test_source_" + idx)
+    val schemas = (source +: sources).zipWithIndex map { case (src, idx) =>
+      parser.parse(src, "test_source_" + idx)
     }
 
     ParsedModel(schemas)
   }
 
   protected def buildModel(sources: String*): Model = {
-    val schemas = sources.zipWithIndex map {
-      case (src, idx) =>
-        src -> ("test_source_" + idx)
+    val schemas = sources.zipWithIndex map { case (src, idx) =>
+      src -> ("test_source_" + idx)
     }
 
     Model.buildFromString(schemas)

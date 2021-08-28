@@ -50,4 +50,5 @@ class VersionsIntervalSpec extends AnyWordSpec with Matchers {
     }
 
   }
+
 }

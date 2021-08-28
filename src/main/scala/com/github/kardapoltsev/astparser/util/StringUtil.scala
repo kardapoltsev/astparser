@@ -17,7 +17,9 @@
 package com.github.kardapoltsev.astparser.util
 
 object StringUtil {
+
   implicit class StringOpt(private val self: String) extends AnyVal {
+
     def simpleName: String = {
       self.drop(self.lastIndexOf(".") + 1)
     }
@@ -47,5 +49,7 @@ object StringUtil {
       b.toString()
     }
     //scalastyle:on method.name
+
   }
+
 }
