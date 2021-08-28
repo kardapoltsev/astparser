@@ -81,9 +81,21 @@ class HttpParserSpec extends AnyWordSpec with Matchers {
           Url(
             Seq(PathSegment("api"), PathSegment("users"), PathParam("userId")),
             Seq(QueryParam("param1"), QueryParam("param2"))
-          )
+          ),
+          cached = false
         )
     }
+
+    "parse cached http request" in new HttpParserEnv {
+      override protected val enableProfiling: Boolean = true
+      parse(request, "CACHED GET /api/users") shouldBe
+        HttpRequest(
+          Get(),
+          Url(Seq(PathSegment("api"), PathSegment("users")), Nil),
+          cached = true
+        )
+    }
+
     "not parse invalid http request" in new HttpParserEnv {
       a[ParseException] shouldBe thrownBy {
         parse("GET /api/users{bug}", "test_src")

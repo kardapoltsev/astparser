@@ -92,5 +92,14 @@ class HttpLexerSpec extends AnyWordSpec with Matchers {
         RightBrace()
       )
     }
+
+    "parse CACHED directive" in {
+      scan("CACHED GET /user") shouldBe List(
+        CachedDirective(),
+        Method("GET"),
+        Slash(),
+        Lexeme("user")
+      )
+    }
   }
 }

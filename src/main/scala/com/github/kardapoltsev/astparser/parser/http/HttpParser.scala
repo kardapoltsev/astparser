@@ -58,7 +58,8 @@ case class Delete() extends HttpMethod {
 case class Patch() extends HttpMethod {
   override def toString: String = "PATCH"
 }
-case class HttpRequest(method: HttpMethod, url: Url) extends Positional {
+case class Cached() extends Positional
+case class HttpRequest(method: HttpMethod, url: Url, cached: Boolean) extends Positional {
   override def toString: String = {
     method.toString + " " + url.toString
   }
@@ -73,11 +74,22 @@ class HttpParser(override protected val enableProfiling: Boolean = false) extend
   def request: Parser[HttpRequest] = profile("request") {
     positioned {
       phrase {
-        method ~ url ^^ {
-          case m ~ url =>
-            HttpRequest(m, url)
+        cached ~ method ~ url ^^ {
+          case cached ~ m ~ url =>
+            HttpRequest(m, url, cached = cached.isDefined)
         }
       }
+    }
+  }
+
+  protected def cached: Parser[Option[Cached]] = {
+    opt {
+      accept(
+        "CachedKeyword",
+        {
+          case _: CachedDirective => Cached()
+        }
+      )
     }
   }
 

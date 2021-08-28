@@ -30,7 +30,7 @@ class HttpLexer extends BaseLexer {
   }
 
   override def token: Parser[Token] = {
-    method | leftBrace | rightBrace | questionMark | ampersand | slash | lexeme
+    cached | method | leftBrace | rightBrace | questionMark | ampersand | slash | lexeme
   }
   protected def lexeme: Parser[Lexeme] =
     opt('`') ~> rep1(lexemeChar) <~ opt('`') ^^ (x => Lexeme(x.mkString))
@@ -62,6 +62,11 @@ class HttpLexer extends BaseLexer {
   protected def delete: Parser[Token] = acceptSeq("DELETE") ^^ { m =>
     Method(m.mkString)
   }
+
+  protected def cached: Parser[Token] = acceptSeq("CACHED") ^^ { _ =>
+    CachedDirective()
+  }
+
   protected def leftBrace    = '{' ^^^ LeftBrace()
   protected def rightBrace   = '}' ^^^ RightBrace()
   protected def questionMark = '?' ^^^ QuestionMark()
@@ -75,14 +80,14 @@ class HttpLexer extends BaseLexer {
 }
 
 object HttpLexer {
-  sealed trait Token               extends Positional
-  case class LeftBrace()           extends Token
-  case class RightBrace()          extends Token
-  case class QuestionMark()        extends Token
-  case class Ampersand()           extends Token
-  case class Slash()               extends Token
-  case class Lexeme(chars: String) extends Token
-  case class Error(msg: String)    extends Token
-
+  sealed trait Token                extends Positional
+  case class LeftBrace()            extends Token
+  case class RightBrace()           extends Token
+  case class QuestionMark()         extends Token
+  case class Ampersand()            extends Token
+  case class Slash()                extends Token
+  case class Lexeme(chars: String)  extends Token
+  case class Error(msg: String)     extends Token
   case class Method(method: String) extends Token
+  case class CachedDirective()      extends Token
 }
