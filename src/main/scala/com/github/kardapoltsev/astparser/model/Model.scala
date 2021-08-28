@@ -27,7 +27,7 @@ import com.github.kardapoltsev.astparser.util.Logger
 
 case class Model(
   schemas: Seq[Schema],
-  private[astparser] val parsedModel: parser.Model,
+  private[astparser] val parsedModel: parser.Model
 ) extends Logger {
 
   private val definitions = deepDefinitions
@@ -130,17 +130,17 @@ object Model {
         Schema(
           name = s.name,
           definitions = convertDefinitions(s.definitions),
-          constraint = convertConstraint(s.constraint),
+          constraint = convertConstraint(s.constraint)
         )
       },
-      parsed,
+      parsed
     )
   }
 
   private def convertConstraint(constraint: parser.Constraint): Constraint = {
     Constraint(
       EnableConstraint(constraint.enable.constraints),
-      DisableConstraint(constraint.disable.constraints),
+      DisableConstraint(constraint.disable.constraints)
     )
   }
 
@@ -170,7 +170,7 @@ object Model {
       p.packageName,
       p.name,
       convertDefinitions(p.definitions),
-      convertConstraint(p.constraint),
+      convertConstraint(p.constraint)
     )
   }
 
@@ -183,7 +183,7 @@ object Model {
       t.name,
       t.parents map resolve map (_.head) map convertParent,
       convertDocs(t.docs),
-      convertConstraint(t.constraint),
+      convertConstraint(t.constraint)
     )
   }
 
@@ -193,7 +193,7 @@ object Model {
     val httpDefinition = c.httpRequest map { http =>
       httpParser.parse(
         http,
-        s"http definition for ${c.humanReadable}",
+        s"http definition for ${c.humanReadable}"
       )
     }
 
@@ -211,7 +211,7 @@ object Model {
       httpDefinition,
       convertVersionsInterval(c.versions),
       convertDocs(c.docs),
-      convertConstraint(c.constraint),
+      convertConstraint(c.constraint)
     )
   }
 
@@ -238,7 +238,7 @@ object Model {
     Argument(
       a.name,
       convertTypeStatement(a.`type`),
-      convertDocs(a.docs),
+      convertDocs(a.docs)
     )
   }
 
@@ -255,7 +255,7 @@ object Model {
       ts.packageName,
       TypeReference(resolve(ts.ref).head.fullName),
       ts.typeArguments map convertTypeStatement(isTypeArgument = true),
-      isTypeArgument,
+      isTypeArgument
     )
   }
 
@@ -266,7 +266,7 @@ object Model {
       et.packageName,
       et.fullName,
       et.typeArguments map convertTypeParameter,
-      convertConstraint(et.constraint),
+      convertConstraint(et.constraint)
     )
   }
 
@@ -275,7 +275,7 @@ object Model {
   ): TypeParameter = {
     TypeParameter(
       tp.name,
-      tp.typeParameters map convertTypeParameter,
+      tp.typeParameters map convertTypeParameter
     )
   }
 
@@ -289,7 +289,7 @@ object Model {
         convertTypeConstructor(constructors)
       },
       docs = convertDocs(t.docs),
-      convertConstraint(t.constraint),
+      convertConstraint(t.constraint)
     )
   }
 
@@ -343,13 +343,13 @@ object Model {
         arguments = constructor.arguments map convertArgument,
         versions = convertVersionsInterval(constructor.versions),
         docs = convertDocs(constructor.docs),
-        constraint = convertConstraint(constructor.constraint),
+        constraint = convertConstraint(constructor.constraint)
       )
     }
     TypeConstructor(
       parent = packageName,
       name = name,
-      versions = versions,
+      versions = versions
     )
   }
 

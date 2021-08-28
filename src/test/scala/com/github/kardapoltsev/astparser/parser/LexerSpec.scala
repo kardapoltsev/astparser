@@ -60,7 +60,7 @@ class LexerSpec extends AnyWordSpec with Matchers {
         Eq(),
         LeftParen(),
         RightParen(),
-        Dash(),
+        Dash()
       )
     }
 
@@ -155,7 +155,7 @@ class LexerSpec extends AnyWordSpec with Matchers {
           Lexeme("B"),
           RightBracket(),
           RightDoc(lineDocSample),
-          RightBrace(),
+          RightBrace()
         )
 
       val in =
@@ -194,7 +194,7 @@ class LexerSpec extends AnyWordSpec with Matchers {
         Dot(),
         Lexeme("other"),
         Dot(),
-        Lexeme("Type"),
+        Lexeme("Type")
       )
     }
 
@@ -202,7 +202,7 @@ class LexerSpec extends AnyWordSpec with Matchers {
       val in = "type typeAliasForX"
       scan(in) shouldBe List(
         TypeKeyword(),
-        Lexeme("typeAliasForX"),
+        Lexeme("typeAliasForX")
       )
     }
 

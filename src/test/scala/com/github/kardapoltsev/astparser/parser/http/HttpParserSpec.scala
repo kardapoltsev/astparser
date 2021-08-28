@@ -81,9 +81,9 @@ class HttpParserSpec extends AnyWordSpec with Matchers {
           Get(),
           Url(
             Seq(PathSegment("api"), PathSegment("users"), PathParam("userId")),
-            Seq(QueryParam("param1"), QueryParam("param2")),
+            Seq(QueryParam("param1"), QueryParam("param2"))
           ),
-          cached = false,
+          cached = false
         )
     }
 
@@ -93,7 +93,7 @@ class HttpParserSpec extends AnyWordSpec with Matchers {
         HttpRequest(
           Get(),
           Url(Seq(PathSegment("api"), PathSegment("users")), Nil),
-          cached = true,
+          cached = true
         )
     }
 

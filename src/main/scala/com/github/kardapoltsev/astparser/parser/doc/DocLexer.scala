@@ -50,7 +50,7 @@ class DocLexer extends BaseLexer {
     rep1(specialChar) ^^ (x => SpecialCharacters(x.mkString))
 
   private val allowedCharacters = Set(
-    '-', '+', '*', '=', ',', '_', ':', '~', '\'', '"', '(', ')', '[', ']', '{', '}', '<', '>', '/', '|', '\\', '!', '?',
+    '-', '+', '*', '=', ',', '_', ':', '~', '\'', '"', '(', ')', '[', ']', '{', '}', '<', '>', '/', '|', '\\', '!', '?'
   )
 
   private def specialChar =

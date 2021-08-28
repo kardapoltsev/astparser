@@ -36,7 +36,7 @@ class HttpLexerSpec extends AnyWordSpec with Matchers {
         Lexeme("api"),
         Slash(),
         Lexeme("users"),
-        Slash(),
+        Slash()
       )
     }
 
@@ -49,7 +49,7 @@ class HttpLexerSpec extends AnyWordSpec with Matchers {
         LeftBrace(),
         Lexeme("userId"),
         RightBrace(),
-        Slash(),
+        Slash()
       )
     }
 
@@ -62,7 +62,7 @@ class HttpLexerSpec extends AnyWordSpec with Matchers {
         LeftBrace(),
         Lexeme("type"),
         RightBrace(),
-        Slash(),
+        Slash()
       )
     }
 
@@ -78,7 +78,7 @@ class HttpLexerSpec extends AnyWordSpec with Matchers {
         Ampersand(),
         LeftBrace(),
         Lexeme("param2"),
-        RightBrace(),
+        RightBrace()
       )
     }
 
@@ -90,7 +90,7 @@ class HttpLexerSpec extends AnyWordSpec with Matchers {
         QuestionMark(),
         LeftBrace(),
         Lexeme("call"),
-        RightBrace(),
+        RightBrace()
       )
     }
 
@@ -99,7 +99,7 @@ class HttpLexerSpec extends AnyWordSpec with Matchers {
         CachedDirective(),
         Method("GET"),
         Slash(),
-        Lexeme("user"),
+        Lexeme("user")
       )
     }
   }

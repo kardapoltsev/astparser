@@ -262,7 +262,7 @@ class ModelSpec extends TestBase {
           |    }
           |  }
           |}
-        """.stripMargin,
+        """.stripMargin
       )
       val api   = m.findSchema("api").head
       val typeA = api.getDefinition("p1.A").head.asInstanceOf[Type]
@@ -348,7 +348,7 @@ class ModelSpec extends TestBase {
             |     x: E.e
             |  }
             |}
-          """.stripMargin,
+          """.stripMargin
         )
       }
     }
@@ -409,7 +409,7 @@ class ModelSpec extends TestBase {
             |schema b
             |import common.Int
             |
-          """.stripMargin,
+          """.stripMargin
         )
       }
     }

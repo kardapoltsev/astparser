@@ -27,8 +27,8 @@ class ConstrainedSpec extends AnyWordSpec with Matchers {
       name = "",
       constraint = Constraint(
         EnableConstraint(enabled),
-        DisableConstraint(disabled),
-      ),
+        DisableConstraint(disabled)
+      )
     )
   }
 

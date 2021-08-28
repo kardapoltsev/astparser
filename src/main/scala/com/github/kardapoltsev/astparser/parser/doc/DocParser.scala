@@ -69,7 +69,7 @@ class DocParser(override protected val enableProfiling: Boolean = false) extends
         case Dot()                    => "."
         case Newline()                => "\n"
         case Space()                  => " "
-      },
+      }
     )
 
   private def identifier: Parser[String] =
@@ -77,7 +77,7 @@ class DocParser(override protected val enableProfiling: Boolean = false) extends
       "identifier",
       { case Identifier(chars) =>
         chars
-      },
+      }
     )
 
   def parse(input: CharSequence, sourceName: String): Docs = {
@@ -93,7 +93,7 @@ class DocParser(override protected val enableProfiling: Boolean = false) extends
   protected def tryParse[T](
     parser: Parser[T],
     input: CharSequence,
-    sourceName: String,
+    sourceName: String
   ): ParseResult[T] = {
     val reader  = new ReaderWithSourcePosition(new CharSequenceReader(input), sourceName)
     val scanner = new lexer.Scanner(reader)

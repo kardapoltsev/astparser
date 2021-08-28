@@ -39,7 +39,7 @@ class HttpLexer extends BaseLexer {
   //TODO: improve valid http elems
   private val specialCharacters = Set(
     '-',
-    '_',
+    '_'
   )
 
   private def lexemeChar =

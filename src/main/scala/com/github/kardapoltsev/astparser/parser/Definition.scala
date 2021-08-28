@@ -86,7 +86,7 @@ private[astparser] case class DisableConstraint(
 
 private[astparser] case class Constraint(
   enable: EnableConstraint,
-  disable: DisableConstraint,
+  disable: DisableConstraint
 ) extends Element
 
 sealed private[astparser] trait Constrained {
@@ -94,14 +94,14 @@ sealed private[astparser] trait Constrained {
 
   assert(
     constraint.enable.constraints.intersect(constraint.disable.constraints).isEmpty,
-    "enable and disable contains the same constraint",
+    "enable and disable contains the same constraint"
   )
 
 }
 
 private[astparser] case class VersionsInterval(
   start: Option[Int],
-  end: Option[Int],
+  end: Option[Int]
 ) extends Element
 
 sealed private[astparser] trait Versioned {
@@ -146,7 +146,7 @@ final private[astparser] case class Type(
   parents: Seq[Reference],
   constructors: Seq[TypeConstructor],
   docs: Seq[Documentation],
-  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil)),
+  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil))
 ) extends TypeLike
     with PackageLike
     with Constrained {
@@ -158,7 +158,7 @@ final private[astparser] case class Type(
 final private[astparser] case class ExternalType(
   override val fullName: String,
   typeArguments: Seq[TypeParameter],
-  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil)),
+  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil))
 ) extends TypeLike
     with Constrained {
   def docs    = Seq.empty
@@ -168,7 +168,7 @@ final private[astparser] case class ExternalType(
 
 final private[astparser] case class TypeParameter(
   name: String,
-  typeParameters: Seq[TypeParameter],
+  typeParameters: Seq[TypeParameter]
 ) extends Element
 
 final private[astparser] case class TypeConstructor(
@@ -179,7 +179,7 @@ final private[astparser] case class TypeConstructor(
   parents: Seq[Reference],
   versions: VersionsInterval,
   docs: Seq[Documentation],
-  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil)),
+  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil))
 ) extends TypeLike
     with TypeId
     with Argumented
@@ -217,7 +217,7 @@ final private[astparser] case class Reference(
 final private[astparser] case class Import(
   name: String,
   reference: Reference,
-  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil)),
+  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil))
 ) extends Definition
     with Constrained {
   children = Seq(reference)
@@ -227,7 +227,7 @@ final private[astparser] case class Import(
 final private[astparser] case class TypeAlias(
   name: String,
   `type`: TypeStatement,
-  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil)),
+  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil))
 ) extends TypeLike
     with Constrained {
   children = Seq(`type`)
@@ -244,7 +244,7 @@ final private[astparser] case class Call(
   httpRequest: Option[String],
   versions: VersionsInterval,
   docs: Seq[Documentation],
-  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil)),
+  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil))
 ) extends TypeLike
     with TypeId
     with Versioned
@@ -269,7 +269,7 @@ final private[astparser] case class Call(
 final private[astparser] case class Argument(
   name: String,
   `type`: TypeStatement,
-  docs: Seq[Documentation],
+  docs: Seq[Documentation]
 ) extends NamedElement
     with Documented {
   children = `type` +: docs
@@ -280,7 +280,7 @@ final private[astparser] case class Argument(
 
 final private[astparser] case class TypeStatement(
   ref: Reference,
-  typeArguments: Seq[TypeStatement] = Seq.empty,
+  typeArguments: Seq[TypeStatement] = Seq.empty
 ) extends Element {
   children = ref +: typeArguments
 
@@ -393,7 +393,7 @@ sealed private[astparser] trait PackageLike extends Definition with Logger {
 final private[astparser] case class Package(
   name: String,
   definitions: Seq[Definition],
-  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil)),
+  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil))
 ) extends PackageLike
     with Constrained {
   children = definitions
@@ -405,7 +405,7 @@ final private[astparser] case class Trait(
   arguments: Seq[Argument],
   parents: Seq[Reference],
   docs: Seq[Documentation],
-  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil)),
+  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil))
 ) extends TypeLike
     with Argumented
     with Constrained {
@@ -423,7 +423,7 @@ trait Documented {
 final private[astparser] case class Schema(
   name: String,
   definitions: Seq[Definition],
-  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil)),
+  constraint: Constraint = Constraint(EnableConstraint(Nil), DisableConstraint(Nil))
 ) extends PackageLike
     with Constrained {
   children = definitions

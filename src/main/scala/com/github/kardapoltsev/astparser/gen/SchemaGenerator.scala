@@ -25,7 +25,7 @@ import java.io.FileWriter
 
 class SchemaGenerator(
   m: model.Model,
-  filenameExtension: String,
+  filenameExtension: String
 ) extends Generator {
   import Hardcoded.{Keywords => K}
   private def ls = System.lineSeparator()
@@ -42,7 +42,7 @@ class SchemaGenerator(
     GeneratedFile(
       path = "",
       name = filename,
-      content,
+      content
     )
   }
 
@@ -166,7 +166,7 @@ class SchemaGenerator(
     K.Call,
     K.Package,
     K.Schema,
-    K.Type,
+    K.Type
   )
 
   private def escaped(v: String): String = {

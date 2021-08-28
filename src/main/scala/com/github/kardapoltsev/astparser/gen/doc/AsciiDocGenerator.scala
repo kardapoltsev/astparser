@@ -21,7 +21,7 @@ import com.github.kardapoltsev.astparser.model._
 
 class AsciiDocGenerator(
   m: Model,
-  targetVersion: Int,
+  targetVersion: Int
 ) extends DocGenerator {
   import AsciiDocGenerator._
   val model = m.slice(targetVersion, targetVersion)
@@ -76,18 +76,18 @@ class AsciiDocGenerator(
         Seq(
           Text("Result type: "),
           linkified(m.returnType),
-          LineBreak,
+          LineBreak
         ) ++ docs
       ),
       httpString(m),
-      Paragraph(paramsTable(m.arguments)),
+      Paragraph(paramsTable(m.arguments))
     )
   }
 
   private def typeDoc(t: Type): DocNode = {
     Paragraph(
       Header(t.fullName, t.name, 2),
-      renderDocs(t.docs),
+      renderDocs(t.docs)
     )
   }
 
@@ -97,7 +97,7 @@ class AsciiDocGenerator(
         Seq(
           Header(c.fullName, c.name, 3),
           Paragraph(renderDocs(constructor.docs)),
-          Paragraph(paramsTable(constructor.arguments)),
+          Paragraph(paramsTable(constructor.arguments))
         )
       )
     }
@@ -139,9 +139,9 @@ class AsciiDocGenerator(
         Seq(
           Text(p.name),
           linkified(p.`type`),
-          renderDocs(p.docs),
+          renderDocs(p.docs)
         )
-      },
+      }
     )
   }
 
@@ -262,7 +262,7 @@ object AsciiDocGenerator {
       val lines = Seq(
         s"""[width="100%",cols="$width",frame="topbot",grid="rows"]""",
         s"""[options="autowidth${headers.fold("")(_ => ",header")}"]""",
-        "|======",
+        "|======"
       ) ++ (headers.map(h => h ++ Seq.fill(width - h.length)(" ")) ++ rows.map(_.map(_.render)))
         .map(_.mkString("|", "|", "")) :+
         "|======"

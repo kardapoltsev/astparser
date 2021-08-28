@@ -39,7 +39,7 @@ class DocLexerSpec extends AnyWordSpec with Matchers {
         Identifier("pkg"),
         Dot(),
         Identifier("test"),
-        BackTick(),
+        BackTick()
       )
     }
     "parse special characters" in {
@@ -49,7 +49,7 @@ class DocLexerSpec extends AnyWordSpec with Matchers {
         SpecialCharacters("()"),
         Space(),
         Identifier("wordWithCharacter"),
-        SpecialCharacters("[]"),
+        SpecialCharacters("[]")
       )
     }
     "parse multiline docs" in {
@@ -83,8 +83,8 @@ class DocLexerSpec extends AnyWordSpec with Matchers {
           Space(),
           Identifier("the"),
           Space(),
-          Identifier("beginning"),
-        ),
+          Identifier("beginning")
+        )
       )
     }
   }

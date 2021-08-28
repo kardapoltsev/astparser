@@ -77,7 +77,7 @@ class AstParser(
       reference ~ opt(LeftBracket() ~> rep1sep(typeStatement, Comma()) <~ RightBracket()) ^^ { case ref ~ ts =>
         TypeStatement(
           ref,
-          ts.getOrElse(Seq.empty),
+          ts.getOrElse(Seq.empty)
         )
       }
     }
@@ -152,7 +152,7 @@ class AstParser(
             parents,
             body,
             docs,
-            c,
+            c
           )
       }
     }
@@ -169,7 +169,7 @@ class AstParser(
       args.getOrElse(Seq.empty).map { path =>
         TypeParameter(
           path.map(_.name).mkString("."),
-          Seq.empty,
+          Seq.empty
         ).setPos(path.head.pos)
       }
     }
@@ -226,7 +226,7 @@ class AstParser(
             httpRequest = httpDef,
             i,
             docs = ld,
-            constraint = c,
+            constraint = c
           )
         }
     }
@@ -237,7 +237,7 @@ class AstParser(
       "httpDefinition",
       { case Http(content) =>
         content
-      },
+      }
     )
   }
 
@@ -276,7 +276,7 @@ class AstParser(
       "prefix doc",
       { case LeftDoc(d) =>
         Documentation(d)
-      },
+      }
     )
   }
 
@@ -285,7 +285,7 @@ class AstParser(
       "suffix doc",
       { case RightDoc(d) =>
         Documentation(d)
-      },
+      }
     )
   }
 
@@ -313,7 +313,7 @@ class AstParser(
       {
         case l @ Lexeme(x) if IntNumberRegexp.unapplySeq(x).isDefined =>
           IntNumber(x.toInt).setPos(l.pos)
-      },
+      }
     )
   }
 
@@ -324,7 +324,7 @@ class AstParser(
         case l @ Lexeme(x) if HexNumberRegexp.unapplySeq(x).isDefined =>
           //noinspection ScalaStyle
           IntNumber(java.lang.Long.parseLong(x, 16).toInt).setPos(l.pos)
-      },
+      }
     )
   }
 
@@ -363,7 +363,7 @@ class AstParser(
     definitions: Seq[Definition],
     doc: Seq[Documentation],
     position: Position,
-    constraint: Constraint,
+    constraint: Constraint
   ): Package = {
     val names = fullName.split("\\.").toSeq.reverse
     val inner = Package(names.head, definitions, constraint).setPos(position)
@@ -375,7 +375,7 @@ class AstParser(
   protected def tryParse[T](
     parser: Parser[T],
     input: CharSequence,
-    sourceName: String,
+    sourceName: String
   ): ParseResult[T] = {
     parser(
       new lexer.Scanner(

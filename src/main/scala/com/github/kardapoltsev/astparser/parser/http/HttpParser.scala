@@ -111,7 +111,7 @@ class HttpParser(override protected val enableProfiling: Boolean = false) extend
         "CachedKeyword",
         { case _: CachedDirective =>
           Cached()
-        },
+        }
       )
     }
   }
@@ -125,7 +125,7 @@ class HttpParser(override protected val enableProfiling: Boolean = false) extend
         case Method("POST")   => Post()
         case Method("PATCH")  => Patch()
         case Method("DELETE") => Delete()
-      },
+      }
     )
 
   private def url: Parser[Url] = profile("url") {
@@ -159,7 +159,7 @@ class HttpParser(override protected val enableProfiling: Boolean = false) extend
       "pathSegment",
       { case Lexeme(chars) =>
         chars.toString
-      },
+      }
     )
 
   private def query: Parser[Seq[QueryParam]] = profile("query") {
@@ -190,7 +190,7 @@ class HttpParser(override protected val enableProfiling: Boolean = false) extend
   protected def tryParse[T](
     parser: Parser[T],
     input: CharSequence,
-    sourceName: String,
+    sourceName: String
   ): ParseResult[T] = {
     val reader  = new ReaderWithSourcePosition(new CharSequenceReader(input), sourceName)
     val scanner = new lexer.Scanner(reader)
