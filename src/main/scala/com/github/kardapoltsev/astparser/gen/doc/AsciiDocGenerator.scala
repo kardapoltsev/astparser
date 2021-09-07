@@ -55,9 +55,44 @@ class AsciiDocGenerator(
           constructorDoc(c)
         }
         Some(Group(td +: cd))
+      case t: Trait =>
+        Some(traitDoc(t))
+      case a: TypeAlias =>
+        Some(typeAliasDoc(a))
       case _ =>
         None
     }
+  }
+
+  private def typeAliasDoc(a: TypeAlias): DocNode = {
+    Group(
+      Header(a.fullName, s"alias ${a.name}", 2),
+      Paragraph(
+        Seq(
+          Text("""same as """),
+          Text(a.`type`.typeReference.fullName)
+        )
+      )
+    )
+  }
+
+  private def traitDoc(t: Trait): DocNode = {
+    val docs =
+      if (t.docs.content.nonEmpty)
+        Seq(renderDocs(t.docs))
+      else
+        Seq.empty
+    Group(
+      Header(t.fullName, "trait " + t.name, 2),
+      Paragraph(
+        Seq(
+          Text("Inherit: "),
+          Group(t.parents.flatMap(p => Seq(linkified(p), Text(", ")))),
+          LineBreak
+        ) ++ docs
+      ),
+      Paragraph(paramsTable(t.arguments))
+    )
   }
 
   private def packageDoc(p: Package): DocNode = {
@@ -71,11 +106,14 @@ class AsciiDocGenerator(
       else
         Seq.empty
     Group(
-      Header(m.fullName, m.name, 2),
+      Header(m.fullName, "method " + m.name, 2),
       Paragraph(
         Seq(
           Text("Result type: "),
           linkified(m.returnType),
+          LineBreak,
+          Text("Inherit: "),
+          Group(m.parents.flatMap(p => Seq(linkified(p), Text(", ")))),
           LineBreak
         ) ++ docs
       ),
@@ -86,7 +124,7 @@ class AsciiDocGenerator(
 
   private def typeDoc(t: Type): DocNode = {
     Paragraph(
-      Header(t.fullName, t.name, 2),
+      Header(t.fullName, "model " + t.name, 2),
       renderDocs(t.docs)
     )
   }

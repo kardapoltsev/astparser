@@ -27,8 +27,12 @@ class AsciiDocGeneratorSpec extends TestBase {
                                 |external type Int
                                 |external type Long
                                 |external type Void
+                                |type UserId = Int
                                 |
                                 |package outer.inner {
+                                |  /** Used to mark some requests */
+                                |  trait RequestMarker
+                                |  trait AuthorizedRequest
                                 |  /**Documentation for type A*/
                                 |  type A {
                                 |    /** Multi line doc
@@ -54,6 +58,11 @@ class AsciiDocGeneratorSpec extends TestBase {
                                 |    param: Long
                                 |    pathParam: Int
                                 |    => Void
+                                |    
+                                |  @GET /authorized
+                                |  call authorized <: AuthorizedRequest RequestMarker ::
+                                |    userId: UserId
+                                |    => Void
                                 |}
                                 |
                                 |package p1 {
@@ -70,7 +79,7 @@ class AsciiDocGeneratorSpec extends TestBase {
 
       val generated = generator.generate()
       generated should have size 1
-      //GeneratedFile.write(generated.head, ".")
+//      GeneratedFile.write(generated.head, ".")
       val apiDoc = generated.head.content
 
       apiDoc should include("= api")
@@ -78,7 +87,7 @@ class AsciiDocGeneratorSpec extends TestBase {
       apiDoc should include(
         """|
            |[[api.outer.inner.A]]
-           |=== A
+           |=== model A
            |Documentation for type A
            |""".stripMargin
       )
@@ -98,6 +107,8 @@ class AsciiDocGeneratorSpec extends TestBase {
         s"""Multi line doc
            |        for constructor a""".stripMargin
       )
+      apiDoc should include("=== alias UserId")
+      apiDoc should include("=== trait RequestMarker")
     }
   }
 
