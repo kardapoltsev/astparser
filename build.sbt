@@ -27,7 +27,7 @@ scalacOptions ++= Seq(
   "-feature",
   //"-Xfatal-warnings", turned of because of StringLike.lineIterator/lines deprecations
   "-Xlint",
-  "-Yrangepos",
+  "-Yrangepos"
 )
 
 scalacOptions ++= {
@@ -59,7 +59,7 @@ homepage := Some(url("https://github.com/kardapoltsev/astparser"))
 scmInfo := Some(
   ScmInfo(
     url("https://github.com/kardapoltsev/astparser"),
-    "scm:git@github.com:kardapoltsev/astparser.git",
+    "scm:git@github.com:kardapoltsev/astparser.git"
   )
 )
 
@@ -68,7 +68,7 @@ developers := List(
     id = "kardapoltsev",
     name = "Alexey Kardapoltsev",
     email = "alexey.kardapoltsev@gmail.com",
-    url = url("https://github.com/kardapoltsev"),
+    url = url("https://github.com/kardapoltsev")
   )
 )
 
@@ -78,9 +78,9 @@ import de.heikoseeberger.sbtheader.AutomateHeaderPlugin
 startYear := Some(2016)
 
 val scalaParsers  = "org.scala-lang.modules"   %% "scala-parser-combinators" % "1.1.2"
-val scalatest     = "org.scalatest"            %% "scalatest"                % "3.2.9"  % "test"
-val log4jApi      = "org.apache.logging.log4j"  % "log4j-api"                % "2.14.1"
-val log4jCore     = "org.apache.logging.log4j"  % "log4j-core"               % "2.14.1" % "test"
+val scalatest     = "org.scalatest"            %% "scalatest"                % "3.2.11" % "test"
+val log4jApi      = "org.apache.logging.log4j"  % "log4j-api"                % "2.17.2"
+val log4jCore     = "org.apache.logging.log4j"  % "log4j-core"               % "2.17.2" % "test"
 val log4jScalaApi = "org.apache.logging.log4j" %% "log4j-api-scala"          % "12.0"
 
 val baseDependencies = Seq(
@@ -88,7 +88,7 @@ val baseDependencies = Seq(
   log4jCore,
   log4jScalaApi,
   scalaParsers,
-  scalatest,
+  scalatest
 )
 
 Compile / doc / scalacOptions := Seq(
@@ -99,7 +99,7 @@ Compile / doc / scalacOptions := Seq(
   "-unchecked",
   "-groups",
   "-implicits",
-  "-diagrams",
+  "-diagrams"
 )
 
 libraryDependencies ++= baseDependencies

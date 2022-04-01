@@ -25,6 +25,8 @@ import com.github.kardapoltsev.astparser.parser.http.HttpRequest
 import com.github.kardapoltsev.astparser.parser.http.PathParam
 import com.github.kardapoltsev.astparser.util.Logger
 
+import scala.collection.immutable.ListMap
+
 case class Model(
   schemas: Seq[Schema],
   private[astparser] val parsedModel: parser.Model
@@ -280,14 +282,20 @@ object Model {
   }
 
   private def convertType(t: parser.Type)(implicit m: parser.Model): Type = {
+    // don't use groupBy to preserve constructors order
+    var cm = ListMap.empty[String, List[parser.TypeConstructor]]
+    t.constructors.foreach { c =>
+      val before = cm.getOrElse(c.name, Nil)
+      cm = cm.updated(c.name, before :+ c)
+    }
+    val constructors = cm.values.toSeq
+
     Type(
       t.packageName,
       name = t.name,
       typeArguments = t.typeArguments map convertTypeParameter,
       parents = t.parents map resolve map (_.head) map convertParent,
-      constructors = t.constructors.groupBy(_.name).toSeq map { case (_, constructors) =>
-        convertTypeConstructor(constructors)
-      },
+      constructors = constructors.map(convertTypeConstructor),
       docs = convertDocs(t.docs),
       convertConstraint(t.constraint)
     )
