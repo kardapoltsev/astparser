@@ -301,7 +301,7 @@ object AsciiDocGenerator {
         s"""[width="100%",cols="$width",frame="topbot",grid="rows"]""",
         s"""[options="autowidth${headers.fold("")(_ => ",header")}"]""",
         "|======"
-      ) ++ (headers.map(h => h ++ Seq.fill(width - h.length)(" ")) ++ rows.map(_.map(_.render)))
+      ) ++ (headers.map(h => h ++ Seq.fill(width - h.length)(Text(" "))) ++ rows.map(_.map(_.render)))
         .map(_.mkString("|", "|", "")) :+
         "|======"
       lines.mkString("\n", "\n", "")

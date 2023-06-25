@@ -27,8 +27,8 @@ class BaseParser extends Parsers with Logger {
   protected def getResult[T](res: ParseResult[T]): T = res match {
     case Success(v, _) =>
       v
-    case NoSuccess(msg, next) =>
-      throw new ParseException(s"$msg; at `${next.first}`:${next.pos}", next.pos)
+    case r: NoSuccess =>
+      throw new ParseException(s"${r.msg}; at `${r.next.first}`:${r.next.pos}", r.next.pos)
   }
 
   protected val enableProfiling: Boolean = false
@@ -72,7 +72,7 @@ class BaseParser extends Parsers with Logger {
           case Success(x: Identifier, _)   => s"${x.getClass.getSimpleName}: $x"
           case Success(x: Reference, _)    => s"${x.getClass.getSimpleName}: ${x.fullName}"
           case Success(x, _)               => x.getClass.getSimpleName
-          case x @ NoSuccess(m, _)         => s"${x.getClass.getSimpleName}: $m"
+          case x: NoSuccess                => s"${x.getClass.getSimpleName}: ${x.msg}"
         }
         printerUnindent()
         println(s"} $name => $t - parse in ${end - start}ms")

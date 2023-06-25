@@ -29,6 +29,7 @@ case class SourcePosition(position: Position, sourceName: String) extends Positi
     case p: OffsetPosition => p.lineContents
     case p: SourcePosition => p.lineContents
     case NoPosition        => ""
+    case x                 => throw new IllegalArgumentException(s"unknown position type ${x.getClass.getSimpleName}")
   }
 
   override def <(that: Position) = that match {

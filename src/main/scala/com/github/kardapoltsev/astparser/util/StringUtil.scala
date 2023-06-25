@@ -34,14 +34,14 @@ object StringUtil {
 
     //scalastyle:off method.name
     def ~(other: String): String = {
-      val b = StringBuilder.newBuilder
+      val b = new StringBuilder()
       if (self != ".") {
         b.append(self)
       }
       if (b.nonEmpty && b.last != '.' && other.nonEmpty && other != ".") {
         b.append(".")
       }
-      if (other.headOption.exists(_ == '.')) { //scala 2.10 don't have a contains
+      if (other.headOption.contains('.')) {
         b.append(other.tail)
       } else {
         b.append(other)

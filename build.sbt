@@ -2,22 +2,16 @@ val Organization = "com.github.kardapoltsev"
 
 organization                  := Organization
 name                          := "ast-parser"
-scalaVersion                  := "2.13.4"
-crossScalaVersions            := Seq("2.11.12", "2.12.11", scalaVersion.value)
+scalaVersion                  := "2.13.11"
+crossScalaVersions            := Seq("2.12.18", scalaVersion.value)
 organizationName              := "Alexey Kardapoltsev"
 organizationHomepage          := Some(url("https://github.com/kardapoltsev"))
 Test / parallelExecution      := true
 ThisBuild / scalafmtOnCompile := true
 Global / onChangedBuildSource := ReloadOnSourceChanges
-ThisBuild / scapegoatVersion  := "1.4.8"
-
-initialize ~= { _ =>
-  if (sys.props("java.specification.version") < "1.7")
-    sys.error("Java 7 is required for this project.")
-}
 
 addCompilerPlugin(scalafixSemanticdb)
-ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.5.0"
+ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.6.0"
 
 scalacOptions ++= Seq(
   "-encoding",
@@ -25,9 +19,10 @@ scalacOptions ++= Seq(
   "-deprecation",
   "-unchecked",
   "-feature",
-  //"-Xfatal-warnings", turned of because of StringLike.lineIterator/lines deprecations
+  "-Xfatal-warnings", //turned of because of StringLike.lineIterator/lines deprecations
   "-Xlint",
-  "-Yrangepos"
+  "-Yrangepos",
+  "-Xsource:3",
 )
 
 scalacOptions ++= {
@@ -77,10 +72,10 @@ licenses := Seq(("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-
 import de.heikoseeberger.sbtheader.AutomateHeaderPlugin
 startYear := Some(2016)
 
-val scalaParsers  = "org.scala-lang.modules"   %% "scala-parser-combinators" % "1.1.2"
-val scalatest     = "org.scalatest"            %% "scalatest"                % "3.2.11" % "test"
-val log4jApi      = "org.apache.logging.log4j"  % "log4j-api"                % "2.17.2"
-val log4jCore     = "org.apache.logging.log4j"  % "log4j-core"               % "2.17.2" % "test"
+val scalaParsers  = "org.scala-lang.modules"   %% "scala-parser-combinators" % "2.2.0"
+val scalatest     = "org.scalatest"            %% "scalatest"                % "3.2.15" % "test"
+val log4jApi      = "org.apache.logging.log4j"  % "log4j-api"                % "2.20.0"
+val log4jCore     = "org.apache.logging.log4j"  % "log4j-core"               % "2.20.0" % "test"
 val log4jScalaApi = "org.apache.logging.log4j" %% "log4j-api-scala"          % "12.0"
 
 val baseDependencies = Seq(

@@ -1,4 +1,4 @@
-image: openjdk:11
+image: openjdk:17
 
 before_script:
   - apt-get update -y
